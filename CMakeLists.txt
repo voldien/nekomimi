@@ -1,0 +1,10 @@
+CMAKE_MINIMUM_REQUIRED( VERSION 3.0 )
+PROJECT(mimi-imgui)
+include(GNUInstallDirs)
+
+
+# Ouput directory for both library and executables.
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL "" FORCE)
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib CACHE INTERNAL "" FORCE)
+
+
