@@ -1,9 +1,7 @@
-/**
-	Vulkan common and core library
-	Copyright (C) 2021  Valdemar Lindberg
-*/
-#ifndef _VKCOMMON_WINDOW_H_
-#define _VKCOMMON_WINDOW_H_ 1
+
+#ifndef _MIMI_IMGUI_WINDOW_H_
+#define _MIMI_IMGUI_WINDOW_H_ 1
+#include"Window.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <string>

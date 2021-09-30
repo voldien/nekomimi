@@ -1,7 +1,6 @@
-#include "WindowBackend.h"
+#include "GraphicBackend/WindowBackend.h"
 
 #include <GL/glew.h>
-#include <Logging.h>
 #include <SDL2/SDL_vulkan.h>
 #include <algorithm>
 #include <bits/exception.h>
@@ -11,15 +10,9 @@
 #include <imgui/backends/imgui_impl_sdl.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 #include <imgui/imgui.h>
-#include <implot.h>
-#include <spdlog/logger.h>
 #include <stdexcept>
 #include <stdint.h>
-#include <vulkan/vulkan_core.h>
 
-#include "Exception/IException.h"
-#include "Exception/RuntimeException.h"
-#include "ResourceManager.h"
 #include "SDL.h"
 #include "SDL_events.h"
 #include "SDL_stdinc.h"
@@ -27,8 +20,6 @@
 #include "VKUtil.h"
 #include "VkPhysicalDevice.h"
 #include "VulkanCore.h"
-#include "imtui/imtui-impl-ncurses.h"
-#include "imtui/imtui-impl-text.h"
 
 
 const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {

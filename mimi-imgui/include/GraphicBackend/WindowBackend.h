@@ -1,10 +1,10 @@
 #ifndef _MIMI_IMGUI_UI_WINDOW_BACKEND_H_
 #define _MIMI_IMGUI_UI_WINDOW_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
-#include <SDL2/SDL.h>
-#include <chrono>
+#include "Window.h"
+//#include <SDL2/SDL.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
-#include <imtui/imtui.h>
+//#include <imtui/imtui.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -21,51 +21,71 @@ namespace ImTui {
 	struct TScreen;
 } // namespace ImTui
 
-class WindowBackend {
+class WindowBackend : public Window {
   public:
-	enum GfxBackEnd { ImGUI_Terminal, ImGUI_OpenGL, ImGUI_Vulkan };
+	enum GfxBackEnd {
+		ImGUI_Terminal,
+		ImGUI_OpenGL,
+		ImGUI_Vulkan,
+		ImGUI_DirectX9,
+		ImGUI_DirectX10,
+		ImGUI_DirectX11,
+		ImGUI_DirectX12
+	};
+
+	enum WindowBackend {
+		WindowBackendSDL2,
+		WindowBackendGLFW3,
+		WindowBackendWindows
+	};
+
 	static const char *getGfxBackEndSymbol(GfxBackEnd v) noexcept;
+	static const char *getWindowBackEndSymbol(GfxBackEnd v) noexcept;
 	WindowBackend(GfxBackEnd backend);
-	~WindowBackend(void);
+	~WindowBackend();
 
 	virtual void initGfx(GfxBackEnd backend);
 
-	void initTerminal(void);
-	void initVulkan(void);
-	void initOpenGL(void);
+	void initTerminal();
+	void initVulkan();
+	void initOpenGL();
+	void initDX9();
+	void initDX10();
+	void initDX11();
+	void initDX12();
 
 	virtual void showDockSpace(bool *open);
 
-	virtual void beginRender(void);
-	virtual void endRender(void);
-	virtual void releaseRender(void);
+	virtual void beginRender();
+	virtual void endRender();
+	virtual void releaseRender();
 
-	GfxBackEnd getBackendRenderer(void) const noexcept { return this->gfxBackend; }
+	GfxBackEnd getBackendRenderer() const noexcept { return this->gfxBackend; }
 
   public:
-	virtual void show(void) noexcept;
+	virtual void show() noexcept;
 
-	virtual void hide(void) noexcept;
+	virtual void hide() noexcept;
 
-	virtual void close(void) noexcept;
+	virtual void close() noexcept;
 
-	virtual void focus(void);
+	virtual void focus();
 
-	virtual void restore(void);
+	virtual void restore();
 
-	virtual void maximize(void);
+	virtual void maximize();
 
-	virtual void minimize(void);
+	virtual void minimize();
 
 	virtual void setTitle(const std::string &title);
 
-	virtual std::string getTitle(void);
+	virtual std::string getTitle();
 
-	virtual int x(void) const noexcept;
-	virtual int y(void) const noexcept;
+	virtual int x() const noexcept;
+	virtual int y() const noexcept;
 
-	virtual int width(void) const noexcept;
-	virtual int height(void) const noexcept;
+	virtual int width() const noexcept;
+	virtual int height() const noexcept;
 
 	virtual void getPosition(int *x, int *y) const;
 
@@ -79,7 +99,7 @@ class WindowBackend {
 
 	virtual void setFullScreen(bool fullscreen);
 
-	virtual bool isFullScreen(void) const;
+	virtual bool isFullScreen() const;
 
 	virtual void setBordered(bool borded);
 

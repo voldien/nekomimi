@@ -2,7 +2,6 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.0 )
 PROJECT(mimi-imgui)
 include(GNUInstallDirs)
 
-
 # Ouput directory for both library and executables.
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL "" FORCE)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib CACHE INTERNAL "" FORCE)
@@ -28,7 +27,8 @@ ELSE()
 ENDIF()
 
 IF(PKG_CONFIG_FOUND)
-	pkg_check_modules(SDL2 REQUIRED sdl2)
+	pkg_check_modules(SDL2 sdl2)
+	pkg_check_modules(GLFW glfw3)
 ELSE()
 ENDIF()
 
@@ -36,11 +36,16 @@ IF(SDL2_FOUND)
 	MESSAGE(STATUS "Found sdl2: ${SDL2_LIBRARIES} -- version ${SDL2_VERSION}.")
 ENDIF()
 
+IF(SDL2_FOUND)
+	MESSAGE(STATUS "Found glfw: ${GLFW_LIBRARIES} -- version ${GLFW_VERSION}.")
+ENDIF()
+
 
 FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/UIComponents/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/GraphicBackend/*.cpp
+
 	${CMAKE_SOURCE_DIR}/extern/imgui/backends/imgui_impl_opengl3.cpp
 	${CMAKE_SOURCE_DIR}/extern/imgui/backends/imgui_impl_vulkan.cpp
 	${CMAKE_SOURCE_DIR}/extern/imgui/backends/imgui_impl_sdl.cpp
@@ -49,10 +54,14 @@ FILE(GLOB SOURCE_FILES
 	${CMAKE_SOURCE_DIR}/extern/imgui/imgui_widgets.cpp
 	${CMAKE_SOURCE_DIR}/extern/imgui/imgui.cpp
 )
+
 FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/UIComponents/*.h
 )
 ADD_SUBDIRECTORY(${CMAKE_SOURCE_DIR}/extern/fvkcore EXCLUDE_FROM_ALL)
+
+ADD_LIBRARY(mimi-sdl2 OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/GraphicBackend/SDLWindow.cpp)
+ADD_LIBRARY(mimi-glfw OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/GraphicBackend/glwf3Window.cpp)
 
 
 ADD_LIBRARY(mimi-window ${SOURCE_FILES} ${HEADER_FILES} )

@@ -8,6 +8,7 @@
  */
 class MIMIWindow : public WindowBackend {
 public:
+  MIMIWindow(GfxBackEnd backend);
 
 protected:
   virtual void displayMenuBar(void);
