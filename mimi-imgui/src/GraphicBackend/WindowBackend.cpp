@@ -1,26 +1,21 @@
 #include "GraphicBackend/WindowBackend.h"
 
+#include "GraphicBackend/SDLWindow.h"
+
 #include <GL/glew.h>
-#include <SDL2/SDL_vulkan.h>
+//#include <SDL2/SDL_vulkan.h>
+#include <SDL_events.h>
+#include <SDL_video.h>
+#include <VKDevice.h>
 #include <algorithm>
-#include <bits/exception.h>
-#include <ext/alloc_traits.h>
 #include <fmt/format.h>
+#include <imgui/backends/imgui_impl_dx9.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 #include <imgui/backends/imgui_impl_sdl.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 #include <imgui/imgui.h>
-#include <stdexcept>
+#include <memory>
 #include <stdint.h>
-
-#include "SDL.h"
-#include "SDL_events.h"
-#include "SDL_stdinc.h"
-#include "VKDevice.h"
-#include "VKUtil.h"
-#include "VkPhysicalDevice.h"
-#include "VulkanCore.h"
-
 
 const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
 	switch (v) {
@@ -30,21 +25,46 @@ const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
 		return "Vulkan";
 	case GfxBackEnd::ImGUI_Terminal:
 		return "Terminal";
+	case GfxBackEnd::ImGUI_DirectX9:
+		return "DirectX9";
+	case GfxBackEnd::ImGUI_DirectX10:
+		return "DirectX10";
+	case GfxBackEnd::ImGUI_DirectX11:
+		return "DirectX11";
+	case GfxBackEnd::ImGUI_DirectX12:
+		return "DirectX12";
 	default:
 		assert(0);
 		return "";
 	}
 }
 
-WindowBackend::WindowBackend(GfxBackEnd backend) { initGfx(backend); }
+const char *WindowBackend::getWindowBackEndSymbol(WindowLibBackend v) noexcept {
+	switch (v) {
+	case WindowLibBackend::WindowBackendSDL2:
+		return "SDL2";
+	case WindowLibBackend::WindowBackendGLFW3:
+		return "GLFW3";
+	case WindowLibBackend::WindowBackendWindows:
+		return "Windows";
+	default:
+		assert(0);
+		return "";
+	}
+}
 
-WindowBackend::~WindowBackend(void) { releaseRender(); }
+WindowBackend::WindowBackend(WindowLibBackend windowBackend, GfxBackEnd gfxBackend) {
+	initWindow(windowBackend);
+	initGfx(gfxBackend);
+}
 
-void WindowBackend::releaseRender(void) {
+WindowBackend::~WindowBackend() { releaseRender(); }
+
+void WindowBackend::releaseRender() {
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
-		ImTui_ImplText_Shutdown();
-		ImTui_ImplNcurses_Shutdown();
+		// ImTui_ImplText_Shutdown();
+		// ImTui_ImplNcurses_Shutdown();
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
 		ImGui_ImplOpenGL3_Shutdown();
@@ -59,9 +79,9 @@ void WindowBackend::releaseRender(void) {
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Vulkan:
 	case GfxBackEnd::ImGUI_OpenGL:
-		SDL_DestroyWindow(gfxWindow);
-		ImGui_ImplSDL2_Shutdown();
-		SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
+		// SDL_DestroyWindow(gfxWindow);
+		// ImGui_ImplSDL2_Shutdown();
+		// SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
 		break;
 	default:
 		break;
@@ -71,9 +91,9 @@ void WindowBackend::releaseRender(void) {
 }
 
 void WindowBackend::initGfx(GfxBackEnd backend) {
-
 	this->gfxBackend = backend;
-	Logger::log()->info("Initilize UI Graphic with Backend Graphic: {}", backend);
+
+	// Logger::log()->info("Initilize UI Graphic with Backend Graphic: {}", backend);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -87,9 +107,9 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
-	if (backend == GfxBackEnd::ImGUI_OpenGL || backend == GfxBackEnd::ImGUI_Vulkan) {
-		SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
-	}
+	// if (backend == GfxBackEnd::ImGUI_OpenGL || backend == GfxBackEnd::ImGUI_Vulkan) {
+	// 	SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
+	// }
 
 	if (backend == GfxBackEnd::ImGUI_OpenGL || backend == GfxBackEnd::ImGUI_Vulkan) {
 		// TODO relocate
@@ -115,14 +135,14 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 		config.MergeMode = true;
 		// io.Fonts->AddFontFromFileTTF("Verdana.ttf", 18.0f, &config, io.Fonts->GetGlyphRangesJapanese()));
 		// TODO relocate
-		std::string fontPath = ResourceManager::getResourcePath("NotoSansCJKjp-Medium.otf");
-		io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+		// std::string fontPath = ResourceManager::getResourcePath("NotoSansCJKjp-Medium.otf");
+		// io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 		io.Fonts->Build();
 	}
 
-	switch (gfxBackend) {
+	/*	*/
+	switch (getBackendRenderer()) {
 	case GfxBackEnd::ImGUI_Terminal:
-		initTerminal();
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
 		initOpenGL();
@@ -130,38 +150,58 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 	case GfxBackEnd::ImGUI_Vulkan:
 		initVulkan();
 		break;
+	case GfxBackEnd::ImGUI_DirectX9:
+		break;
+	case GfxBackEnd::ImGUI_DirectX10:
+		break;
+	case GfxBackEnd::ImGUI_DirectX11:
+		break;
+	case GfxBackEnd::ImGUI_DirectX12:
+		break;
+
 	default:
 		break;
 	}
-
-	// TODO relocate to the inherit class
-	ImPlot::CreateContext();
 }
 
-void WindowBackend::initTerminal(void) {
-	this->imtuiScreen = ImTui_ImplNcurses_Init(true);
-	ImTui_ImplText_Init();
+void WindowBackend::initWindow(WindowLibBackend windowBackend) {
+	this->windowBackend = windowBackend;
+	switch (getBackendWindowManager()) {
+	case WindowLibBackend::WindowBackendSDL2:
+		this->proxyWindow = new SDLWindow();
+		break;
+	case WindowLibBackend::WindowBackendGLFW3:
+		break;
+	default:
+		assert(0);
+		break;
+	}
 }
 
-void WindowBackend::initVulkan(void) {
+void WindowBackend::initTerminal() {
+	// this->imtuiScreen = ImTui_ImplNcurses_Init(true);
+	// ImTui_ImplText_Init();
+}
+
+void WindowBackend::initVulkan() {
 
 	int width = 800;
 	int height = 600;
 
-	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE |
-													 SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_INPUT_FOCUS);
-	gfxWindow = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, window_flags);
+	// SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE |
+	// 												 SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_INPUT_FOCUS);
+	// gfxWindow = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, window_flags);
 
-	SDL_SetWindowMinimumSize(gfxWindow, 800, 600);
+	// this->mini
 
 	this->vkCore = std::make_shared<VulkanCore>();
 	this->vkPhysicalDevices = this->vkCore->createPhysicalDevices();
 	this->vkDevice = std::make_shared<VKDevice>(vkPhysicalDevices);
 
 	/*  Create surface. */
-	bool surfaceResult = SDL_Vulkan_CreateSurface(this->gfxWindow, vkCore->getHandle(), &wd.Surface);
+	bool surfaceResult; //= SDL_Vulkan_CreateSurface(this->gfxWindow, vkCore->getHandle(), &wd.Surface);
 	if (surfaceResult == SDL_FALSE) {
-		throw RuntimeException("failed create vulkan surface - {}", SDL_GetError());
+		// throw RuntimeException("failed create vulkan surface - {}", SDL_GetError());
 	}
 
 	/*	Check if any of the gpu devices and which of their queue support present.	*/
@@ -176,8 +216,8 @@ void WindowBackend::initVulkan(void) {
 	}
 	assert(gpu_index < (int)this->vkDevice->getNrPhysicalDevices());
 
-	if (gpu_index == -1)
-		throw RuntimeException("No Supported GPU device that are presentable");
+	//	if (gpu_index == -1)
+	// throw RuntimeException("No Supported GPU device that are presentable");
 
 	const std::shared_ptr<PhysicalDevice> &gpuDevice = this->vkDevice->getPhysicalDevice(gpu_index);
 
@@ -215,9 +255,9 @@ void WindowBackend::initVulkan(void) {
 	vkCreateDescriptorPool(vkDevice->getHandle(), &pool_info, nullptr, &desc_pool);
 
 	// Setup Platform/Renderer backends
-	if (!ImGui_ImplSDL2_InitForVulkan(gfxWindow)) {
-		throw RuntimeException("Failed init ImGUI SDL - Vulkan");
-	}
+	// if (!ImGui_ImplSDL2_InitForVulkan(gfxWindow)) {
+	// 	//throw RuntimeException("Failed init ImGUI SDL - Vulkan");
+	// }
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = this->vkCore->getHandle();
 	init_info.PhysicalDevice = gpuDevice->getHandle();
@@ -233,7 +273,7 @@ void WindowBackend::initVulkan(void) {
 	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
 	if (!ImGui_ImplVulkan_Init(&init_info, wd.RenderPass)) {
-		throw RuntimeException("Failed init ImGUI Vulkan");
+		// throw RuntimeException("Failed init ImGUI Vulkan");
 	}
 
 	VkCommandPool command_pool = wd.Frames[wd.FrameIndex].CommandPool;
@@ -247,7 +287,7 @@ void WindowBackend::initVulkan(void) {
 	VKS_VALIDATE(vkBeginCommandBuffer(command_buffer, &begin_info));
 
 	if (!ImGui_ImplVulkan_CreateFontsTexture(command_buffer)) {
-		throw RuntimeException("Failed to generate font ImGUI Vulkan");
+		// throw RuntimeException("Failed to generate font ImGUI Vulkan");
 	}
 
 	VkSubmitInfo end_info = {};
@@ -263,7 +303,7 @@ void WindowBackend::initVulkan(void) {
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
-void WindowBackend::initOpenGL(void) {
+void WindowBackend::initOpenGL() {
 	// set OpenGL attributes
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 2);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -296,14 +336,8 @@ void WindowBackend::initOpenGL(void) {
 	int width = 800;
 	int height = 600;
 
-	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
-													 SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_INPUT_FOCUS);
-	gfxWindow = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, window_flags);
-
-	SDL_SetWindowMinimumSize(gfxWindow, 800, 600);
-
-	gl_context = SDL_GL_CreateContext(gfxWindow);
-	SDL_GL_MakeCurrent(gfxWindow, gl_context);
+	gl_context = SDL_GL_CreateContext((SDL_Window *)getNativePtr());
+	SDL_GL_MakeCurrent((SDL_Window *)getNativePtr(), gl_context);
 
 	// enable VSync
 	SDL_GL_SetSwapInterval(1);
@@ -311,10 +345,10 @@ void WindowBackend::initOpenGL(void) {
 	glViewport(0, 0, width, height);
 
 	if (glewInit() != GLEW_OK) {
-		throw RuntimeException("GLEW Failed");
+		// throw RuntimeException("GLEW Failed");
 	}
 
-	ImGui_ImplSDL2_InitForOpenGL(gfxWindow, gl_context);
+	ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)getNativePtr(), gl_context);
 	ImGui_ImplOpenGL3_Init(glsl_version.c_str());
 }
 
@@ -366,9 +400,26 @@ void WindowBackend::showDockSpace(bool *open) {
 	ImGui::End();
 }
 
-void WindowBackend::beginRender(void) {
+void WindowBackend::beginRenderVulkan() {}
+void WindowBackend::beginRenderOpenGL() {}
+void WindowBackend::beginRenderTerminal() {}
+void WindowBackend::beginRenderDX9() {}
+void WindowBackend::beginRenderDX10() {}
+void WindowBackend::beginRenderDX11() {}
+void WindowBackend::beginRenderDX12() {}
 
-	if (gfxBackend == ImGUI_Vulkan || gfxBackend == ImGUI_OpenGL) {
+void WindowBackend::endRenderVulkan() {}
+void WindowBackend::endRenderOpenGL() {}
+void WindowBackend::endRenderTerminal() {}
+void WindowBackend::endRenderDX9() {}
+void WindowBackend::endRenderDX10() {}
+void WindowBackend::endRenderDX11() {}
+void WindowBackend::endRenderDX12() {}
+
+void WindowBackend::beginRender() {
+
+	if (this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_Vulkan ||
+		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_OpenGL) {
 
 		int windowWidth;
 		int windowHeight;
@@ -412,22 +463,23 @@ void WindowBackend::beginRender(void) {
 
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
-		ImTui_ImplNcurses_NewFrame();
-		ImTui_ImplText_NewFrame();
+		// ImTui_ImplNcurses_NewFrame();
+		// ImTui_ImplText_NewFrame();
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
 		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplSDL2_NewFrame(gfxWindow);
+		ImGui_ImplSDL2_NewFrame();
 		break;
 	case GfxBackEnd::ImGUI_Vulkan:
-		ImGui_ImplVulkan_NewFrame();
-		ImGui_ImplSDL2_NewFrame(gfxWindow);
+		// ImGui_ImplVulkan_NewFrame();
+		// ImGui_ImplSDL2_NewFrame();
 		break;
 	default:
 		break;
 	}
 }
-void WindowBackend::endRender(void) {
+
+void WindowBackend::endRender() {
 	ImGuiIO &io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
 		ImGui::UpdatePlatformWindows();
@@ -435,13 +487,13 @@ void WindowBackend::endRender(void) {
 	}
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
-		ImTui_ImplText_RenderDrawData(ImGui::GetDrawData(), this->imtuiScreen);
-		ImTui_ImplNcurses_DrawScreen();
+		// ImTui_ImplText_RenderDrawData(ImGui::GetDrawData(), this->imtuiScreen);
+		// ImTui_ImplNcurses_DrawScreen();
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
 		glClear(GL_COLOR_BUFFER_BIT);
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		SDL_GL_SwapWindow(gfxWindow);
+		SDL_GL_SwapWindow((SDL_Window *)getNativePtr());
 		break;
 	case GfxBackEnd::ImGUI_Vulkan: {
 		VkResult err;
@@ -526,78 +578,70 @@ void WindowBackend::endRender(void) {
 		break;
 	}
 }
-void WindowBackend::show() noexcept { SDL_ShowWindow(this->gfxWindow); }
+void WindowBackend::show() { this->proxyWindow->show(); }
 
-void WindowBackend::hide() noexcept { SDL_HideWindow(this->gfxWindow); }
+void WindowBackend::hide() { this->proxyWindow->hide(); }
 
-void WindowBackend::close(void) noexcept {
-	this->hide();
-	SDL_DestroyWindow(this->gfxWindow);
+void WindowBackend::close() { this->hide(); }
+
+void WindowBackend::setPosition(int x, int y) {
+	// this->proxyWindow->setPosition(x, y);
 }
 
-void WindowBackend::setPosition(int x, int y) noexcept { SDL_SetWindowPosition(this->gfxWindow, x, y); }
+void WindowBackend::setSize(int width, int height) { /*	TODO determine if it shall update framebuffera as well.	*/
+													 // this->proxyWindow->setSize(width, height);
 
-void WindowBackend::setSize(int width, int height) noexcept {
-	/*	TODO determine if it shall update framebuffera as well.	*/
-	SDL_SetWindowSize(this->gfxWindow, width, height);
+	//						recreateSwapChain();
 }
 
-void WindowBackend::getPosition(int *x, int *y) const { SDL_GetWindowPosition(this->gfxWindow, x, y); }
+void WindowBackend::getPosition(int *x, int *y) const {}
 
-void WindowBackend::getSize(int *width, int *height) const { SDL_GetWindowSize(this->gfxWindow, width, height); }
-void WindowBackend::setTitle(const std::string &title) { SDL_SetWindowTitle(gfxWindow, title.c_str()); }
+void WindowBackend::getSize(int *width, int *height) const {}
+void WindowBackend::setTitle(const std::string &title) { this->proxyWindow->setTitle(title); }
 
-std::string WindowBackend::getTitle(void) { return SDL_GetWindowTitle(gfxWindow); }
+std::string WindowBackend::getTitle() const { return this->proxyWindow->getTitle(); }
 
-int WindowBackend::x(void) const noexcept {
+int WindowBackend::x() const noexcept {
 	int x, y;
-	SDL_GetWindowPosition(this->gfxWindow, &x, &y);
+
 	return x;
 }
-int WindowBackend::y(void) const noexcept {
+int WindowBackend::y() const noexcept {
 	int x, y;
-	SDL_GetWindowPosition(this->gfxWindow, &x, &y);
+
 	return y;
 }
-void WindowBackend::resizable(bool resizable) noexcept { SDL_SetWindowResizable(this->gfxWindow, (SDL_bool)resizable); }
+void WindowBackend::resizable(bool resizable) noexcept {}
 
-void WindowBackend::setFullScreen(bool fullscreen) {
-	// TODO add option for using either of the modes.
-	if (fullscreen)
-		SDL_SetWindowFullscreen(this->gfxWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-	else
-		SDL_SetWindowFullscreen(this->gfxWindow, 0);
-}
+void WindowBackend::setFullScreen(bool fullscreen) {}
 
-bool WindowBackend::isFullScreen(void) const { return false; }
+bool WindowBackend::isFullScreen() const { return false; }
 
-void WindowBackend::setBordered(bool bordered) { SDL_SetWindowBordered(this->gfxWindow, (SDL_bool)bordered); }
+void WindowBackend::setBordered(bool bordered) {}
 
-int WindowBackend::width(void) const noexcept {
+int WindowBackend::width() const noexcept {
 	int w, h;
 	getSize(&w, &h);
 	return w;
 }
-int WindowBackend::height(void) const noexcept {
+int WindowBackend::height() const noexcept {
 	int w, h;
 	getSize(&w, &h);
 	return h;
 }
 
-void WindowBackend::setMinimumSize(int width, int height) { SDL_SetWindowMinimumSize(this->gfxWindow, width, height); }
-void WindowBackend::getMinimumSize(int *width, int *height) {
-	SDL_GetWindowMinimumSize(this->gfxWindow, width, height);
-}
+void WindowBackend::setMinimumSize(int width, int height) {}
+void WindowBackend::getMinimumSize(int *width, int *height) {}
 
-void WindowBackend::setMaximumSize(int width, int height) { SDL_SetWindowMaximumSize(this->gfxWindow, width, height); }
-void WindowBackend::getMaximumSize(int *width, int *height) {
-	SDL_GetWindowMaximumSize(this->gfxWindow, width, height);
-}
+void WindowBackend::setMaximumSize(int width, int height) {}
+void WindowBackend::getMaximumSize(int *width, int *height) {}
 
-void WindowBackend::focus(void) { SDL_SetWindowInputFocus(this->gfxWindow); }
+void WindowBackend::focus() {}
 
-void WindowBackend::restore(void) { SDL_RestoreWindow(this->gfxWindow); }
+void WindowBackend::restore() {}
 
-void WindowBackend::maximize(void) { SDL_MaximizeWindow(this->gfxWindow); }
+void WindowBackend::maximize() {}
 
-void WindowBackend::minimize(void) { SDL_MinimizeWindow(this->gfxWindow); }
+void WindowBackend::minimize() {}
+
+intptr_t WindowBackend::getNativePtr() const { return this->proxyWindow->getNativePtr(); }

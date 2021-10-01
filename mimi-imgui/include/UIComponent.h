@@ -1,9 +1,8 @@
 #ifndef _MIMI_IMGUI_UICOMPONENT_H_
 #define _MIMI_IMGUI_UICOMPONENT_H_ 1
-#include "Translation.h"
-#include <ITree.h>
-#include <NoCopyable.h>
+//#include <ITree.h>
 #include <imgui/imgui.h>
+#include <string>
 
 /**
  * @brief
@@ -27,6 +26,9 @@ class UIComponent {
 	//	virtual const std::string &getName(void) const { return name; }
 	virtual const std::string &getHelperInformation(void) const { return this->helperInformation; }
 
+	void setName(const std::string &name) { this->name = name; }
+	const std::string &getName() const { return this->name; }
+
   protected:
 	virtual void draw() = 0;
 
@@ -37,6 +39,7 @@ class UIComponent {
 	ImGuiWindowFlags window_flags;
 	std::string helperInformation;
 	bool isContentVisible;
+	std::string name;
 };
 
 #endif

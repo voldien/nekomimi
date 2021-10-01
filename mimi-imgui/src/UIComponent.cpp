@@ -1,4 +1,4 @@
-#include "UIComponents/UIComponent.h"
+#include "UIComponent.h"
 
 UIComponent::UIComponent(void) : window_flags(ImGuiWindowFlags_None) { this->m_show = true; }
 
@@ -10,7 +10,7 @@ void UIComponent::begin(void) {
 		ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x * 0.25f, ImGui::GetIO().DisplaySize.y * 0.25f),
 								 ImGuiCond_FirstUseEver);
 
-		this->isContentVisible = ImGui::Begin(Translation::getInstance()->getText(getName().c_str()), &this->m_show);
+		this->isContentVisible = ImGui::Begin(getName().c_str(), &this->m_show);
 	}
 }
 

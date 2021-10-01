@@ -1,36 +1,38 @@
 
 #ifndef _MIMI_IMGUI_WINDOW_H_
 #define _MIMI_IMGUI_WINDOW_H_ 1
-#include"Window.h"
+#include "Window.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <string>
 
-class SDLWindow {
+class SDLWindow : public Window {
   public:
-	virtual void show(void) noexcept;
+	SDLWindow();
 
-	virtual void hide(void) noexcept;
+	virtual void show() override;
 
-	virtual void close(void) noexcept;
+	virtual void hide() override;
 
-	virtual void focus(void);
+	virtual void close() override;
 
-	virtual void restore(void);
+	virtual void focus() override;
 
-	virtual void maximize(void);
+	virtual void restore() override;
 
-	virtual void minimize(void);
+	virtual void maximize() override;
 
-	virtual void setTitle(const std::string &title);
+	virtual void minimize() override;
 
-	virtual std::string getTitle(void);
+	virtual void setTitle(const std::string &title) override;
 
-	virtual int x(void) const noexcept;
-	virtual int y(void) const noexcept;
+	virtual std::string getTitle() const override;
 
-	virtual int width(void) const noexcept;
-	virtual int height(void) const noexcept;
+	virtual int x() const noexcept;
+	virtual int y() const noexcept;
+
+	virtual int width() const noexcept;
+	virtual int height() const noexcept;
 
 	virtual void getPosition(int *x, int *y) const;
 
@@ -44,7 +46,7 @@ class SDLWindow {
 
 	virtual void setFullScreen(bool fullscreen);
 
-	virtual bool isFullScreen(void) const;
+	virtual bool isFullScreen() const;
 
 	virtual void setBordered(bool borded);
 
@@ -52,6 +54,8 @@ class SDLWindow {
 	virtual void getMinimumSize(int *width, int *height);
 	virtual void setMaximumSize(int width, int height);
 	virtual void getMaximumSize(int *width, int *height);
+
+	virtual intptr_t getNativePtr() const override; /*  Get native window reference object. */
 
   protected:
 	SDL_Window *window;

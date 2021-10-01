@@ -5,25 +5,19 @@
 //#include <SDL2/SDL.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 //#include <imtui/imtui.h>
+#include <VKDevice.h>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "SDL_video.h"
-#include "VKDevice.h"
-#include "VulkanCore.h"
-
-class PhysicalDevice;
-class VKDevice;
-class VulkanCore;
 namespace ImTui {
 	struct TScreen;
 } // namespace ImTui
 
 class WindowBackend : public Window {
   public:
-	enum GfxBackEnd {
+	enum class GfxBackEnd {
 		ImGUI_Terminal,
 		ImGUI_OpenGL,
 		ImGUI_Vulkan,
@@ -33,18 +27,18 @@ class WindowBackend : public Window {
 		ImGUI_DirectX12
 	};
 
-	enum WindowBackend {
-		WindowBackendSDL2,
-		WindowBackendGLFW3,
-		WindowBackendWindows
-	};
+	enum class WindowLibBackend { WindowBackendSDL2, WindowBackendGLFW3, WindowBackendWindows };
 
 	static const char *getGfxBackEndSymbol(GfxBackEnd v) noexcept;
-	static const char *getWindowBackEndSymbol(GfxBackEnd v) noexcept;
-	WindowBackend(GfxBackEnd backend);
-	~WindowBackend();
+	static const char *getWindowBackEndSymbol(WindowLibBackend v) noexcept;
+	static bool isGfxBackendSupported(GfxBackEnd gfxBackend);
+	static bool isWindowBackendSupported(WindowLibBackend windowBackend);
+
+	WindowBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
+	virtual ~WindowBackend();
 
 	virtual void initGfx(GfxBackEnd backend);
+	virtual void initWindow(WindowLibBackend windowBackend);
 
 	void initTerminal();
 	void initVulkan();
@@ -58,28 +52,47 @@ class WindowBackend : public Window {
 
 	virtual void beginRender();
 	virtual void endRender();
+
+	virtual void beginRenderVulkan();
+	virtual void beginRenderOpenGL();
+	virtual void beginRenderTerminal();
+	virtual void beginRenderDX9();
+	virtual void beginRenderDX10();
+	virtual void beginRenderDX11();
+	virtual void beginRenderDX12();
+
+	virtual void endRenderVulkan();
+	virtual void endRenderOpenGL();
+	virtual void endRenderTerminal();
+	virtual void endRenderDX9();
+	virtual void endRenderDX10();
+	virtual void endRenderDX11();
+	virtual void endRenderDX12();
+
 	virtual void releaseRender();
 
 	GfxBackEnd getBackendRenderer() const noexcept { return this->gfxBackend; }
 
+	WindowLibBackend getBackendWindowManager() const noexcept { return this->windowBackend; }
+
   public:
-	virtual void show() noexcept;
+	virtual void show(void) override;
 
-	virtual void hide() noexcept;
+	virtual void hide(void) override;
 
-	virtual void close() noexcept;
+	virtual void close(void) override;
 
-	virtual void focus();
+	virtual void focus(void) override;
 
-	virtual void restore();
+	virtual void restore(void) override;
 
-	virtual void maximize();
+	virtual void maximize(void) override;
 
-	virtual void minimize();
+	virtual void minimize(void) override;
 
-	virtual void setTitle(const std::string &title);
+	virtual void setTitle(const std::string &title) override;
 
-	virtual std::string getTitle();
+	virtual std::string getTitle(void) const override;
 
 	virtual int x() const noexcept;
 	virtual int y() const noexcept;
@@ -89,9 +102,9 @@ class WindowBackend : public Window {
 
 	virtual void getPosition(int *x, int *y) const;
 
-	virtual void setPosition(int x, int y) noexcept;
+	virtual void setPosition(int x, int y);
 
-	virtual void setSize(int width, int height) noexcept;
+	virtual void setSize(int width, int height);
 
 	virtual void getSize(int *width, int *height) const;
 
@@ -108,16 +121,22 @@ class WindowBackend : public Window {
 	virtual void setMaximumSize(int width, int height);
 	virtual void getMaximumSize(int *width, int *height);
 
+
+	virtual intptr_t getNativePtr(void) const override; /*  Get native window reference object. */
+
   private:
 	GfxBackEnd gfxBackend;
-	SDL_Window *gfxWindow;
-	SDL_GLContext gl_context;
+	WindowLibBackend windowBackend;
+	/*	*/
+	// SDL_Window *gfxWindow;
+	void* gl_context;
 	std::shared_ptr<VulkanCore> vkCore;
 	std::vector<std::shared_ptr<PhysicalDevice>> vkPhysicalDevices;
 	std::shared_ptr<VKDevice> vkDevice;
 	ImGui_ImplVulkanH_Window wd;
-
 	ImTui::TScreen *imtuiScreen;
+
+	Window *proxyWindow;
 };
 
 #endif
