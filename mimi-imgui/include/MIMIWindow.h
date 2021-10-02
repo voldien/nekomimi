@@ -4,30 +4,33 @@
 #include "UIComponent.h"
 #include "util/imgui-ext.h"
 #include <memory>
-/**
- * @brief
- *
- */
-class MIMIWindow : public WindowBackend {
-  public:
-	MIMIWindow(GfxBackEnd backend);
 
-  public:
-	void run();
+namespace MIMIIMGUI {
+	/**
+	 * @brief
+	 *
+	 */
+	class MIMIWindow : public WindowBackend {
+	  public:
+		MIMIWindow(GfxBackEnd backend);
 
-	void quit();
+	  public:
+		void run();
 
-  protected:
-	virtual void displayMenuBar(void) = 0;
-	virtual void renderUI() = 0;
+		void quit();
 
-	virtual void addUIComponent(const std::shared_ptr<UIComponent> &component);
-	unsigned int getNrUIComponents() const;
-	std::shared_ptr<UIComponent> &getComponent(unsigned int index);
+	  protected:
+		virtual void displayMenuBar() = 0;
+		virtual void renderUI() = 0;
 
-  private:
-	std::vector<std::shared_ptr<UIComponent>> components;
-	bool requestQuit = false;
-};
+		virtual void addUIComponent(const std::shared_ptr<UIComponent> &component);
+		unsigned int getNrUIComponents() const;
+		std::shared_ptr<UIComponent> &getComponent(unsigned int index);
+
+	  private:
+		std::vector<std::shared_ptr<UIComponent>> components;
+		bool requestQuit = false;
+	};
+}
 
 #endif

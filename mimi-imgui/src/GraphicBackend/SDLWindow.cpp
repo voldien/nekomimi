@@ -2,6 +2,8 @@
 //#include <SDL2/SDL_syswm.h>
 #include <SDL2/SDL_video.h>
 
+using namespace MIMIIMGUI;
+
 SDLWindow::SDLWindow() {
 
 	SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
@@ -69,6 +71,10 @@ int SDLWindow::height() const noexcept {
 	getSize(&w, &h);
 	return h;
 }
+
+float SDLWindow::getGamma() const {}
+
+void SDLWindow::setGamma(float gamma) {}
 
 void SDLWindow::setMinimumSize(int width, int height) { SDL_SetWindowMinimumSize(this->window, width, height); }
 void SDLWindow::getMinimumSize(int *width, int *height) { SDL_GetWindowMinimumSize(this->window, width, height); }

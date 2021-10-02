@@ -1,8 +1,10 @@
 #include "UIComponent.h"
 
-UIComponent::UIComponent(void) : window_flags(ImGuiWindowFlags_None) { this->m_show = true; }
+using namespace MIMIIMGUI;
 
-void UIComponent::begin(void) {
+UIComponent::UIComponent() : window_flags(ImGuiWindowFlags_None) { this->m_show = true; }
+
+void UIComponent::begin() {
 
 	if (isVisible()) {
 		ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f),
@@ -14,7 +16,7 @@ void UIComponent::begin(void) {
 	}
 }
 
-void UIComponent::drawUI(void) {
+void UIComponent::drawUI() {
 	if (isVisible()) {
 		this->begin();
 		if (this->isContentVisible)
@@ -23,7 +25,7 @@ void UIComponent::drawUI(void) {
 	}
 }
 
-void UIComponent::end(void) {
+void UIComponent::end() {
 	if (isVisible())
 		ImGui::End();
 }
@@ -36,6 +38,6 @@ void UIComponent::showTitle(bool state) {
 		this->window_flags &= ~ImGuiWindowFlags_NoTitleBar;
 }
 
-bool UIComponent::isVisible(void) const noexcept { return this->m_show; }
+bool UIComponent::isVisible() const noexcept { return this->m_show; }
 
 void UIComponent::setHelperInformation(const std::string &info) { this->helperInformation = info; }

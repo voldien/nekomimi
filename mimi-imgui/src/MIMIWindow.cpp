@@ -1,4 +1,5 @@
 #include "MIMIWindow.h"
+using namespace MIMIIMGUI;
 
 MIMIWindow::MIMIWindow(GfxBackEnd backend)
 	: WindowBackend(WindowBackend::WindowLibBackend::WindowBackendSDL2, backend) {}
@@ -7,6 +8,7 @@ void MIMIWindow::run() {
 	this->show();
 	this->maximize();
 	this->focus();
+	
 	bool show_dockspace = true;
 
 	while (!requestQuit) {
@@ -24,6 +26,8 @@ void MIMIWindow::run() {
 			uiComponent->drawUI();
 		}
 
+
+		/*	User Callback.	*/
 		renderUI();
 
 		ImGui::Render();
@@ -31,12 +35,9 @@ void MIMIWindow::run() {
 		endRender();
 	}
 
-	// isAlive = false;
 }
 
-void MIMIWindow::quit(){
-	this->requestQuit = true;
-}
+void MIMIWindow::quit() { this->requestQuit = true; }
 
 void MIMIWindow::addUIComponent(const std::shared_ptr<UIComponent> &component) {
 	this->components.push_back(component);

@@ -1,64 +1,71 @@
 
-#ifndef _MIMI_IMGUI_WINDOW_H_
-#define _MIMI_IMGUI_WINDOW_H_ 1
+#ifndef _MIMI_IMGUI_SDL_WINDOW_H_
+#define _MIMI_IMGUI_SDL_WINDOW_H_ 1
 #include "Window.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <string>
 
-class SDLWindow : public Window {
-  public:
-	SDLWindow();
+namespace MIMIIMGUI {
 
-	virtual void show() override;
+	class SDLWindow : public Window {
+	  public:
+		SDLWindow();
 
-	virtual void hide() override;
+		virtual void show() override;
 
-	virtual void close() override;
+		virtual void hide() override;
 
-	virtual void focus() override;
+		virtual void close() override;
 
-	virtual void restore() override;
+		virtual void focus() override;
 
-	virtual void maximize() override;
+		virtual void restore() override;
 
-	virtual void minimize() override;
+		virtual void maximize() override;
 
-	virtual void setTitle(const std::string &title) override;
+		virtual void minimize() override;
 
-	virtual std::string getTitle() const override;
+		virtual void setTitle(const std::string &title) override;
 
-	virtual int x() const noexcept;
-	virtual int y() const noexcept;
+		virtual std::string getTitle() const override;
 
-	virtual int width() const noexcept;
-	virtual int height() const noexcept;
+		virtual int x() const noexcept override;
+		virtual int y() const noexcept override;
 
-	virtual void getPosition(int *x, int *y) const;
+		virtual int width() const noexcept override;
+		virtual int height() const noexcept override;
 
-	virtual void setPosition(int x, int y) noexcept;
+		virtual void getPosition(int *x, int *y) const override;
 
-	virtual void setSize(int width, int height) noexcept;
+		virtual void setPosition(int x, int y) noexcept override;
 
-	virtual void getSize(int *width, int *height) const;
+		virtual void setSize(int width, int height) noexcept override;
 
-	virtual void resizable(bool resizable) noexcept;
+		virtual void getSize(int *width, int *height) const override;
 
-	virtual void setFullScreen(bool fullscreen);
+		virtual void resizable(bool resizable) noexcept;
 
-	virtual bool isFullScreen() const;
+		virtual void setFullScreen(bool fullscreen);
 
-	virtual void setBordered(bool borded);
+		virtual bool isFullScreen() const;
 
-	virtual void setMinimumSize(int width, int height);
-	virtual void getMinimumSize(int *width, int *height);
-	virtual void setMaximumSize(int width, int height);
-	virtual void getMaximumSize(int *width, int *height);
+		virtual void setBordered(bool borded);
 
-	virtual intptr_t getNativePtr() const override; /*  Get native window reference object. */
+		virtual float getGamma() const override;
 
-  protected:
-	SDL_Window *window;
-};
+		virtual void setGamma(float gamma) override;
+
+		virtual void setMinimumSize(int width, int height) override;
+		virtual void getMinimumSize(int *width, int *height) override;
+		virtual void setMaximumSize(int width, int height) override;
+		virtual void getMaximumSize(int *width, int *height) override;
+
+		virtual intptr_t getNativePtr() const override; /*  Get native window reference object. */
+
+	  protected:
+		SDL_Window *window;
+	};
+}
 
 #endif

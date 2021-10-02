@@ -13,9 +13,13 @@
 #include <imgui/backends/imgui_impl_opengl3.h>
 #include <imgui/backends/imgui_impl_sdl.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
+
+/*	TODO include directX if supported.	*/
 #include <imgui/imgui.h>
 #include <memory>
 #include <stdint.h>
+
+using namespace MIMIIMGUI;
 
 const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
 	switch (v) {
@@ -50,6 +54,19 @@ const char *WindowBackend::getWindowBackEndSymbol(WindowLibBackend v) noexcept {
 	default:
 		assert(0);
 		return "";
+	}
+}
+
+bool WindowBackend::isGfxBackendSupported(GfxBackEnd gfxBackend) {
+	switch (gfxBackend) {
+	default:
+		return true;
+	}
+}
+bool WindowBackend::isWindowBackendSupported(WindowLibBackend windowBackend) {
+	switch (windowBackend) {
+	default:
+		return true;
 	}
 }
 
@@ -171,6 +188,8 @@ void WindowBackend::initWindow(WindowLibBackend windowBackend) {
 		this->proxyWindow = new SDLWindow();
 		break;
 	case WindowLibBackend::WindowBackendGLFW3:
+		break;
+	case WindowLibBackend::WindowBackendWindows:
 		break;
 	default:
 		assert(0);
