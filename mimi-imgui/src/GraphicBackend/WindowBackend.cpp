@@ -659,14 +659,6 @@ int WindowBackend::y() const noexcept {
 
 	return y;
 }
-void WindowBackend::resizable(bool resizable) noexcept {}
-
-void WindowBackend::setFullScreen(bool fullscreen) {}
-
-bool WindowBackend::isFullScreen() const { return false; }
-
-void WindowBackend::setBordered(bool bordered) {}
-
 int WindowBackend::width() const noexcept {
 	int w, h;
 	getSize(&w, &h);
@@ -677,6 +669,18 @@ int WindowBackend::height() const noexcept {
 	getSize(&w, &h);
 	return h;
 }
+
+void WindowBackend::resizable(bool resizable) noexcept {}
+
+void WindowBackend::setFullScreen(bool fullscreen) {}
+
+bool WindowBackend::isFullScreen() const { return false; }
+
+void WindowBackend::setBordered(bool bordered) {}
+
+float WindowBackend::getGamma() const { return this->proxyWindow->getGamma(); }
+
+void WindowBackend::setGamma(float gamma) { return this->proxyWindow->setGamma(gamma); }
 
 void WindowBackend::setMinimumSize(int width, int height) { this->proxyWindow->setMinimumSize(width, height); }
 void WindowBackend::getMinimumSize(int *width, int *height) { this->proxyWindow->getMinimumSize(width, height); }
