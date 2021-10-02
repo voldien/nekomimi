@@ -215,8 +215,6 @@ void WindowBackend::initVulkan() {
 	// 												 SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_INPUT_FOCUS);
 	// gfxWindow = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, window_flags);
 
-	// this->mini
-
 	this->vkCore = std::make_shared<VulkanCore>();
 	this->vkPhysicalDevices = this->vkCore->createPhysicalDevices();
 	this->vkDevice = std::make_shared<VKDevice>(vkPhysicalDevices);
@@ -452,9 +450,94 @@ void WindowBackend::beginRenderDX12() {
 	ImGui_ImplSDL2_NewFrame();
 }
 
-void WindowBackend::endRenderVulkan() {}
-void WindowBackend::endRenderOpenGL() {}
-void WindowBackend::endRenderTerminal() {}
+void WindowBackend::endRenderVulkan() {
+	VkResult err;
+
+	VkSemaphore image_acquired_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].ImageAcquiredSemaphore;
+	VkSemaphore render_complete_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].RenderCompleteSemaphore;
+	err = vkAcquireNextImageKHR(vkDevice->getHandle(), wd.Swapchain, UINT64_MAX, image_acquired_semaphore,
+								VK_NULL_HANDLE, &wd.FrameIndex);
+	if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
+		// g_SwapChainRebuild = true;
+		return;
+	}
+	VKS_VALIDATE(err);
+
+	ImGui_ImplVulkanH_Frame *fd = &wd.Frames[wd.FrameIndex];
+	{
+		VKS_VALIDATE(vkWaitForFences(vkDevice->getHandle(), 1, &fd->Fence, VK_TRUE,
+									 UINT64_MAX)); // wait indefinitely instead of periodically checking
+
+		VKS_VALIDATE(vkResetFences(vkDevice->getHandle(), 1, &fd->Fence));
+	}
+	{
+		VKS_VALIDATE(vkResetCommandPool(vkDevice->getHandle(), fd->CommandPool, 0));
+
+		VkCommandBufferBeginInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		VKS_VALIDATE(vkBeginCommandBuffer(fd->CommandBuffer, &info));
+	}
+	{
+		VkRenderPassBeginInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		info.renderPass = wd.RenderPass;
+		info.framebuffer = fd->Framebuffer;
+		info.renderArea.extent.width = wd.Width;
+		info.renderArea.extent.height = wd.Height;
+		info.clearValueCount = 1;
+		info.pClearValues = &wd.ClearValue;
+		vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
+	}
+
+	// Record dear imgui primitives into command buffer
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), fd->CommandBuffer);
+
+	// Submit command buffer
+	vkCmdEndRenderPass(fd->CommandBuffer);
+	{
+		VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		VkSubmitInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		info.waitSemaphoreCount = 1;
+		info.pWaitSemaphores = &image_acquired_semaphore;
+		info.pWaitDstStageMask = &wait_stage;
+		info.commandBufferCount = 1;
+		info.pCommandBuffers = &fd->CommandBuffer;
+		info.signalSemaphoreCount = 1;
+		info.pSignalSemaphores = &render_complete_semaphore;
+
+		err = vkEndCommandBuffer(fd->CommandBuffer);
+
+		err = vkQueueSubmit(vkDevice->getDefaultGraphicQueue(), 1, &info, fd->Fence);
+	}
+
+	render_complete_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].RenderCompleteSemaphore;
+	VkPresentInfoKHR info = {};
+	info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	info.waitSemaphoreCount = 1;
+	info.pWaitSemaphores = &render_complete_semaphore;
+	info.swapchainCount = 1;
+	info.pSwapchains = &wd.Swapchain;
+	info.pImageIndices = &wd.FrameIndex;
+	err = vkQueuePresentKHR(vkDevice->getDefaultGraphicQueue(), &info);
+	if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
+		// g_SwapChainRebuild = true;
+		return;
+	}
+	VKS_VALIDATE(err);
+
+	wd.SemaphoreIndex = (wd.SemaphoreIndex + 1) % wd.ImageCount; // Now we can use the next set of semaphores
+}
+void WindowBackend::endRenderOpenGL() {
+	glClear(GL_COLOR_BUFFER_BIT);
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	SDL_GL_SwapWindow((SDL_Window *)getNativePtr());
+}
+void WindowBackend::endRenderTerminal() {
+	// ImTui_ImplText_RenderDrawData(ImGui::GetDrawData(), this->imtuiScreen);
+	// ImTui_ImplNcurses_DrawScreen();
+}
 void WindowBackend::endRenderDX9() {}
 void WindowBackend::endRenderDX10() {}
 void WindowBackend::endRenderDX11() {}
@@ -530,94 +613,12 @@ void WindowBackend::endRender() {
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
 		endRenderTerminal();
-		// ImTui_ImplText_RenderDrawData(ImGui::GetDrawData(), this->imtuiScreen);
-		// ImTui_ImplNcurses_DrawScreen();
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
 		endRenderOpenGL();
-		glClear(GL_COLOR_BUFFER_BIT);
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		SDL_GL_SwapWindow((SDL_Window *)getNativePtr());
 		break;
 	case GfxBackEnd::ImGUI_Vulkan: {
 		endRenderVulkan();
-		VkResult err;
-
-		VkSemaphore image_acquired_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].ImageAcquiredSemaphore;
-		VkSemaphore render_complete_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].RenderCompleteSemaphore;
-		err = vkAcquireNextImageKHR(vkDevice->getHandle(), wd.Swapchain, UINT64_MAX, image_acquired_semaphore,
-									VK_NULL_HANDLE, &wd.FrameIndex);
-		if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
-			// g_SwapChainRebuild = true;
-			return;
-		}
-		VKS_VALIDATE(err);
-
-		ImGui_ImplVulkanH_Frame *fd = &wd.Frames[wd.FrameIndex];
-		{
-			VKS_VALIDATE(vkWaitForFences(vkDevice->getHandle(), 1, &fd->Fence, VK_TRUE,
-										 UINT64_MAX)); // wait indefinitely instead of periodically checking
-
-			VKS_VALIDATE(vkResetFences(vkDevice->getHandle(), 1, &fd->Fence));
-		}
-		{
-			VKS_VALIDATE(vkResetCommandPool(vkDevice->getHandle(), fd->CommandPool, 0));
-
-			VkCommandBufferBeginInfo info = {};
-			info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-			VKS_VALIDATE(vkBeginCommandBuffer(fd->CommandBuffer, &info));
-		}
-		{
-			VkRenderPassBeginInfo info = {};
-			info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-			info.renderPass = wd.RenderPass;
-			info.framebuffer = fd->Framebuffer;
-			info.renderArea.extent.width = wd.Width;
-			info.renderArea.extent.height = wd.Height;
-			info.clearValueCount = 1;
-			info.pClearValues = &wd.ClearValue;
-			vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
-		}
-
-		// Record dear imgui primitives into command buffer
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), fd->CommandBuffer);
-
-		// Submit command buffer
-		vkCmdEndRenderPass(fd->CommandBuffer);
-		{
-			VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-			VkSubmitInfo info = {};
-			info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			info.waitSemaphoreCount = 1;
-			info.pWaitSemaphores = &image_acquired_semaphore;
-			info.pWaitDstStageMask = &wait_stage;
-			info.commandBufferCount = 1;
-			info.pCommandBuffers = &fd->CommandBuffer;
-			info.signalSemaphoreCount = 1;
-			info.pSignalSemaphores = &render_complete_semaphore;
-
-			err = vkEndCommandBuffer(fd->CommandBuffer);
-
-			err = vkQueueSubmit(vkDevice->getDefaultGraphicQueue(), 1, &info, fd->Fence);
-		}
-
-		render_complete_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].RenderCompleteSemaphore;
-		VkPresentInfoKHR info = {};
-		info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		info.waitSemaphoreCount = 1;
-		info.pWaitSemaphores = &render_complete_semaphore;
-		info.swapchainCount = 1;
-		info.pSwapchains = &wd.Swapchain;
-		info.pImageIndices = &wd.FrameIndex;
-		err = vkQueuePresentKHR(vkDevice->getDefaultGraphicQueue(), &info);
-		if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
-			// g_SwapChainRebuild = true;
-			return;
-		}
-		VKS_VALIDATE(err);
-
-		wd.SemaphoreIndex = (wd.SemaphoreIndex + 1) % wd.ImageCount; // Now we can use the next set of semaphores
 	} break;
 	case GfxBackEnd::ImGUI_DirectX9:
 	case GfxBackEnd::ImGUI_DirectX10:
