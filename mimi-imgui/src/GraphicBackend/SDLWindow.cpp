@@ -15,6 +15,9 @@ SDLWindow::SDLWindow() {
 													 SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_INPUT_FOCUS);
 	this->window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, window_flags);
 }
+SDLWindow::~SDLWindow() {
+	SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
+}
 
 void SDLWindow::show() { SDL_ShowWindow(this->window); }
 

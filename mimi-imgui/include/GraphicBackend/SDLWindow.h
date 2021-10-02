@@ -11,6 +11,7 @@ namespace MIMIIMGUI {
 	class SDLWindow : public Window {
 	  public:
 		SDLWindow();
+		virtual ~SDLWindow();
 
 		virtual void show() override;
 

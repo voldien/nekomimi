@@ -102,11 +102,13 @@ void WindowBackend::releaseRender() {
 	case GfxBackEnd::ImGUI_OpenGL:
 		// SDL_DestroyWindow(gfxWindow);
 		// ImGui_ImplSDL2_Shutdown();
+
 		// SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
 		break;
 	default:
 		break;
 	}
+	delete this->proxyWindow;
 
 	ImGui::DestroyContext();
 }
