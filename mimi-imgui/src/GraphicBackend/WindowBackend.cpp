@@ -71,6 +71,10 @@ bool WindowBackend::isWindowBackendSupported(WindowLibBackend windowBackend) {
 }
 
 WindowBackend::WindowBackend(WindowLibBackend windowBackend, GfxBackEnd gfxBackend) {
+	if (isWindowBackendSupported(windowBackend)) {
+	}
+	if (isGfxBackendSupported(gfxBackend)) {
+	}
 	initWindow(windowBackend);
 	initGfx(gfxBackend);
 }
@@ -419,13 +423,34 @@ void WindowBackend::showDockSpace(bool *open) {
 	ImGui::End();
 }
 
-void WindowBackend::beginRenderVulkan() {}
-void WindowBackend::beginRenderOpenGL() {}
-void WindowBackend::beginRenderTerminal() {}
-void WindowBackend::beginRenderDX9() {}
-void WindowBackend::beginRenderDX10() {}
-void WindowBackend::beginRenderDX11() {}
-void WindowBackend::beginRenderDX12() {}
+void WindowBackend::beginRenderVulkan() {
+	ImGui_ImplVulkan_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+}
+void WindowBackend::beginRenderOpenGL() {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+}
+void WindowBackend::beginRenderTerminal() {
+	// ImTui_ImplNcurses_NewFrame();
+	// ImTui_ImplText_NewFrame();
+}
+void WindowBackend::beginRenderDX9() {
+	// ImGui_ImplDX9_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+}
+void WindowBackend::beginRenderDX10() {
+	// ImGui_ImplDX10_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+}
+void WindowBackend::beginRenderDX11() {
+	// ImGui_ImplDX11_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+}
+void WindowBackend::beginRenderDX12() {
+	// ImGui_ImplDX12_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+}
 
 void WindowBackend::endRenderVulkan() {}
 void WindowBackend::endRenderOpenGL() {}
@@ -482,16 +507,13 @@ void WindowBackend::beginRender() {
 
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
-		// ImTui_ImplNcurses_NewFrame();
-		// ImTui_ImplText_NewFrame();
+		beginRenderTerminal();
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplSDL2_NewFrame();
+		beginRenderOpenGL();
 		break;
 	case GfxBackEnd::ImGUI_Vulkan:
-		// ImGui_ImplVulkan_NewFrame();
-		// ImGui_ImplSDL2_NewFrame();
+		beginRenderVulkan();
 		break;
 	default:
 		break;
@@ -504,17 +526,21 @@ void WindowBackend::endRender() {
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
 	}
+
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
+		endRenderTerminal();
 		// ImTui_ImplText_RenderDrawData(ImGui::GetDrawData(), this->imtuiScreen);
 		// ImTui_ImplNcurses_DrawScreen();
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
+		endRenderOpenGL();
 		glClear(GL_COLOR_BUFFER_BIT);
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		SDL_GL_SwapWindow((SDL_Window *)getNativePtr());
 		break;
 	case GfxBackEnd::ImGUI_Vulkan: {
+		endRenderVulkan();
 		VkResult err;
 
 		VkSemaphore image_acquired_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].ImageAcquiredSemaphore;
@@ -593,6 +619,10 @@ void WindowBackend::endRender() {
 
 		wd.SemaphoreIndex = (wd.SemaphoreIndex + 1) % wd.ImageCount; // Now we can use the next set of semaphores
 	} break;
+	case GfxBackEnd::ImGUI_DirectX9:
+	case GfxBackEnd::ImGUI_DirectX10:
+	case GfxBackEnd::ImGUI_DirectX11:
+	case GfxBackEnd::ImGUI_DirectX12:
 	default:
 		break;
 	}
@@ -603,19 +633,17 @@ void WindowBackend::hide() { this->proxyWindow->hide(); }
 
 void WindowBackend::close() { this->hide(); }
 
-void WindowBackend::setPosition(int x, int y) {
-	// this->proxyWindow->setPosition(x, y);
-}
+void WindowBackend::setPosition(int x, int y) { this->proxyWindow->setPosition(x, y); }
 
 void WindowBackend::setSize(int width, int height) { /*	TODO determine if it shall update framebuffera as well.	*/
-													 // this->proxyWindow->setSize(width, height);
+	this->proxyWindow->setSize(width, height);
 
 	//						recreateSwapChain();
 }
 
-void WindowBackend::getPosition(int *x, int *y) const {}
+void WindowBackend::getPosition(int *x, int *y) const { this->proxyWindow->getPosition(x, y); }
 
-void WindowBackend::getSize(int *width, int *height) const {}
+void WindowBackend::getSize(int *width, int *height) const { this->proxyWindow->getSize(width, height); }
 void WindowBackend::setTitle(const std::string &title) { this->proxyWindow->setTitle(title); }
 
 std::string WindowBackend::getTitle() const { return this->proxyWindow->getTitle(); }
@@ -649,18 +677,18 @@ int WindowBackend::height() const noexcept {
 	return h;
 }
 
-void WindowBackend::setMinimumSize(int width, int height) {}
-void WindowBackend::getMinimumSize(int *width, int *height) {}
+void WindowBackend::setMinimumSize(int width, int height) { this->proxyWindow->setMinimumSize(width, height); }
+void WindowBackend::getMinimumSize(int *width, int *height) { this->proxyWindow->getMinimumSize(width, height); }
 
-void WindowBackend::setMaximumSize(int width, int height) {}
-void WindowBackend::getMaximumSize(int *width, int *height) {}
+void WindowBackend::setMaximumSize(int width, int height) { this->proxyWindow->setMaximumSize(width, height); }
+void WindowBackend::getMaximumSize(int *width, int *height) { this->proxyWindow->getMaximumSize(width, height); }
 
-void WindowBackend::focus() {}
+void WindowBackend::focus() { this->proxyWindow->focus(); }
 
-void WindowBackend::restore() {}
+void WindowBackend::restore() { this->proxyWindow->restore(); }
 
-void WindowBackend::maximize() {}
+void WindowBackend::maximize() { this->proxyWindow->maximize(); }
 
-void WindowBackend::minimize() {}
+void WindowBackend::minimize() { this->proxyWindow->minimize(); }
 
 intptr_t WindowBackend::getNativePtr() const { return this->proxyWindow->getNativePtr(); }

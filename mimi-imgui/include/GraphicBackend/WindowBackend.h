@@ -132,6 +132,7 @@ namespace MIMIIMGUI {
 	  private:
 		GfxBackEnd gfxBackend;
 		WindowLibBackend windowBackend;
+
 		/*	*/
 		// SDL_Window *gfxWindow;
 		void *gl_context;
@@ -143,6 +144,6 @@ namespace MIMIIMGUI {
 
 		Window *proxyWindow;
 	};
-}
+} // namespace MIMIIMGUI
 
 #endif
