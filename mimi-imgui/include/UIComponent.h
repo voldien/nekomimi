@@ -41,6 +41,6 @@ namespace MIMIIMGUI {
 		bool isContentVisible;
 		std::string name;
 	};
-}
+} // namespace MIMIIMGUI
 
 #endif

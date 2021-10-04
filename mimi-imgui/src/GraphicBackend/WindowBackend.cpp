@@ -216,8 +216,9 @@ void WindowBackend::initVulkan() {
 	// SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE |
 	// 												 SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_INPUT_FOCUS);
 	// gfxWindow = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, window_flags);
+	const std::unordered_map<const char *, bool> &requested_extensions = {};
 
-	this->vkCore = std::make_shared<VulkanCore>();
+	this->vkCore = std::make_shared<VulkanCore>(requested_extensions);
 	this->vkPhysicalDevices = this->vkCore->createPhysicalDevices();
 	this->vkDevice = std::make_shared<VKDevice>(vkPhysicalDevices);
 
