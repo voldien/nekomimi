@@ -24,13 +24,17 @@ namespace MIMIIMGUI {
 		virtual void renderUI() = 0;
 
 		virtual void addUIComponent(const std::shared_ptr<UIComponent> &component);
+		virtual void removeUIComponent(const std::shared_ptr<UIComponent> &component);
 		unsigned int getNrUIComponents() const;
 		std::shared_ptr<UIComponent> &getComponent(unsigned int index);
+		// std::shared_ptr<UIComponent> &getComponent(unsigned int index);
 
 	  private:
+		void removeUIComponent(uint32_t uid);
+
 		std::vector<std::shared_ptr<UIComponent>> components;
 		bool requestQuit = false;
 	};
-}
+} // namespace MIMIIMGUI
 
 #endif

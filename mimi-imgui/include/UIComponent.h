@@ -1,5 +1,7 @@
 #ifndef _MIMI_IMGUI_UICOMPONENT_H_
 #define _MIMI_IMGUI_UICOMPONENT_H_ 1
+#include "GraphicBackend/Window.h"
+#include "UIDObject.h"
 //#include <ITree.h>
 #include <imgui/imgui.h>
 #include <string>
@@ -8,7 +10,7 @@ namespace MIMIIMGUI {
 	 * @brief
 	 *
 	 */
-	class UIComponent {
+	class UIComponent : public UIDObject {
 	  public:
 		UIComponent();
 		virtual ~UIComponent() = default;

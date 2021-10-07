@@ -1,6 +1,7 @@
 
 #ifndef _MIMI_IMGUI_WINDOW_H_
 #define _MIMI_IMGUI_WINDOW_H_ 1
+#include"../UIDObject.h"
 #include <stdint.h>
 #include <string>
 
@@ -10,7 +11,7 @@ namespace MIMIIMGUI {
 	 * @brief
 	 *
 	 */
-	class Window {
+	class Window : public UIDObject {
 	  public:
 		virtual void show() = 0;
 
