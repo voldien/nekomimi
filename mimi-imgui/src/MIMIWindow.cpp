@@ -8,7 +8,7 @@ void MIMIWindow::run() {
 	this->show();
 	this->maximize();
 	this->focus();
-	
+
 	bool show_dockspace = true;
 
 	while (!requestQuit) {
@@ -26,7 +26,6 @@ void MIMIWindow::run() {
 			uiComponent->drawUI();
 		}
 
-
 		/*	User Callback.	*/
 		renderUI();
 
@@ -34,7 +33,6 @@ void MIMIWindow::run() {
 
 		endRender();
 	}
-
 }
 
 void MIMIWindow::quit() { this->requestQuit = true; }
@@ -42,5 +40,7 @@ void MIMIWindow::quit() { this->requestQuit = true; }
 void MIMIWindow::addUIComponent(const std::shared_ptr<UIComponent> &component) {
 	this->components.push_back(component);
 }
+
+void MIMIWindow::removeUIComponent(const std::shared_ptr<UIComponent> &component) {}
 unsigned int MIMIWindow::getNrUIComponents() const { return this->components.size(); }
 std::shared_ptr<UIComponent> &MIMIWindow::getComponent(unsigned int index) { return this->components[index]; }
