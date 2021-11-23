@@ -1,6 +1,6 @@
 [submodule "extern/imgui"]
 	path = extern/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "extern/fvkcore"]
-	path = extern/fvkcore
-	url = https://github.com/voldien/fvkcore.git
+[submodule "extern/fragcore"]
+	path = extern/fragcore
+	url = https://github.com/voldien/fragcore.git
