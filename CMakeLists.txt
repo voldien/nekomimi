@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 3.0 )
 PROJECT(mimi-imgui)
-include(GNUInstallDirs)
+INCLUDE(GNUInstallDirs)
 
 # Ouput directory for both library and executables.
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL "" FORCE)
@@ -16,6 +16,10 @@ ELSE()
 ENDIF(NOT BUILD_SHARED_LIBS)
 
 
+
+################################################
+# Find all dependices libraries and etc.
+################################################
 SET(OpenGL_GL_PREFERENCE "GLVND")
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLEW REQUIRED)
@@ -35,6 +39,7 @@ ELSE()
 	MESSAGE(WARNING "Some library dependices may not be able to be found automatically.")
 ENDIF()
 
+# Find SDL and GLFW3
 IF(PKG_CONFIG_FOUND)
 	pkg_check_modules(SDL2 sdl2)
 	pkg_check_modules(GLFW glfw3)
@@ -72,7 +77,9 @@ FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/GraphicBackend/*.h
 )
 
-#
+#######################################
+# SDL2 Window Backend Impl
+######################################
 ADD_LIBRARY(mimi-sdl2 OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/GraphicBackend/SDLWindow.cpp)
 TARGET_INCLUDE_DIRECTORIES(mimi-sdl2 PUBLIC ${SDL2_INCLUDE_DIRS} PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include
 )
@@ -81,15 +88,18 @@ TARGET_LINK_LIBRARIES(mimi-sdl2 PUBLIC  ${SDL2_LIBRARIES} fragcore)
 TARGET_COMPILE_OPTIONS(mimi-sdl2 PRIVATE ${SDL2_CFLAGS_OTHER} )
 
 
-#
+#######################################
+# GLFW3 Window Backend Impl
+######################################
 ADD_LIBRARY(mimi-glfw OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/GraphicBackend/glwf3Window.cpp)
 TARGET_INCLUDE_DIRECTORIES(mimi-glfw PUBLIC ${GLFW_INCLUDE_DIRS} PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include)
 TARGET_COMPILE_OPTIONS(mimi-glfw PRIVATE  "-fPIC")
 TARGET_LINK_LIBRARIES(mimi-glfw PUBLIC  ${GLFW_LIBRARIES} fragcore)
 TARGET_COMPILE_OPTIONS(mimi-glfw PRIVATE ${GLFW_CFLAGS_OTHER} )
 
-
-
+#########################################
+# Core Window Management Library.
+#########################################
 ADD_LIBRARY(mimi-window ${SOURCE_FILES} ${HEADER_FILES} )
 TARGET_COMPILE_OPTIONS(mimi-window  PRIVATE  "-fPIC")
 TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
@@ -103,8 +113,9 @@ TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
 )
 
 
-TARGET_LINK_LIBRARIES(mimi-window PUBLIC vkcommon-core mimi-sdl2  fragcore PRIVATE fragcore-rgl  )
-ADD_DEPENDENCIES(mimi-window vkcommon-core fragcore )
+TARGET_LINK_LIBRARIES(mimi-window PUBLIC vkcommon-core mimi-sdl2 fragcore fragcore-render-interface PRIVATE ${Vulkan_LIBRARIES}   ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGLES_EGL_LIBRARY})
+ADD_DEPENDENCIES(mimi-window vkcommon-core fragcore fragcore-render-interface)
 
 
+#####
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/samples)
