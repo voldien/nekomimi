@@ -327,7 +327,13 @@ void WindowBackend::initVulkan() {
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
+#include <RendererFactory.h>
+#include <opengl/GLRendererInterface.h>
 void WindowBackend::initOpenGL() {
+
+	fragcore::GLRendererInterface *renderer =
+		(fragcore::GLRendererInterface *)fragcore::RenderingFactory::createRendering(fragcore::RenderingFactory::OpenGL,
+																					 nullptr);
 	// set OpenGL attributes
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 2);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -360,8 +366,11 @@ void WindowBackend::initOpenGL() {
 	int width = 800;
 	int height = 600;
 
-	gl_context = SDL_GL_CreateContext((SDL_Window *)getNativePtr());
-	SDL_GL_MakeCurrent((SDL_Window *)getNativePtr(), gl_context);
+	gl_context = SDL_GL_CreateContext((SDL_Window *)this->getNativePtr());
+	if (gl_context == nullptr) {
+		throw fragcore::RuntimeException("Failed to create OpenGL Context", gl_context);
+	}
+	int rc = SDL_GL_MakeCurrent((SDL_Window *)getNativePtr(), gl_context);
 
 	// enable VSync
 	SDL_GL_SetSwapInterval(1);
@@ -372,7 +381,7 @@ void WindowBackend::initOpenGL() {
 		// throw RuntimeException("GLEW Failed");
 	}
 
-	ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)getNativePtr(), gl_context);
+	ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)this->getNativePtr(), gl_context);
 	ImGui_ImplOpenGL3_Init(glsl_version.c_str());
 }
 

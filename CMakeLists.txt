@@ -54,7 +54,9 @@ IF(GLFW_FOUND)
 	MESSAGE(STATUS "Found glfw: ${GLFW_LIBRARIES} -- version ${GLFW_VERSION}.")
 ENDIF()
 
+IF (NOT TARGET fragcore)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore EXCLUDE_FROM_ALL)
+ENDIF()
 
 FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/*.cpp
@@ -114,7 +116,7 @@ TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
 
 
 TARGET_LINK_LIBRARIES(mimi-window PUBLIC vkcommon-core mimi-sdl2 fragcore fragcore-render-interface PRIVATE ${Vulkan_LIBRARIES}   ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGLES_EGL_LIBRARY})
-ADD_DEPENDENCIES(mimi-window vkcommon-core fragcore fragcore-render-interface)
+ADD_DEPENDENCIES(mimi-window vkcommon-core fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
 
 
 #####
