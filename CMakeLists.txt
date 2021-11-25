@@ -115,7 +115,7 @@ TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
 )
 
 
-TARGET_LINK_LIBRARIES(mimi-window PUBLIC vkcommon-core mimi-sdl2 fragcore fragcore-render-interface PRIVATE ${Vulkan_LIBRARIES}   ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGLES_EGL_LIBRARY})
+TARGET_LINK_LIBRARIES(mimi-window PUBLIC vkcommon-core mimi-sdl2 fragcore fragcore-render-interface PRIVATE fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} ${OPENGLES_EGL_LIBRARY})
 ADD_DEPENDENCIES(mimi-window vkcommon-core fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
 
 

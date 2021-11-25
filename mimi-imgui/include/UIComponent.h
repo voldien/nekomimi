@@ -1,7 +1,6 @@
 #ifndef _MIMI_IMGUI_UICOMPONENT_H_
 #define _MIMI_IMGUI_UICOMPONENT_H_ 1
-#include "GraphicBackend/Window.h"
-#include<Core/UIDObject.h>
+#include <Core/UIDObject.h>
 //#include <ITree.h>
 #include <imgui/imgui.h>
 #include <string>

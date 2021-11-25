@@ -1,14 +1,14 @@
 
 #ifndef _MIMI_IMGUI_SDL_WINDOW_H_
 #define _MIMI_IMGUI_SDL_WINDOW_H_ 1
-#include "Window.h"
+#include "Window/Window.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
 #include <string>
 
 namespace MIMIIMGUI {
 
-	class SDLWindow : public Window {
+	class SDLWindow : public fragcore::Window {
 	  public:
 		SDLWindow();
 		virtual ~SDLWindow();
@@ -31,11 +31,11 @@ namespace MIMIIMGUI {
 
 		virtual std::string getTitle() const override;
 
-		virtual int x() const noexcept override;
-		virtual int y() const noexcept override;
+		// virtual int x() const noexcept override;
+		// virtual int y() const noexcept override;
 
-		virtual int width() const noexcept override;
-		virtual int height() const noexcept override;
+		// virtual int width() const noexcept override;
+		// virtual int height() const noexcept override;
 
 		virtual void getPosition(int *x, int *y) const override;
 
@@ -67,6 +67,6 @@ namespace MIMIIMGUI {
 	  protected:
 		SDL_Window *window;
 	};
-}
+} // namespace MIMIIMGUI
 
 #endif

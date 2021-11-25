@@ -1,7 +1,7 @@
 #ifndef _MIMI_IMGUI_UI_WINDOW_BACKEND_H_
 #define _MIMI_IMGUI_UI_WINDOW_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
-#include "Window.h"
+#include "Window/Window.h"
 //#include <SDL2/SDL.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 //#include <imtui/imtui.h>
@@ -17,7 +17,7 @@ namespace ImTui {
 
 namespace MIMIIMGUI {
 
-	class WindowBackend : public Window {
+	class WindowBackend : public fragcore::Window {
 	  public:
 		enum class GfxBackEnd {
 			ImGUI_Terminal,
@@ -96,11 +96,11 @@ namespace MIMIIMGUI {
 
 		virtual std::string getTitle() const override;
 
-		virtual int x() const noexcept override;
-		virtual int y() const noexcept override;
+		// virtual int x() const noexcept override;
+		// virtual int y() const noexcept override;
 
-		virtual int width() const noexcept override;
-		virtual int height() const noexcept override;
+		// virtual int width() const noexcept override;
+		// virtual int height() const noexcept override;
 
 		virtual void getPosition(int *x, int *y) const override;
 
@@ -127,6 +127,16 @@ namespace MIMIIMGUI {
 		virtual void setMaximumSize(int width, int height) override;
 		virtual void getMaximumSize(int *width, int *height) override;
 
+		// TODO change the type to image.
+		virtual void setIcon(void *) override{};
+		//		virtual void setIcon(Image* image) = 0;
+
+		virtual void *getIcon() const override{};
+		virtual fragcore::Display *getCurrentDisplay() const override {}
+		virtual void setFullScreen(fragcore::Display &display) override {}
+
+		//		virtual Image* setIcon(Image* image) = 0;
+
 		virtual intptr_t getNativePtr() const override; /*  Get native window reference object. */
 
 	  private:
@@ -142,7 +152,7 @@ namespace MIMIIMGUI {
 		ImGui_ImplVulkanH_Window wd;
 		ImTui::TScreen *imtuiScreen;
 
-		Window *proxyWindow;
+		fragcore::Window *proxyWindow;
 	};
 } // namespace MIMIIMGUI
 

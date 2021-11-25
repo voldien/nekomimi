@@ -4,6 +4,7 @@
 
 #include <GL/glew.h>
 //#include <SDL2/SDL_vulkan.h>
+#include <RendererFactory.h>
 #include <SDL_events.h>
 #include <SDL_video.h>
 #include <VKDevice.h>
@@ -13,6 +14,8 @@
 #include <imgui/backends/imgui_impl_opengl3.h>
 #include <imgui/backends/imgui_impl_sdl.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
+#include <opengl/GLRendererInterface.h>
+#include <vulkan/VKRenderInterface.h>
 
 /*	TODO include directX if supported.	*/
 #include <imgui/imgui.h>
@@ -191,7 +194,7 @@ void WindowBackend::initWindow(WindowLibBackend windowBackend) {
 	this->windowBackend = windowBackend;
 	switch (getBackendWindowManager()) {
 	case WindowLibBackend::WindowBackendSDL2:
-		this->proxyWindow = new SDLWindow();
+		// this->proxyWindow = new SDLWindow();
 		break;
 	case WindowLibBackend::WindowBackendGLFW3:
 		break;
@@ -327,19 +330,11 @@ void WindowBackend::initVulkan() {
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
-#include <RendererFactory.h>
-#include <opengl/GLRendererInterface.h>
 void WindowBackend::initOpenGL() {
 
-	fragcore::GLRendererInterface *renderer =
-		(fragcore::GLRendererInterface *)fragcore::RenderingFactory::createRendering(fragcore::RenderingFactory::OpenGL,
-																					 nullptr);
-	// set OpenGL attributes
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 2);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	fragcore::GLRendererInterface *opengLRenderer = new fragcore::GLRendererInterface(nullptr);
+	gl_context = opengLRenderer->getOpenGLContext();
+	this->proxyWindow = (fragcore::Window *)opengLRenderer->createWindow(1, 1, 100, 100);
 
 	std::string glsl_version = "";
 #ifdef __APPLE__
@@ -352,9 +347,9 @@ void WindowBackend::initOpenGL() {
 #elif __linux__
 	// GL 3.2 Core + GLSL 150
 	glsl_version = "#version 330";
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 #elif _WIN32
 	// GL 3.0 + GLSL 130
 	glsl_version = "#version 130";
@@ -363,23 +358,15 @@ void WindowBackend::initOpenGL() {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 #endif
 
-	int width = 800;
-	int height = 600;
-
-	gl_context = SDL_GL_CreateContext((SDL_Window *)this->getNativePtr());
-	if (gl_context == nullptr) {
-		throw fragcore::RuntimeException("Failed to create OpenGL Context", gl_context);
-	}
-	int rc = SDL_GL_MakeCurrent((SDL_Window *)getNativePtr(), gl_context);
-
 	// enable VSync
-	SDL_GL_SetSwapInterval(1);
+	int rc = SDL_GL_SetSwapInterval(1);
 
-	glViewport(0, 0, width, height);
+	//glViewport(0, 0, width, height);
 
-	if (glewInit() != GLEW_OK) {
-		// throw RuntimeException("GLEW Failed");
-	}
+	// int glewStatus = glewInit();
+	// if (glewStatus != GLEW_OK) {
+	// 	throw fragcore::RuntimeException("GLEW Failed {}", glewGetErrorString(glewStatus));
+	// }
 
 	ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)this->getNativePtr(), gl_context);
 	ImGui_ImplOpenGL3_Init(glsl_version.c_str());
@@ -558,7 +545,8 @@ void WindowBackend::endRenderDX12() {}
 void WindowBackend::beginRender() {
 
 	if (this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_Vulkan ||
-		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_OpenGL) {
+		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_OpenGL ||
+		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_DirectX9) {
 
 		int windowWidth;
 		int windowHeight;
@@ -567,7 +555,9 @@ void WindowBackend::beginRender() {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			// without it you won't have keyboard input and other things
-			ImGui_ImplSDL2_ProcessEvent(&event);
+			if (ImGui_ImplSDL2_ProcessEvent(&event)) {
+				/*	*/
+			}
 			// you might also want to check io.WantCaptureMouse and io.WantCaptureKeyboard
 			// before processing events
 
@@ -661,26 +651,26 @@ void WindowBackend::setTitle(const std::string &title) { this->proxyWindow->setT
 
 std::string WindowBackend::getTitle() const { return this->proxyWindow->getTitle(); }
 
-int WindowBackend::x() const noexcept {
-	int x, y;
+// int WindowBackend::x() const noexcept {
+// 	int x, y;
 
-	return x;
-}
-int WindowBackend::y() const noexcept {
-	int x, y;
+// 	return x;
+// }
+// int WindowBackend::y() const noexcept {
+// 	int x, y;
 
-	return y;
-}
-int WindowBackend::width() const noexcept {
-	int w, h;
-	getSize(&w, &h);
-	return w;
-}
-int WindowBackend::height() const noexcept {
-	int w, h;
-	getSize(&w, &h);
-	return h;
-}
+// 	return y;
+// }
+// int WindowBackend::width() const noexcept {
+// 	int w, h;
+// 	getSize(&w, &h);
+// 	return w;
+// }
+// int WindowBackend::height() const noexcept {
+// 	int w, h;
+// 	getSize(&w, &h);
+// 	return h;
+// }
 
 void WindowBackend::resizable(bool resizable) noexcept {}
 

@@ -1,13 +1,13 @@
 
 #ifndef _MIMI_IMGUI_GLFW_WINDOW_H_
 #define _MIMI_IMGUI_GLFW_WINDOW_H_ 1
-#include "Window.h"
+#include "Window/Window.h"
 #include <GLFW/glfw3.h>
 #include <string>
 
 namespace MIMIIMGUI {
 
-	class GLFWWindow : public Window {
+	class GLFWWindow : public fragcore::Window {
 	  public:
 		GLFWWindow();
 

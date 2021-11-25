@@ -40,16 +40,16 @@ void SDLWindow::getPosition(int *x, int *y) const { SDL_GetWindowPosition(this->
 
 void SDLWindow::getSize(int *width, int *height) const { SDL_GetWindowSize(this->window, width, height); }
 
-int SDLWindow::x() const noexcept {
-	int x, y;
-	SDL_GetWindowPosition(this->window, &x, &y);
-	return x;
-}
-int SDLWindow::y() const noexcept {
-	int x, y;
-	SDL_GetWindowPosition(this->window, &x, &y);
-	return y;
-}
+// int SDLWindow::x() const noexcept {
+// 	int x, y;
+// 	SDL_GetWindowPosition(this->window, &x, &y);
+// 	return x;
+// }
+// int SDLWindow::y() const noexcept {
+// 	int x, y;
+// 	SDL_GetWindowPosition(this->window, &x, &y);
+// 	return y;
+// }
 void SDLWindow::resizable(bool resizable) noexcept { SDL_SetWindowResizable(this->window, (SDL_bool)resizable); }
 
 void SDLWindow::setFullScreen(bool fullscreen) {
@@ -64,16 +64,16 @@ bool SDLWindow::isFullScreen() const { return false; }
 
 void SDLWindow::setBordered(bool bordered) { SDL_SetWindowBordered(this->window, (SDL_bool)bordered); }
 
-int SDLWindow::width() const noexcept {
-	int w, h;
-	getSize(&w, &h);
-	return w;
-}
-int SDLWindow::height() const noexcept {
-	int w, h;
-	getSize(&w, &h);
-	return h;
-}
+// int SDLWindow::width() const noexcept {
+// 	int w, h;
+// 	getSize(&w, &h);
+// 	return w;
+// }
+// int SDLWindow::height() const noexcept {
+// 	int w, h;
+// 	getSize(&w, &h);
+// 	return h;
+// }
 
 float SDLWindow::getGamma() const {}
 
