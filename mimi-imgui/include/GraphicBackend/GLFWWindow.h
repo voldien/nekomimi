@@ -29,11 +29,11 @@ namespace MIMIIMGUI {
 
 		virtual std::string getTitle() const override;
 
-		virtual int x() const noexcept override;
-		virtual int y() const noexcept override;
+		// virtual int x() const noexcept override;
+		// virtual int y() const noexcept override;
 
-		virtual int width() const noexcept override;
-		virtual int height() const noexcept override;
+		// virtual int width() const noexcept override;
+		// virtual int height() const noexcept override;
 
 		virtual void getPosition(int *x, int *y) const override;
 

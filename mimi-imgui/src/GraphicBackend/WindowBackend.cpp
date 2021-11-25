@@ -222,7 +222,7 @@ void WindowBackend::initVulkan() {
 
 	this->vkCore = std::make_shared<VulkanCore>(requested_extensions);
 	this->vkPhysicalDevices = this->vkCore->createPhysicalDevices();
-	this->vkDevice = std::make_shared<VKDevice>(vkPhysicalDevices);
+	this->vkDevice = std::make_shared<VKDevice>(vkPhysicalDevices[0]);
 
 	/*  Create surface. */
 	bool surfaceResult; //= SDL_Vulkan_CreateSurface(this->gfxWindow, vkCore->getHandle(), &wd.Surface);
@@ -299,7 +299,7 @@ void WindowBackend::initVulkan() {
 	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
 	if (!ImGui_ImplVulkan_Init(&init_info, wd.RenderPass)) {
-		// throw RuntimeException("Failed init ImGUI Vulkan");
+		throw fragcore::RuntimeException("Failed init ImGUI Vulkan");
 	}
 
 	VkCommandPool command_pool = wd.Frames[wd.FrameIndex].CommandPool;
@@ -313,7 +313,7 @@ void WindowBackend::initVulkan() {
 	VKS_VALIDATE(vkBeginCommandBuffer(command_buffer, &begin_info));
 
 	if (!ImGui_ImplVulkan_CreateFontsTexture(command_buffer)) {
-		// throw RuntimeException("Failed to generate font ImGUI Vulkan");
+		throw fragcore::RuntimeException("Failed to generate font ImGUI Vulkan");
 	}
 
 	VkSubmitInfo end_info = {};
@@ -335,6 +335,7 @@ void WindowBackend::initOpenGL() {
 	this->renderer = std::shared_ptr<fragcore::IRenderer>(openGLRenderer);
 	void *gl_context = openGLRenderer->getOpenGLContext();
 	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(1, 1, 100, 100);
+	this->commandList = std::shared_ptr<fragcore::CommandList>(openGLRenderer->createCommandBuffer());
 
 	std::string glsl_version = "";
 #ifdef __APPLE__
@@ -349,10 +350,15 @@ void WindowBackend::initOpenGL() {
 #endif
 
 	// enable VSync
+	// TODO replace with the renderwindow.
 	int rc = SDL_GL_SetSwapInterval(1);
 
-	ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)this->getNativePtr(), gl_context);
-	ImGui_ImplOpenGL3_Init(glsl_version.c_str());
+	if (!ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)this->getNativePtr(), gl_context)) {
+		throw fragcore::RuntimeException("Failed to Init ImGUI SDL2 OpenGL");
+	}
+	if (!ImGui_ImplOpenGL3_Init(glsl_version.c_str())) {
+		throw fragcore::RuntimeException("Failed to Init ImGUI OpenGL3");
+	}
 }
 
 void WindowBackend::showDockSpace(bool *open) {
@@ -589,6 +595,7 @@ void WindowBackend::beginRender() {
 }
 
 void WindowBackend::endRender() {
+
 	ImGuiIO &io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
 		ImGui::UpdatePlatformWindows();

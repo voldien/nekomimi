@@ -2,8 +2,9 @@
 #define _MIMI_IMGUI_UI_WINDOW_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
 #include "Window/Window.h"
-//#include <SDL2/SDL.h>
+#include <CommandList.h>
 #include <IRenderer.h>
+#include <VulkanCore.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 //#include <imtui/imtui.h>
 #include <VKDevice.h>
@@ -147,6 +148,7 @@ namespace MIMIIMGUI {
 		/*	*/
 		// SDL_Window *gfxWindow;
 		std::shared_ptr<fragcore::IRenderer> renderer;
+		std::shared_ptr<fragcore::CommandList> commandList;
 
 		// TODO can be relocated.
 		std::shared_ptr<VulkanCore> vkCore;
