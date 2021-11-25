@@ -92,7 +92,6 @@ void WindowBackend::releaseRender() {
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
 		ImGui_ImplOpenGL3_Shutdown();
-		SDL_GL_DeleteContext(gl_context);
 		break;
 	case GfxBackEnd::ImGUI_Vulkan:
 		ImGui_ImplVulkan_Shutdown();
@@ -332,41 +331,25 @@ void WindowBackend::initVulkan() {
 
 void WindowBackend::initOpenGL() {
 
-	fragcore::GLRendererInterface *opengLRenderer = new fragcore::GLRendererInterface(nullptr);
-	gl_context = opengLRenderer->getOpenGLContext();
-	this->proxyWindow = (fragcore::Window *)opengLRenderer->createWindow(1, 1, 100, 100);
+	fragcore::GLRendererInterface *openGLRenderer = new fragcore::GLRendererInterface(nullptr);
+	this->renderer = std::shared_ptr<fragcore::IRenderer>(openGLRenderer);
+	void *gl_context = openGLRenderer->getOpenGLContext();
+	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(1, 1, 100, 100);
 
 	std::string glsl_version = "";
 #ifdef __APPLE__
 	// GL 3.2 Core + GLSL 150
 	glsl_version = "#version 150";
-	SDL_GL_SetAttribute( // required on Mac OS
-		SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 #elif __linux__
 	// GL 3.2 Core + GLSL 150
 	glsl_version = "#version 330";
-	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 #elif _WIN32
 	// GL 3.0 + GLSL 130
 	glsl_version = "#version 130";
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 #endif
 
 	// enable VSync
 	int rc = SDL_GL_SetSwapInterval(1);
-
-	//glViewport(0, 0, width, height);
-
-	// int glewStatus = glewInit();
-	// if (glewStatus != GLEW_OK) {
-	// 	throw fragcore::RuntimeException("GLEW Failed {}", glewGetErrorString(glewStatus));
-	// }
 
 	ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)this->getNativePtr(), gl_context);
 	ImGui_ImplOpenGL3_Init(glsl_version.c_str());

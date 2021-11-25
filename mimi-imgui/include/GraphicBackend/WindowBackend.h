@@ -3,6 +3,7 @@
 #define IMTERM_USE_FMT 1
 #include "Window/Window.h"
 //#include <SDL2/SDL.h>
+#include <IRenderer.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 //#include <imtui/imtui.h>
 #include <VKDevice.h>
@@ -145,13 +146,17 @@ namespace MIMIIMGUI {
 
 		/*	*/
 		// SDL_Window *gfxWindow;
-		void *gl_context;
+		std::shared_ptr<fragcore::IRenderer> renderer;
+
+		// TODO can be relocated.
 		std::shared_ptr<VulkanCore> vkCore;
 		std::vector<std::shared_ptr<PhysicalDevice>> vkPhysicalDevices;
 		std::shared_ptr<VKDevice> vkDevice;
+
+		/*	*/
 		ImGui_ImplVulkanH_Window wd;
 		ImTui::TScreen *imtuiScreen;
-
+		/*	*/
 		fragcore::Window *proxyWindow;
 	};
 } // namespace MIMIIMGUI
