@@ -12,6 +12,8 @@ void MIMIWindow::run() {
 	bool show_dockspace = true;
 
 	while (!requestQuit) {
+
+		/*	*/
 		beginRender();
 
 		ImGui::NewFrame();

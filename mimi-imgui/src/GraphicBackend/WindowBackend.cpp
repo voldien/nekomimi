@@ -8,21 +8,24 @@
 #include <SDL_events.h>
 #include <SDL_video.h>
 #include <VKDevice.h>
+#include <Window/WindowManager.h>
 #include <algorithm>
 #include <fmt/format.h>
 #include <imgui/backends/imgui_impl_dx9.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 #include <imgui/backends/imgui_impl_sdl.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
+#include <opengl/GLRenderWindow.h>
 #include <opengl/GLRendererInterface.h>
 #include <vulkan/VKRenderInterface.h>
-
+#include <vulkan/VKRenderWindow.h>
 /*	TODO include directX if supported.	*/
+#include <cstdint>
 #include <imgui/imgui.h>
 #include <memory>
-#include <stdint.h>
 
 using namespace MIMIIMGUI;
+using namespace fragcore;
 
 const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
 	switch (v) {
@@ -74,10 +77,13 @@ bool WindowBackend::isWindowBackendSupported(WindowLibBackend windowBackend) {
 }
 
 WindowBackend::WindowBackend(WindowLibBackend windowBackend, GfxBackEnd gfxBackend) {
-	if (isWindowBackendSupported(windowBackend)) {
+	if (!isWindowBackendSupported(windowBackend)) {
+		throw RuntimeException("Window Backed not Supported {}", getWindowBackEndSymbol(windowBackend));
 	}
-	if (isGfxBackendSupported(gfxBackend)) {
+	if (!isGfxBackendSupported(gfxBackend)) {
+		throw RuntimeException("Graphic Backed not Supported {}", getGfxBackEndSymbol(gfxBackend));
 	}
+	/*	*/
 	initWindow(windowBackend);
 	initGfx(gfxBackend);
 }
@@ -87,6 +93,7 @@ WindowBackend::~WindowBackend() { releaseRender(); }
 void WindowBackend::releaseRender() {
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
+
 		// ImTui_ImplText_Shutdown();
 		// ImTui_ImplNcurses_Shutdown();
 		break;
@@ -102,10 +109,7 @@ void WindowBackend::releaseRender() {
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Vulkan:
 	case GfxBackEnd::ImGUI_OpenGL:
-		// SDL_DestroyWindow(gfxWindow);
 		// ImGui_ImplSDL2_Shutdown();
-
-		// SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
 		break;
 	default:
 		break;
@@ -193,6 +197,7 @@ void WindowBackend::initWindow(WindowLibBackend windowBackend) {
 	this->windowBackend = windowBackend;
 	switch (getBackendWindowManager()) {
 	case WindowLibBackend::WindowBackendSDL2:
+
 		// this->proxyWindow = new SDLWindow();
 		break;
 	case WindowLibBackend::WindowBackendGLFW3:
@@ -215,9 +220,11 @@ void WindowBackend::initVulkan() {
 	int width = 800;
 	int height = 600;
 
-	// SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE |
-	// 												 SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_INPUT_FOCUS);
-	// gfxWindow = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, window_flags);
+	this->renderer = std::shared_ptr<VKRenderInterface>(new VKRenderInterface(nullptr));
+	this->proxyWindow = renderer->createWindow(0, 0, 100, 100);
+	VKRenderWindow *renderWindow = static_cast<VKRenderWindow *>(this->proxyWindow);
+	this->commandList = std::shared_ptr<CommandList>(renderer->createCommandBuffer());
+
 	const std::unordered_map<const char *, bool> &requested_extensions = {};
 
 	this->vkCore = std::make_shared<VulkanCore>(requested_extensions);
@@ -282,7 +289,7 @@ void WindowBackend::initVulkan() {
 
 	// Setup Platform/Renderer backends
 	// if (!ImGui_ImplSDL2_InitForVulkan(gfxWindow)) {
-	// 	//throw RuntimeException("Failed init ImGUI SDL - Vulkan");
+	// 	throw RuntimeException("Failed init ImGUI SDL - Vulkan");
 	// }
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = this->vkCore->getHandle();
@@ -533,6 +540,8 @@ void WindowBackend::endRenderDX12() {}
 
 void WindowBackend::beginRender() {
 
+	this->commandList->begin();
+
 	if (this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_Vulkan ||
 		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_OpenGL ||
 		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_DirectX9) {
@@ -564,7 +573,7 @@ void WindowBackend::beginRender() {
 					//           << "x"
 					//           << windowHeight
 					//           << std::endl;
-					glViewport(0, 0, windowWidth, windowHeight);
+					this->commandList->setviewport(0, 0, windowWidth, windowHeight);
 					break;
 				case SDL_WINDOWEVENT_CLOSE:
 					requestQuit = true;
@@ -619,6 +628,9 @@ void WindowBackend::endRender() {
 	default:
 		break;
 	}
+	/*	Finalize and execute.	*/
+	this->commandList->end();
+	this->renderer->execute(this->commandList.get());
 }
 void WindowBackend::show() { this->proxyWindow->show(); }
 

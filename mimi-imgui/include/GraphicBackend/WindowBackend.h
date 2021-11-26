@@ -19,25 +19,93 @@ namespace ImTui {
 
 namespace MIMIIMGUI {
 
+	/**
+	 * @brief
+	 *
+	 */
 	class WindowBackend : public fragcore::Window {
 	  public:
 		enum class GfxBackEnd {
+			/**
+			 * @brief
+			 *
+			 */
 			ImGUI_Terminal,
+			/**
+			 * @brief
+			 *
+			 */
 			ImGUI_OpenGL,
+			/**
+			 * @brief
+			 *
+			 */
 			ImGUI_Vulkan,
+			/**
+			 * @brief
+			 *
+			 */
 			ImGUI_DirectX9,
+			/**
+			 * @brief
+			 *
+			 */
 			ImGUI_DirectX10,
+			/**
+			 * @brief
+			 *
+			 */
 			ImGUI_DirectX11,
+			/**
+			 * @brief
+			 *
+			 */
 			ImGUI_DirectX12
 		};
 
-		enum class WindowLibBackend { WindowBackendSDL2, WindowBackendGLFW3, WindowBackendWindows };
+		/**
+		 * @brief
+		 *
+		 */
+		enum class WindowLibBackend {
+			/**
+			 * @brief
+			 *
+			 */
+			WindowBackendSDL2,
+			/**
+			 * @brief
+			 *
+			 */
+			WindowBackendGLFW3,
+			/**
+			 * @brief
+			 *
+			 */
+			WindowBackendWindows
+		};
 
 		static const char *getGfxBackEndSymbol(GfxBackEnd v) noexcept;
 		static const char *getWindowBackEndSymbol(WindowLibBackend v) noexcept;
+
+		/**
+		 * @brief
+		 *
+		 * @param gfxBackend
+		 * @return true
+		 * @return false
+		 */
 		static bool isGfxBackendSupported(GfxBackEnd gfxBackend);
+		/**
+		 * @brief
+		 *
+		 * @param windowBackend
+		 * @return true
+		 * @return false
+		 */
 		static bool isWindowBackendSupported(WindowLibBackend windowBackend);
 
+	  public:
 		WindowBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
 		virtual ~WindowBackend();
 
@@ -107,18 +175,17 @@ namespace MIMIIMGUI {
 		virtual void getPosition(int *x, int *y) const override;
 
 		virtual void setPosition(int x, int y) override;
-
 		virtual void setSize(int width, int height) override;
 
-		virtual void getSize(int *width, int *height) const;
+		virtual void getSize(int *width, int *height) const override;
 
-		virtual void resizable(bool resizable) noexcept;
+		virtual void resizable(bool resizable) noexcept override;
 
-		virtual void setFullScreen(bool fullscreen);
+		virtual void setFullScreen(bool fullscreen) override;
 
-		virtual bool isFullScreen() const;
+		virtual bool isFullScreen() const override;
 
-		virtual void setBordered(bool borded);
+		virtual void setBordered(bool borded) override;
 
 		virtual float getGamma() const override;
 
@@ -133,8 +200,8 @@ namespace MIMIIMGUI {
 		virtual void setIcon(void *) override{};
 		//		virtual void setIcon(Image* image) = 0;
 
-		virtual void *getIcon() const override{};
-		virtual fragcore::Display *getCurrentDisplay() const override {}
+		virtual void *getIcon() const override {}
+		virtual fragcore::Display *getCurrentDisplay() const override { return this->proxyWindow->getCurrentDisplay(); }
 		virtual void setFullScreen(fragcore::Display &display) override {}
 
 		//		virtual Image* setIcon(Image* image) = 0;
