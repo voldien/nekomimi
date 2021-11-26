@@ -11,7 +11,7 @@ class SampleComponent : public UIComponent {
 
 class SampleWindow : public MIMIWindow {
   public:
-	SampleWindow() : MIMIWindow(WindowBackend::GfxBackEnd::ImGUI_OpenGL) {
+	SampleWindow(WindowBackend::GfxBackEnd gfx = WindowBackend::GfxBackEnd::ImGUI_OpenGL) : MIMIWindow(gfx) {
 		this->setTitle("Sample Main Window");
 
 		/*	*/
@@ -48,7 +48,13 @@ class SampleWindow : public MIMIWindow {
 
 int main(int argc, const char **argv) {
 
-	SampleWindow *window = new SampleWindow();
+	try {
+		SampleWindow *window = new SampleWindow(static_cast<WindowBackend::GfxBackEnd>(std::atoi(argv[1])));
 
-	window->run();
+		window->run();
+		return EXIT_SUCCESS;
+	} catch (const std::exception &ex) {
+		std::cerr << cxxexcept::getStackMessage(ex);
+		return EXIT_FAILURE;
+	}
 }

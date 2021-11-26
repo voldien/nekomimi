@@ -65,8 +65,16 @@ const char *WindowBackend::getWindowBackEndSymbol(WindowLibBackend v) noexcept {
 
 bool WindowBackend::isGfxBackendSupported(GfxBackEnd gfxBackend) {
 	switch (gfxBackend) {
-	default:
+	case GfxBackEnd::ImGUI_OpenGL:
+	case GfxBackEnd::ImGUI_Vulkan:
 		return true;
+	case GfxBackEnd::ImGUI_Terminal:
+	case GfxBackEnd::ImGUI_DirectX9:
+	case GfxBackEnd::ImGUI_DirectX10:
+	case GfxBackEnd::ImGUI_DirectX11:
+	case GfxBackEnd::ImGUI_DirectX12:
+	default:
+		return false;
 	}
 }
 bool WindowBackend::isWindowBackendSupported(WindowLibBackend windowBackend) {
@@ -122,8 +130,6 @@ void WindowBackend::releaseRender() {
 void WindowBackend::initGfx(GfxBackEnd backend) {
 	this->gfxBackend = backend;
 
-	// Logger::log()->info("Initilize UI Graphic with Backend Graphic: {}", backend);
-
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
@@ -170,14 +176,14 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 	}
 
 	/*	*/
-	switch (getBackendRenderer()) {
+	switch (this->getBackendRenderer()) {
 	case GfxBackEnd::ImGUI_Terminal:
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
-		initOpenGL();
+		this->initOpenGL();
 		break;
 	case GfxBackEnd::ImGUI_Vulkan:
-		initVulkan();
+		this->initVulkan();
 		break;
 	case GfxBackEnd::ImGUI_DirectX9:
 		break;
@@ -220,52 +226,49 @@ void WindowBackend::initVulkan() {
 	int width = 800;
 	int height = 600;
 
-	this->renderer = std::shared_ptr<VKRenderInterface>(new VKRenderInterface(nullptr));
+	VKRenderInterface *vkRenderer = new VKRenderInterface(nullptr);
+	this->renderer = std::shared_ptr<VKRenderInterface>(vkRenderer);
 	this->proxyWindow = renderer->createWindow(0, 0, 100, 100);
 	VKRenderWindow *renderWindow = static_cast<VKRenderWindow *>(this->proxyWindow);
 	this->commandList = std::shared_ptr<CommandList>(renderer->createCommandBuffer());
 
-	const std::unordered_map<const char *, bool> &requested_extensions = {};
+	std::unordered_map<const char *, bool> required_instance_extensions = {{VK_KHR_SURFACE_EXTENSION_NAME, true},
+																		   {"VK_KHR_xlib_surface", true}};
 
-	this->vkCore = std::make_shared<VulkanCore>(requested_extensions);
-	this->vkPhysicalDevices = this->vkCore->createPhysicalDevices();
-	this->vkDevice = std::make_shared<VKDevice>(vkPhysicalDevices[0]);
+	std::unordered_map<const char *, bool> required_instance_layer = {{"VK_LAYER_LUNARG_standard_validation", false}};
+	std::unordered_map<const char *, bool> required_device_extensions = {{VK_KHR_SWAPCHAIN_EXTENSION_NAME, true}};
 
-	/*  Create surface. */
-	bool surfaceResult; //= SDL_Vulkan_CreateSurface(this->gfxWindow, vkCore->getHandle(), &wd.Surface);
-	if (surfaceResult == SDL_FALSE) {
-		// throw RuntimeException("failed create vulkan surface - {}", SDL_GetError());
-	}
+	ImGui_ImplVulkanH_Window wd;
+
+	wd.Swapchain = renderWindow->getSwapChain().swapchain;
+	wd.Surface = renderWindow->getSurface();
+	wd.SurfaceFormat = renderWindow->getSurfaceFormat();
+	wd.PresentMode = renderWindow->getPresentMode();
+	wd.RenderPass = renderWindow->getDefaultRenderPass();
 
 	/*	Check if any of the gpu devices and which of their queue support present.	*/
 	int gpu_index = -1;
-	for (unsigned int i = 0; i < this->vkDevice->getNrPhysicalDevices(); i++) {
-		for (unsigned int j = 0; j < this->vkDevice->getPhysicalDevice(i)->getNrQueueFamilyProperties(); j++) {
+	for (unsigned int i = 0; i < renderWindow->getVKDevice()->getNrPhysicalDevices(); i++) {
+		for (unsigned int j = 0; j < renderWindow->getVKDevice()->getPhysicalDevice(i)->getNrQueueFamilyProperties();
+			 j++) {
 
-			if (this->vkDevice->getPhysicalDevice(i)->isPresentable(wd.Surface, j)) {
+			if (renderWindow->getVKDevice()->getPhysicalDevice(i)->isPresentable(wd.Surface, j)) {
 				gpu_index = i;
 			}
 		}
 	}
-	assert(gpu_index < (int)this->vkDevice->getNrPhysicalDevices());
+	assert(gpu_index < (int)renderWindow->getVKDevice()->getNrPhysicalDevices());
 
-	//	if (gpu_index == -1)
-	// throw RuntimeException("No Supported GPU device that are presentable");
-
-	const std::shared_ptr<PhysicalDevice> &gpuDevice = this->vkDevice->getPhysicalDevice(gpu_index);
+	const std::shared_ptr<PhysicalDevice> &gpuDevice = renderWindow->getVKDevice()->getPhysicalDevice(gpu_index);
 
 	const std::vector<VkFormat> requestFormat = {VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_SRGB};
 	const std::vector<VkPresentModeKHR> requestPresent = {VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_FIFO_KHR,
 														  VK_PRESENT_MODE_FIFO_RELAXED_KHR,
 														  VK_PRESENT_MODE_IMMEDIATE_KHR};
 
-	wd.SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(gpuDevice->getHandle(), wd.Surface, requestFormat.data(),
-															 requestFormat.size(), VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
-	wd.PresentMode = ImGui_ImplVulkanH_SelectPresentMode(gpuDevice->getHandle(), wd.Surface, requestPresent.data(),
-														 requestPresent.size());
-
-	ImGui_ImplVulkanH_CreateOrResizeWindow(this->vkCore->getHandle(), gpuDevice->getHandle(), vkDevice->getHandle(),
-										   &wd, vkDevice->getDefaultGraphicQueueIndex(), nullptr, width, height, 2);
+	ImGui_ImplVulkanH_CreateOrResizeWindow(
+		VK_NULL_HANDLE, gpuDevice->getHandle(), renderWindow->getVKDevice()->getHandle(), &wd,
+		renderWindow->getVKDevice()->getDefaultGraphicQueueIndex(), nullptr, width, height, 2);
 
 	VkDescriptorPool desc_pool;
 	VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
@@ -285,34 +288,35 @@ void WindowBackend::initVulkan() {
 	pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
 	pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
 	pool_info.pPoolSizes = pool_sizes;
-	vkCreateDescriptorPool(vkDevice->getHandle(), &pool_info, nullptr, &desc_pool);
+	VKS_VALIDATE(vkCreateDescriptorPool(renderWindow->getVKDevice()->getHandle(), &pool_info, nullptr, &desc_pool));
 
 	// Setup Platform/Renderer backends
 	// if (!ImGui_ImplSDL2_InitForVulkan(gfxWindow)) {
 	// 	throw RuntimeException("Failed init ImGUI SDL - Vulkan");
 	// }
+
 	ImGui_ImplVulkan_InitInfo init_info = {};
-	init_info.Instance = this->vkCore->getHandle();
+	init_info.Instance = vkRenderer->getInstance()->getHandle();
 	init_info.PhysicalDevice = gpuDevice->getHandle();
-	init_info.Device = vkDevice->getHandle();
-	init_info.QueueFamily = vkDevice->getDefaultGraphicQueueIndex();
-	init_info.Queue = vkDevice->getDefaultGraphicQueue();
+	init_info.Device = renderWindow->getVKDevice()->getHandle();
+	init_info.QueueFamily = renderWindow->getVKDevice()->getDefaultGraphicQueueIndex();
+	init_info.Queue = renderWindow->getVKDevice()->getDefaultGraphicQueue();
 	init_info.PipelineCache = nullptr;
 	init_info.DescriptorPool = desc_pool;
 	init_info.Allocator = nullptr;
 	init_info.MinImageCount = 2;
-	init_info.ImageCount = wd.ImageCount;
+	init_info.ImageCount = renderWindow->getNrCommandBuffers();
 	init_info.CheckVkResultFn = nullptr;
 	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
-	if (!ImGui_ImplVulkan_Init(&init_info, wd.RenderPass)) {
+	if (!ImGui_ImplVulkan_Init(&init_info, renderWindow->getDefaultRenderPass())) {
 		throw fragcore::RuntimeException("Failed init ImGUI Vulkan");
 	}
 
 	VkCommandPool command_pool = wd.Frames[wd.FrameIndex].CommandPool;
 	VkCommandBuffer command_buffer = wd.Frames[wd.FrameIndex].CommandBuffer;
 
-	VKS_VALIDATE(vkResetCommandPool(vkDevice->getHandle(), command_pool, 0));
+	VKS_VALIDATE(vkResetCommandPool(renderWindow->getVKDevice()->getHandle(), command_pool, 0));
 
 	VkCommandBufferBeginInfo begin_info = {};
 	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -329,9 +333,9 @@ void WindowBackend::initVulkan() {
 	end_info.pCommandBuffers = &command_buffer;
 	VKS_VALIDATE(vkEndCommandBuffer(command_buffer));
 
-	VKS_VALIDATE(vkQueueSubmit(vkDevice->getDefaultGraphicQueue(), 1, &end_info, VK_NULL_HANDLE));
+	VKS_VALIDATE(vkQueueSubmit(renderWindow->getVKDevice()->getDefaultGraphicQueue(), 1, &end_info, VK_NULL_HANDLE));
 
-	VKS_VALIDATE(vkDeviceWaitIdle(vkDevice->getHandle()));
+	VKS_VALIDATE(vkDeviceWaitIdle(renderWindow->getVKDevice()->getHandle()));
 
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
@@ -446,83 +450,85 @@ void WindowBackend::beginRenderDX12() {
 }
 
 void WindowBackend::endRenderVulkan() {
-	VkResult err;
+	RendererWindow *renderWindow = (RendererWindow *)this->proxyWindow;
+	renderWindow->swapBuffer();
+	// VkResult err;
 
-	VkSemaphore image_acquired_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].ImageAcquiredSemaphore;
-	VkSemaphore render_complete_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].RenderCompleteSemaphore;
-	err = vkAcquireNextImageKHR(vkDevice->getHandle(), wd.Swapchain, UINT64_MAX, image_acquired_semaphore,
-								VK_NULL_HANDLE, &wd.FrameIndex);
-	if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
-		// g_SwapChainRebuild = true;
-		return;
-	}
-	VKS_VALIDATE(err);
+	// VkSemaphore image_acquired_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].ImageAcquiredSemaphore;
+	// VkSemaphore render_complete_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].RenderCompleteSemaphore;
+	// err = vkAcquireNextImageKHR(renderWindow->getVKDevice()->getHandle(), wd.Swapchain, UINT64_MAX,
+	// 							image_acquired_semaphore, VK_NULL_HANDLE, &wd.FrameIndex);
+	// if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
+	// 	// g_SwapChainRebuild = true;
+	// 	return;
+	// }
+	// VKS_VALIDATE(err);
 
-	ImGui_ImplVulkanH_Frame *fd = &wd.Frames[wd.FrameIndex];
-	{
-		VKS_VALIDATE(vkWaitForFences(vkDevice->getHandle(), 1, &fd->Fence, VK_TRUE,
-									 UINT64_MAX)); // wait indefinitely instead of periodically checking
+	// ImGui_ImplVulkanH_Frame *fd = &wd.Frames[wd.FrameIndex];
+	// {
+	// 	VKS_VALIDATE(vkWaitForFences(renderWindow->getVKDevice()->getHandle(), 1, &fd->Fence, VK_TRUE,
+	// 								 UINT64_MAX)); // wait indefinitely instead of periodically checking
 
-		VKS_VALIDATE(vkResetFences(vkDevice->getHandle(), 1, &fd->Fence));
-	}
-	{
-		VKS_VALIDATE(vkResetCommandPool(vkDevice->getHandle(), fd->CommandPool, 0));
+	// 	VKS_VALIDATE(vkResetFences(renderWindow->getVKDevice()->getHandle(), 1, &fd->Fence));
+	// }
+	// {
+	// 	VKS_VALIDATE(vkResetCommandPool(renderWindow->getVKDevice()->getHandle(), fd->CommandPool, 0));
 
-		VkCommandBufferBeginInfo info = {};
-		info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		VKS_VALIDATE(vkBeginCommandBuffer(fd->CommandBuffer, &info));
-	}
-	{
-		VkRenderPassBeginInfo info = {};
-		info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		info.renderPass = wd.RenderPass;
-		info.framebuffer = fd->Framebuffer;
-		info.renderArea.extent.width = wd.Width;
-		info.renderArea.extent.height = wd.Height;
-		info.clearValueCount = 1;
-		info.pClearValues = &wd.ClearValue;
-		vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
-	}
+	// 	VkCommandBufferBeginInfo info = {};
+	// 	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	// 	info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	// 	VKS_VALIDATE(vkBeginCommandBuffer(fd->CommandBuffer, &info));
+	// }
+	// {
+	// 	VkRenderPassBeginInfo info = {};
+	// 	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	// 	info.renderPass = wd.RenderPass;
+	// 	info.framebuffer = fd->Framebuffer;
+	// 	info.renderArea.extent.width = wd.Width;
+	// 	info.renderArea.extent.height = wd.Height;
+	// 	info.clearValueCount = 1;
+	// 	info.pClearValues = &wd.ClearValue;
+	// 	vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
+	// }
 
-	// Record dear imgui primitives into command buffer
-	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), fd->CommandBuffer);
+	// // Record dear imgui primitives into command buffer
+	// ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), fd->CommandBuffer);
 
-	// Submit command buffer
-	vkCmdEndRenderPass(fd->CommandBuffer);
-	{
-		VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		VkSubmitInfo info = {};
-		info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		info.waitSemaphoreCount = 1;
-		info.pWaitSemaphores = &image_acquired_semaphore;
-		info.pWaitDstStageMask = &wait_stage;
-		info.commandBufferCount = 1;
-		info.pCommandBuffers = &fd->CommandBuffer;
-		info.signalSemaphoreCount = 1;
-		info.pSignalSemaphores = &render_complete_semaphore;
+	// // Submit command buffer
+	// vkCmdEndRenderPass(fd->CommandBuffer);
+	// {
+	// 	VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	// 	VkSubmitInfo info = {};
+	// 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	// 	info.waitSemaphoreCount = 1;
+	// 	info.pWaitSemaphores = &image_acquired_semaphore;
+	// 	info.pWaitDstStageMask = &wait_stage;
+	// 	info.commandBufferCount = 1;
+	// 	info.pCommandBuffers = &fd->CommandBuffer;
+	// 	info.signalSemaphoreCount = 1;
+	// 	info.pSignalSemaphores = &render_complete_semaphore;
 
-		err = vkEndCommandBuffer(fd->CommandBuffer);
+	// 	err = vkEndCommandBuffer(fd->CommandBuffer);
 
-		err = vkQueueSubmit(vkDevice->getDefaultGraphicQueue(), 1, &info, fd->Fence);
-	}
+	// 	err = vkQueueSubmit(renderWindow->getVKDevice()->getDefaultGraphicQueue(), 1, &info, fd->Fence);
+	// }
 
-	render_complete_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].RenderCompleteSemaphore;
-	VkPresentInfoKHR info = {};
-	info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	info.waitSemaphoreCount = 1;
-	info.pWaitSemaphores = &render_complete_semaphore;
-	info.swapchainCount = 1;
-	info.pSwapchains = &wd.Swapchain;
-	info.pImageIndices = &wd.FrameIndex;
-	err = vkQueuePresentKHR(vkDevice->getDefaultGraphicQueue(), &info);
-	if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
-		// g_SwapChainRebuild = true;
-		return;
-	}
-	VKS_VALIDATE(err);
+	// render_complete_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].RenderCompleteSemaphore;
+	// VkPresentInfoKHR info = {};
+	// info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	// info.waitSemaphoreCount = 1;
+	// info.pWaitSemaphores = &render_complete_semaphore;
+	// info.swapchainCount = 1;
+	// info.pSwapchains = &wd.Swapchain;
+	// info.pImageIndices = &wd.FrameIndex;
+	// err = vkQueuePresentKHR(renderWindow->getVKDevice()->getDefaultGraphicQueue(), &info);
+	// if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
+	// 	// g_SwapChainRebuild = true;
+	// 	return;
+	// }
+	// VKS_VALIDATE(err);
 
-	wd.SemaphoreIndex = (wd.SemaphoreIndex + 1) % wd.ImageCount; // Now we can use the next set of semaphores
+	// wd.SemaphoreIndex = (wd.SemaphoreIndex + 1) % wd.ImageCount; // Now we can use the next set of semaphores
 }
 void WindowBackend::endRenderOpenGL() {
 	glClear(GL_COLOR_BUFFER_BIT);

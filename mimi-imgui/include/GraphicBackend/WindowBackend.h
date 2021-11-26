@@ -216,14 +216,8 @@ namespace MIMIIMGUI {
 		// SDL_Window *gfxWindow;
 		std::shared_ptr<fragcore::IRenderer> renderer;
 		std::shared_ptr<fragcore::CommandList> commandList;
-
-		// TODO can be relocated.
-		std::shared_ptr<VulkanCore> vkCore;
-		std::vector<std::shared_ptr<PhysicalDevice>> vkPhysicalDevices;
-		std::shared_ptr<VKDevice> vkDevice;
-
 		/*	*/
-		ImGui_ImplVulkanH_Window wd;
+
 		ImTui::TScreen *imtuiScreen;
 		/*	*/
 		fragcore::Window *proxyWindow;
