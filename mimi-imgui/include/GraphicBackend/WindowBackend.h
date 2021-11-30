@@ -1,13 +1,13 @@
+
 #ifndef _MIMI_IMGUI_UI_WINDOW_BACKEND_H_
 #define _MIMI_IMGUI_UI_WINDOW_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
 #include "Window/Window.h"
 #include <CommandList.h>
 #include <IRenderer.h>
+#include <VKDevice.h>
 #include <VulkanCore.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
-//#include <imtui/imtui.h>
-#include <VKDevice.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -109,7 +109,18 @@ namespace MIMIIMGUI {
 		WindowBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
 		virtual ~WindowBackend();
 
+		/**
+		 * @brief
+		 *
+		 * @param backend
+		 */
 		virtual void initGfx(GfxBackEnd backend);
+
+		/**
+		 * @brief
+		 *
+		 * @param windowBackend
+		 */
 		virtual void initWindow(WindowLibBackend windowBackend);
 
 		void initTerminal();
@@ -119,8 +130,6 @@ namespace MIMIIMGUI {
 		void initDX10();
 		void initDX11();
 		void initDX12();
-
-		virtual void showDockSpace(bool *open);
 
 		virtual void beginRender();
 		virtual void endRender();
@@ -143,6 +152,10 @@ namespace MIMIIMGUI {
 
 		virtual void releaseRender();
 
+	  public:
+		virtual void showDockSpace(bool *open);
+
+	  public:
 		GfxBackEnd getBackendRenderer() const noexcept { return this->gfxBackend; }
 
 		WindowLibBackend getBackendWindowManager() const noexcept { return this->windowBackend; }
@@ -221,6 +234,8 @@ namespace MIMIIMGUI {
 		ImTui::TScreen *imtuiScreen;
 		/*	*/
 		fragcore::Window *proxyWindow;
+
+		bool requestResize{false};
 	};
 } // namespace MIMIIMGUI
 

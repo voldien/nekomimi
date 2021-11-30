@@ -226,9 +226,14 @@ void WindowBackend::initVulkan() {
 	int width = 800;
 	int height = 600;
 
+	/*	*/
 	VKRenderInterface *vkRenderer = new VKRenderInterface(nullptr);
 	this->renderer = std::shared_ptr<VKRenderInterface>(vkRenderer);
-	this->proxyWindow = renderer->createWindow(0, 0, 100, 100);
+
+	/*	*/
+	this->proxyWindow = renderer->createWindow(0, 0, 2560, 1440);
+
+	/*	*/
 	VKRenderWindow *renderWindow = static_cast<VKRenderWindow *>(this->proxyWindow);
 	this->commandList = std::shared_ptr<CommandList>(renderer->createCommandBuffer());
 
@@ -238,8 +243,8 @@ void WindowBackend::initVulkan() {
 	std::unordered_map<const char *, bool> required_instance_layer = {{"VK_LAYER_LUNARG_standard_validation", false}};
 	std::unordered_map<const char *, bool> required_device_extensions = {{VK_KHR_SWAPCHAIN_EXTENSION_NAME, true}};
 
-	ImGui_ImplVulkanH_Window wd;
-
+	ImGui_ImplVulkanH_Window wd = {};
+	renderWindow->getSize(&wd.Width, &wd.Height);
 	wd.Swapchain = renderWindow->getSwapChain().swapchain;
 	wd.Surface = renderWindow->getSurface();
 	wd.SurfaceFormat = renderWindow->getSurfaceFormat();
@@ -261,15 +266,6 @@ void WindowBackend::initVulkan() {
 
 	const std::shared_ptr<PhysicalDevice> &gpuDevice = renderWindow->getVKDevice()->getPhysicalDevice(gpu_index);
 
-	const std::vector<VkFormat> requestFormat = {VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_SRGB};
-	const std::vector<VkPresentModeKHR> requestPresent = {VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_FIFO_KHR,
-														  VK_PRESENT_MODE_FIFO_RELAXED_KHR,
-														  VK_PRESENT_MODE_IMMEDIATE_KHR};
-
-	ImGui_ImplVulkanH_CreateOrResizeWindow(
-		VK_NULL_HANDLE, gpuDevice->getHandle(), renderWindow->getVKDevice()->getHandle(), &wd,
-		renderWindow->getVKDevice()->getDefaultGraphicQueueIndex(), nullptr, width, height, 2);
-
 	VkDescriptorPool desc_pool;
 	VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
 										 {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
@@ -282,6 +278,7 @@ void WindowBackend::initVulkan() {
 										 {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
 										 {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
 										 {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
+
 	VkDescriptorPoolCreateInfo pool_info = {};
 	pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
@@ -290,10 +287,7 @@ void WindowBackend::initVulkan() {
 	pool_info.pPoolSizes = pool_sizes;
 	VKS_VALIDATE(vkCreateDescriptorPool(renderWindow->getVKDevice()->getHandle(), &pool_info, nullptr, &desc_pool));
 
-	// Setup Platform/Renderer backends
-	// if (!ImGui_ImplSDL2_InitForVulkan(gfxWindow)) {
-	// 	throw RuntimeException("Failed init ImGUI SDL - Vulkan");
-	// }
+	// VKHelper::createPipelineCache(vkRenderer->getDevice()->getHandle(), )
 
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = vkRenderer->getInstance()->getHandle();
@@ -303,20 +297,35 @@ void WindowBackend::initVulkan() {
 	init_info.Queue = renderWindow->getVKDevice()->getDefaultGraphicQueue();
 	init_info.PipelineCache = nullptr;
 	init_info.DescriptorPool = desc_pool;
-	init_info.Allocator = nullptr;
+	init_info.Subpass = 0;
 	init_info.MinImageCount = 2;
 	init_info.ImageCount = renderWindow->getNrCommandBuffers();
 	init_info.CheckVkResultFn = nullptr;
 	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+	init_info.Allocator = nullptr;
+	init_info.CheckVkResultFn = nullptr;
+
+	SDL_Window *window = SDL_CreateWindowFrom((const void *)renderWindow->getNativePtr());
+
+	if (!ImGui_ImplSDL2_InitForVulkan(window)) {
+		throw fragcore::RuntimeException("Failed init SDL2 ImGUI Vulkan");
+	}
 
 	if (!ImGui_ImplVulkan_Init(&init_info, renderWindow->getDefaultRenderPass())) {
 		throw fragcore::RuntimeException("Failed init ImGUI Vulkan");
 	}
 
-	VkCommandPool command_pool = wd.Frames[wd.FrameIndex].CommandPool;
-	VkCommandBuffer command_buffer = wd.Frames[wd.FrameIndex].CommandBuffer;
+	/*  Create command pool.    */
+	VkCommandPool command_pool;
+	VkCommandPoolCreateInfo cmdPoolCreateInfo = {};
+	cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	cmdPoolCreateInfo.queueFamilyIndex = renderWindow->getVKDevice()->getDefaultGraphicQueueIndex();
+	cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	VKS_VALIDATE(
+		vkCreateCommandPool(renderWindow->getVKDevice()->getHandle(), &cmdPoolCreateInfo, NULL, &command_pool));
 
-	VKS_VALIDATE(vkResetCommandPool(renderWindow->getVKDevice()->getHandle(), command_pool, 0));
+	VkCommandBuffer command_buffer =
+		VKHelper::beginSingleTimeCommands(renderWindow->getVKDevice()->getHandle(), command_pool);
 
 	VkCommandBufferBeginInfo begin_info = {};
 	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -336,6 +345,8 @@ void WindowBackend::initVulkan() {
 	VKS_VALIDATE(vkQueueSubmit(renderWindow->getVKDevice()->getDefaultGraphicQueue(), 1, &end_info, VK_NULL_HANDLE));
 
 	VKS_VALIDATE(vkDeviceWaitIdle(renderWindow->getVKDevice()->getHandle()));
+
+	VKS_VALIDATE(vkResetCommandPool(renderWindow->getVKDevice()->getHandle(), command_pool, 0));
 
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
@@ -450,85 +461,46 @@ void WindowBackend::beginRenderDX12() {
 }
 
 void WindowBackend::endRenderVulkan() {
-	RendererWindow *renderWindow = (RendererWindow *)this->proxyWindow;
+	VKRenderWindow *renderWindow = (VKRenderWindow *)this->proxyWindow;
+
+	VkCommandBuffer cmd = renderWindow->getCurrentCommandBuffer();
+
+	int width, height;
+	renderWindow->getSize(&width, &height);
+
+	VKS_VALIDATE(vkQueueWaitIdle(renderWindow->getDefaultGraphicQueue()));
+
+	VKS_VALIDATE(vkResetCommandBuffer(cmd, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT));
+
+	VkCommandBufferBeginInfo beginInfo = {};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+
+	VKS_VALIDATE(vkBeginCommandBuffer(cmd, &beginInfo));
+
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = renderWindow->getDefaultRenderPass();
+	renderPassInfo.framebuffer = renderWindow->getFrameBuffer(renderWindow->getCurrentFrameIndex());
+	renderPassInfo.renderArea.offset = {0, 0};
+	renderPassInfo.renderArea.extent.width = width;
+	renderPassInfo.renderArea.extent.height = height;
+
+	std::array<VkClearValue, 2> clearValues{};
+	clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
+	clearValues[1].depthStencil = {1.0f, 0};
+	renderPassInfo.clearValueCount = clearValues.size();
+	renderPassInfo.pClearValues = clearValues.data();
+
+	vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), renderWindow->getCurrentCommandBuffer());
+
+	vkCmdEndRenderPass(cmd);
+
+	VKS_VALIDATE(vkEndCommandBuffer(cmd));
+
 	renderWindow->swapBuffer();
-	// VkResult err;
-
-	// VkSemaphore image_acquired_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].ImageAcquiredSemaphore;
-	// VkSemaphore render_complete_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].RenderCompleteSemaphore;
-	// err = vkAcquireNextImageKHR(renderWindow->getVKDevice()->getHandle(), wd.Swapchain, UINT64_MAX,
-	// 							image_acquired_semaphore, VK_NULL_HANDLE, &wd.FrameIndex);
-	// if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
-	// 	// g_SwapChainRebuild = true;
-	// 	return;
-	// }
-	// VKS_VALIDATE(err);
-
-	// ImGui_ImplVulkanH_Frame *fd = &wd.Frames[wd.FrameIndex];
-	// {
-	// 	VKS_VALIDATE(vkWaitForFences(renderWindow->getVKDevice()->getHandle(), 1, &fd->Fence, VK_TRUE,
-	// 								 UINT64_MAX)); // wait indefinitely instead of periodically checking
-
-	// 	VKS_VALIDATE(vkResetFences(renderWindow->getVKDevice()->getHandle(), 1, &fd->Fence));
-	// }
-	// {
-	// 	VKS_VALIDATE(vkResetCommandPool(renderWindow->getVKDevice()->getHandle(), fd->CommandPool, 0));
-
-	// 	VkCommandBufferBeginInfo info = {};
-	// 	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	// 	info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-	// 	VKS_VALIDATE(vkBeginCommandBuffer(fd->CommandBuffer, &info));
-	// }
-	// {
-	// 	VkRenderPassBeginInfo info = {};
-	// 	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	// 	info.renderPass = wd.RenderPass;
-	// 	info.framebuffer = fd->Framebuffer;
-	// 	info.renderArea.extent.width = wd.Width;
-	// 	info.renderArea.extent.height = wd.Height;
-	// 	info.clearValueCount = 1;
-	// 	info.pClearValues = &wd.ClearValue;
-	// 	vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
-	// }
-
-	// // Record dear imgui primitives into command buffer
-	// ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), fd->CommandBuffer);
-
-	// // Submit command buffer
-	// vkCmdEndRenderPass(fd->CommandBuffer);
-	// {
-	// 	VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	// 	VkSubmitInfo info = {};
-	// 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	// 	info.waitSemaphoreCount = 1;
-	// 	info.pWaitSemaphores = &image_acquired_semaphore;
-	// 	info.pWaitDstStageMask = &wait_stage;
-	// 	info.commandBufferCount = 1;
-	// 	info.pCommandBuffers = &fd->CommandBuffer;
-	// 	info.signalSemaphoreCount = 1;
-	// 	info.pSignalSemaphores = &render_complete_semaphore;
-
-	// 	err = vkEndCommandBuffer(fd->CommandBuffer);
-
-	// 	err = vkQueueSubmit(renderWindow->getVKDevice()->getDefaultGraphicQueue(), 1, &info, fd->Fence);
-	// }
-
-	// render_complete_semaphore = wd.FrameSemaphores[wd.SemaphoreIndex].RenderCompleteSemaphore;
-	// VkPresentInfoKHR info = {};
-	// info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	// info.waitSemaphoreCount = 1;
-	// info.pWaitSemaphores = &render_complete_semaphore;
-	// info.swapchainCount = 1;
-	// info.pSwapchains = &wd.Swapchain;
-	// info.pImageIndices = &wd.FrameIndex;
-	// err = vkQueuePresentKHR(renderWindow->getVKDevice()->getDefaultGraphicQueue(), &info);
-	// if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
-	// 	// g_SwapChainRebuild = true;
-	// 	return;
-	// }
-	// VKS_VALIDATE(err);
-
-	// wd.SemaphoreIndex = (wd.SemaphoreIndex + 1) % wd.ImageCount; // Now we can use the next set of semaphores
 }
 void WindowBackend::endRenderOpenGL() {
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -574,12 +546,9 @@ void WindowBackend::beginRender() {
 				case SDL_WINDOWEVENT_RESIZED:
 					windowWidth = event.window.data1;
 					windowHeight = event.window.data2;
-					// std::cout << "[INFO] Window size: "
-					//           << windowWidth
-					//           << "x"
-					//           << windowHeight
-					//           << std::endl;
+
 					this->commandList->setviewport(0, 0, windowWidth, windowHeight);
+					this->requestResize = true;
 					break;
 				case SDL_WINDOWEVENT_CLOSE:
 					requestQuit = true;
@@ -648,7 +617,6 @@ void WindowBackend::setPosition(int x, int y) { this->proxyWindow->setPosition(x
 
 void WindowBackend::setSize(int width, int height) { /*	TODO determine if it shall update framebuffera as well.	*/
 	this->proxyWindow->setSize(width, height);
-
 	//						recreateSwapChain();
 }
 
