@@ -1,12 +1,35 @@
 #include "MIMIWindow.h"
+#include "MutableLiveData.h"
+#include "UIObserver.h"
+#include "UIViewController.h"
+#include "UIViewModel.h"
 #include <imgui.h>
 
 using namespace MIMIIMGUI;
 
-class SampleComponent : public UIComponent {
+class TextViewModel : public UIViewModel {
   public:
-	SampleComponent() { this->setName("Sample Window"); }
-	virtual void draw() override {}
+	MutableLiveData<std::string> text;
+};
+
+class SampleComponent : public UIComponent {
+  private:
+	TextViewModel textView;
+
+  public:
+	SampleComponent() {
+		this->setName("Sample Window");
+		this->textView.text.getObserver([this](std::string &text) {
+			text.append("Hell");
+			return;
+		});
+	}
+	virtual void draw() override {
+
+		if (ImGui::Button("Press me")) {
+			textView.text.postValue("Hello There From: ");
+		}
+	}
 };
 
 class SampleWindow : public MIMIWindow {
