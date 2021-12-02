@@ -14,13 +14,13 @@ void MIMIWindow::run() {
 	while (!requestQuit) {
 
 		/*	*/
-		beginRender();
+		this->beginRender();
 
 		ImGui::NewFrame();
 
-		showDockSpace(&show_dockspace);
+		this->showDockSpace(&show_dockspace);
 
-		displayMenuBar();
+		this->displayMenuBar();
 
 		/*	Draw each UI elements on screen.	*/
 		for (unsigned int i = 0; i < components.size(); i++) {
@@ -29,11 +29,11 @@ void MIMIWindow::run() {
 		}
 
 		/*	User Callback.	*/
-		renderUI();
+		this->renderUI();
 
 		ImGui::Render();
 
-		endRender();
+		this->endRender();
 	}
 }
 
