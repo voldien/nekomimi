@@ -547,7 +547,7 @@ void WindowBackend::beginRender() {
 					windowWidth = event.window.data1;
 					windowHeight = event.window.data2;
 
-					this->commandList->setviewport(0, 0, windowWidth, windowHeight);
+					this->commandList->setViewport(0, 0, windowWidth, windowHeight);
 					this->requestResize = true;
 					break;
 				case SDL_WINDOWEVENT_CLOSE:

@@ -213,7 +213,7 @@ namespace MIMIIMGUI {
 		virtual void setIcon(void *) override{};
 		//		virtual void setIcon(Image* image) = 0;
 
-		virtual void *getIcon() const override {}
+		virtual void *getIcon() const override { return nullptr; }
 		virtual fragcore::Display *getCurrentDisplay() const override { return this->proxyWindow->getCurrentDisplay(); }
 		virtual void setFullScreen(fragcore::Display &display) override {}
 
