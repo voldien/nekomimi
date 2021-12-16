@@ -7,11 +7,12 @@ template <typename T> class LiveData {
   public:
 	using Func = std::function<void(T)>;
 	template <typename F> UIObserver<T> &getObserver(const F &lambda) { /**/
-		observers.push_back(lambda);
+		auto ob = UIObserver<T>();
+		observers.push_back(ob);
 		return observers.back();
 	}
 
-	void postValue(T &value) {
+	void postValue(const T &value) {
 		this->value = value;
 		this->observers[0].onChanged(value);
 	}

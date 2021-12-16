@@ -2,5 +2,5 @@
 
 template <typename... T> class UIObserver {
   public:
-	virtual void onChanged(T &... t) {}
+	virtual void onChanged(const T &... t) {}
 };
