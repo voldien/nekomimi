@@ -39,23 +39,9 @@ ELSE()
 	MESSAGE(WARNING "Some library dependices may not be able to be found automatically.")
 ENDIF()
 
-# Find SDL and GLFW3
-IF(PKG_CONFIG_FOUND)
-	pkg_check_modules(SDL2 sdl2)
-	pkg_check_modules(GLFW glfw3)
-ELSE()
-ENDIF()
-
-IF(SDL2_FOUND)
-	MESSAGE(STATUS "Found sdl2: ${SDL2_LIBRARIES} -- version ${SDL2_VERSION}.")
-ENDIF()
-
-IF(GLFW_FOUND)
-	MESSAGE(STATUS "Found glfw: ${GLFW_LIBRARIES} -- version ${GLFW_VERSION}.")
-ENDIF()
 
 IF (NOT TARGET fragcore)
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore EXCLUDE_FROM_ALL)
+	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore EXCLUDE_FROM_ALL)
 ENDIF()
 
 FILE(GLOB SOURCE_FILES
@@ -79,25 +65,6 @@ FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/GraphicBackend/*.h
 )
 
-#######################################
-# SDL2 Window Backend Impl
-######################################
-ADD_LIBRARY(mimi-sdl2 OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/GraphicBackend/SDLWindow.cpp)
-TARGET_INCLUDE_DIRECTORIES(mimi-sdl2 PUBLIC ${SDL2_INCLUDE_DIRS} PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include
-)
-TARGET_COMPILE_OPTIONS(mimi-sdl2 PRIVATE  "-fPIC")
-TARGET_LINK_LIBRARIES(mimi-sdl2 PUBLIC  ${SDL2_LIBRARIES} fragcore)
-TARGET_COMPILE_OPTIONS(mimi-sdl2 PRIVATE ${SDL2_CFLAGS_OTHER} )
-
-
-#######################################
-# GLFW3 Window Backend Impl
-######################################
-ADD_LIBRARY(mimi-glfw OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/GraphicBackend/glwf3Window.cpp)
-TARGET_INCLUDE_DIRECTORIES(mimi-glfw PUBLIC ${GLFW_INCLUDE_DIRS} PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include)
-TARGET_COMPILE_OPTIONS(mimi-glfw PRIVATE  "-fPIC")
-TARGET_LINK_LIBRARIES(mimi-glfw PUBLIC  ${GLFW_LIBRARIES} fragcore)
-TARGET_COMPILE_OPTIONS(mimi-glfw PRIVATE ${GLFW_CFLAGS_OTHER} )
 
 #########################################
 # Core Window Management Library.
@@ -115,9 +82,11 @@ TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
 )
 
 
-TARGET_LINK_LIBRARIES(mimi-window PUBLIC mimi-sdl2 fragcore fragcore-render-interface fragcore-rgl fragcore-rvk )
+TARGET_LINK_LIBRARIES(mimi-window PUBLIC fragcore fragcore-render-interface fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
 ADD_DEPENDENCIES(mimi-window vkcommon-core fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
-
 
 #####
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/samples)
+
+INSTALL(TARGETS mimi-window DESTINATION lib COMPONENT ${LIBMIMIIMGUIFRAGCORE_COMPONENT})
+
