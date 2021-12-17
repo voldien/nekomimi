@@ -1,5 +1,6 @@
 #pragma once
 #include <Exception.hpp>
+#include <observable/observable.hpp>
 
 namespace MIMIIMGUI {
 
@@ -23,4 +24,5 @@ namespace MIMIIMGUI {
 	 *
 	 */
 	enum class WindowLibBackend { WindowBackendSDL2, WindowBackendGLFW3, WindowBackendWindows };
+
 }

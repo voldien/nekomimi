@@ -4,3 +4,6 @@
 [submodule "extern/fragcore"]
 	path = extern/fragcore
 	url = https://github.com/voldien/fragcore.git
+[submodule "extern/observable"]
+	path = extern/observable
+	url = https://github.com/ddinu/observable.git

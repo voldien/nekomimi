@@ -1,6 +1,7 @@
 #ifndef _MIMI_MIMI_WINDOW_H_
 #define _MIMI_MIMI_WINDOW_H_ 1
 #include "GraphicBackend/WindowBackend.h"
+#include "MIMIDef.h"
 #include "UIComponent.h"
 #include "util/imgui-ext.h"
 #include <memory>

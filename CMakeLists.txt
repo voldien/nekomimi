@@ -43,6 +43,7 @@ ENDIF()
 IF (NOT TARGET fragcore)
 	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore EXCLUDE_FROM_ALL)
 ENDIF()
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/observable/observable EXCLUDE_FROM_ALL)
 
 FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/*.cpp
@@ -82,8 +83,8 @@ TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
 )
 
 
-TARGET_LINK_LIBRARIES(mimi-window PUBLIC fragcore fragcore-render-interface fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
-ADD_DEPENDENCIES(mimi-window vkcommon-core fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
+TARGET_LINK_LIBRARIES(mimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
+ADD_DEPENDENCIES(mimi-window observable vkcommon-core fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
 
 #####
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/samples)

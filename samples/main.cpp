@@ -10,6 +10,7 @@ using namespace MIMIIMGUI;
 class TextViewModel : public UIViewModel {
   public:
 	MutableLiveData<std::string> text;
+	observable::value<std::string> text2;
 };
 
 class SampleComponent : public UIComponent {
@@ -19,6 +20,9 @@ class SampleComponent : public UIComponent {
   public:
 	SampleComponent() {
 		this->setName("Sample Window");
+		auto a = observable::value<int>{5};
+		auto b = observable::value<int>{5};
+		observable::observe((a + b) / 2.0f).subscribe([](auto val) { std::cout << val << std::endl; });
 		this->textView.text.getObserver([this](std::string &text) {
 			text.append("Hell");
 			return;
@@ -27,7 +31,7 @@ class SampleComponent : public UIComponent {
 	virtual void draw() override {
 
 		if (ImGui::Button("Press me")) {
-			textView.text.postValue("Hello There From: ");
+			textView.text2 = "";
 		}
 	}
 };
