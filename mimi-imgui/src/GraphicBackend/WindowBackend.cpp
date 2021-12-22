@@ -3,7 +3,7 @@
 #include "GraphicBackend/SDLWindow.h"
 
 #include <GL/glew.h>
-//#include <SDL2/SDL_vulkan.h>
+
 #include <RendererFactory.h>
 #include <SDL_events.h>
 #include <SDL_video.h>
@@ -142,10 +142,6 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
-	// if (backend == GfxBackEnd::ImGUI_OpenGL || backend == GfxBackEnd::ImGUI_Vulkan) {
-	// 	SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
-	// }
-
 	if (backend == GfxBackEnd::ImGUI_OpenGL || backend == GfxBackEnd::ImGUI_Vulkan) {
 		// TODO relocate
 		// SDL_Init(SDL_INIT_EVERYTHING);
@@ -165,14 +161,6 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 		style.Colors[ImGuiCol_Button] = ImVec4(0.44f, 0.44f, 0.44f, 0.40f);
 		style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.46f, 0.47f, 0.48f, 1.00f);
 		style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.42f, 0.42f, 0.42f, 1.00f);
-
-		ImFontConfig config;
-		config.MergeMode = true;
-		// io.Fonts->AddFontFromFileTTF("Verdana.ttf", 18.0f, &config, io.Fonts->GetGlyphRangesJapanese()));
-		// TODO relocate
-		// std::string fontPath = ResourceManager::getResourcePath("NotoSansCJKjp-Medium.otf");
-		// io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-		io.Fonts->Build();
 	}
 
 	/*	*/
@@ -226,14 +214,16 @@ void WindowBackend::initVulkan() {
 	int width = 800;
 	int height = 600;
 
-	/*	*/
-	VKRenderInterface *vkRenderer = new VKRenderInterface(nullptr);
-	this->renderer = std::shared_ptr<VKRenderInterface>(vkRenderer);
+	/*	Create render interface.	*/
+	this->renderer = std::shared_ptr<VKRenderInterface>(new VKRenderInterface(nullptr));
+	VKRenderInterface *vkRenderer = (VKRenderInterface *)this->renderer.get();
+
+	fragcore::Display *mainDisplay;
 
 	/*	*/
 	this->proxyWindow = renderer->createWindow(0, 0, 2560, 1440);
 
-	/*	*/
+	/*	Create command buffer.	*/
 	VKRenderWindow *renderWindow = static_cast<VKRenderWindow *>(this->proxyWindow);
 	this->commandList = std::shared_ptr<CommandList>(renderer->createCommandBuffer());
 
@@ -243,28 +233,29 @@ void WindowBackend::initVulkan() {
 	std::unordered_map<const char *, bool> required_instance_layer = {{"VK_LAYER_LUNARG_standard_validation", false}};
 	std::unordered_map<const char *, bool> required_device_extensions = {{VK_KHR_SWAPCHAIN_EXTENSION_NAME, true}};
 
-	ImGui_ImplVulkanH_Window wd = {};
-	renderWindow->getSize(&wd.Width, &wd.Height);
-	wd.Swapchain = renderWindow->getSwapChain().swapchain;
-	wd.Surface = renderWindow->getSurface();
-	wd.SurfaceFormat = renderWindow->getSurfaceFormat();
-	wd.PresentMode = renderWindow->getPresentMode();
-	wd.RenderPass = renderWindow->getDefaultRenderPass();
+
+	// ImGui_ImplVulkanH_Window wd = {};
+	// renderWindow->getSize(&wd.Width, &wd.Height);
+	// wd.Swapchain = renderWindow->getSwapChain().swapchain;
+	// wd.Surface = renderWindow->getSurface();
+	// wd.SurfaceFormat = renderWindow->getSurfaceFormat();
+	// wd.PresentMode = renderWindow->getPresentMode();
+	// wd.RenderPass = renderWindow->getDefaultRenderPass();
 
 	/*	Check if any of the gpu devices and which of their queue support present.	*/
-	int gpu_index = -1;
-	for (unsigned int i = 0; i < renderWindow->getVKDevice()->getNrPhysicalDevices(); i++) {
-		for (unsigned int j = 0; j < renderWindow->getVKDevice()->getPhysicalDevice(i)->getNrQueueFamilyProperties();
-			 j++) {
+	// int gpu_index = -1;
+	// for (unsigned int i = 0; i < renderWindow->getVKDevice()->getNrPhysicalDevices(); i++) {
+	// 	for (unsigned int j = 0; j < renderWindow->getVKDevice()->getPhysicalDevice(i)->getNrQueueFamilyProperties();
+	// 		 j++) {
 
-			if (renderWindow->getVKDevice()->getPhysicalDevice(i)->isPresentable(wd.Surface, j)) {
-				gpu_index = i;
-			}
-		}
-	}
-	assert(gpu_index < (int)renderWindow->getVKDevice()->getNrPhysicalDevices());
+	// 		if (renderWindow->getVKDevice()->getPhysicalDevice(i)->isPresentable(wd.Surface, j)) {
+	// 			gpu_index = i;
+	// 		}
+	// 	}
+	// }
+	// assert(gpu_index < (int)renderWindow->getVKDevice()->getNrPhysicalDevices());
 
-	const std::shared_ptr<PhysicalDevice> &gpuDevice = renderWindow->getVKDevice()->getPhysicalDevice(gpu_index);
+	const std::shared_ptr<PhysicalDevice> &gpuDevice = renderWindow->getVKDevice()->getPhysicalDevice(0);
 
 	VkDescriptorPool desc_pool;
 	VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
@@ -287,7 +278,7 @@ void WindowBackend::initVulkan() {
 	pool_info.pPoolSizes = pool_sizes;
 	VKS_VALIDATE(vkCreateDescriptorPool(renderWindow->getVKDevice()->getHandle(), &pool_info, nullptr, &desc_pool));
 
-	// VKHelper::createPipelineCache(vkRenderer->getDevice()->getHandle(), )
+	VkPipelineCache cache = VKHelper::createPipelineCache(vkRenderer->getDevice()->getHandle(), 0, nullptr);
 
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = vkRenderer->getInstance()->getHandle();
@@ -295,7 +286,7 @@ void WindowBackend::initVulkan() {
 	init_info.Device = renderWindow->getVKDevice()->getHandle();
 	init_info.QueueFamily = renderWindow->getVKDevice()->getDefaultGraphicQueueIndex();
 	init_info.Queue = renderWindow->getVKDevice()->getDefaultGraphicQueue();
-	init_info.PipelineCache = nullptr;
+	init_info.PipelineCache = cache;
 	init_info.DescriptorPool = desc_pool;
 	init_info.Subpass = 0;
 	init_info.MinImageCount = 2;
@@ -305,12 +296,15 @@ void WindowBackend::initVulkan() {
 	init_info.Allocator = nullptr;
 	init_info.CheckVkResultFn = nullptr;
 
+	/*	*/
 	SDL_Window *window = SDL_CreateWindowFrom((const void *)renderWindow->getNativePtr());
 
+	/*	*/
 	if (!ImGui_ImplSDL2_InitForVulkan(window)) {
 		throw fragcore::RuntimeException("Failed init SDL2 ImGUI Vulkan");
 	}
 
+	/*	*/
 	if (!ImGui_ImplVulkan_Init(&init_info, renderWindow->getDefaultRenderPass())) {
 		throw fragcore::RuntimeException("Failed init ImGUI Vulkan");
 	}
@@ -324,31 +318,39 @@ void WindowBackend::initVulkan() {
 	VKS_VALIDATE(
 		vkCreateCommandPool(renderWindow->getVKDevice()->getHandle(), &cmdPoolCreateInfo, NULL, &command_pool));
 
-	VkCommandBuffer command_buffer =
-		VKHelper::beginSingleTimeCommands(renderWindow->getVKDevice()->getHandle(), command_pool);
+	{
+		// TODO relocate.
+		VkCommandBuffer command_buffer =
+			VKHelper::beginSingleTimeCommands(renderWindow->getVKDevice()->getHandle(), command_pool);
 
-	VkCommandBufferBeginInfo begin_info = {};
-	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-	VKS_VALIDATE(vkBeginCommandBuffer(command_buffer, &begin_info));
+		VkCommandBufferBeginInfo begin_info = {};
+		begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		VKS_VALIDATE(vkBeginCommandBuffer(command_buffer, &begin_info));
 
-	if (!ImGui_ImplVulkan_CreateFontsTexture(command_buffer)) {
-		throw fragcore::RuntimeException("Failed to generate font ImGUI Vulkan");
+		/*	*/
+		if (!ImGui_ImplVulkan_CreateFontsTexture(command_buffer)) {
+			throw fragcore::RuntimeException("Failed to generate font ImGUI Vulkan");
+		}
+
+		VkSubmitInfo end_info = {};
+		end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		end_info.commandBufferCount = 1;
+		end_info.pCommandBuffers = &command_buffer;
+		VKS_VALIDATE(vkEndCommandBuffer(command_buffer));
+
+		// VKHelper::endSingleTimeCommands
+		VKS_VALIDATE(
+			vkQueueSubmit(renderWindow->getVKDevice()->getDefaultGraphicQueue(), 1, &end_info, VK_NULL_HANDLE));
+
+		VKS_VALIDATE(vkDeviceWaitIdle(renderWindow->getVKDevice()->getHandle()));
+
+		VKS_VALIDATE(vkResetCommandBuffer(command_buffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT));
+
+		vkFreeCommandBuffers(renderWindow->getVKDevice()->getHandle(), command_pool, 1, &command_buffer);
+
+		ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
-
-	VkSubmitInfo end_info = {};
-	end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	end_info.commandBufferCount = 1;
-	end_info.pCommandBuffers = &command_buffer;
-	VKS_VALIDATE(vkEndCommandBuffer(command_buffer));
-
-	VKS_VALIDATE(vkQueueSubmit(renderWindow->getVKDevice()->getDefaultGraphicQueue(), 1, &end_info, VK_NULL_HANDLE));
-
-	VKS_VALIDATE(vkDeviceWaitIdle(renderWindow->getVKDevice()->getHandle()));
-
-	VKS_VALIDATE(vkResetCommandPool(renderWindow->getVKDevice()->getHandle(), command_pool, 0));
-
-	ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 void WindowBackend::initOpenGL() {
@@ -381,6 +383,15 @@ void WindowBackend::initOpenGL() {
 	if (!ImGui_ImplOpenGL3_Init(glsl_version.c_str())) {
 		throw fragcore::RuntimeException("Failed to Init ImGUI OpenGL3");
 	}
+}
+
+void WindowBackend::loadFont(const std::string &path) {
+	// TODO add support for multiple
+	ImFontConfig config;
+	ImGuiIO &io = ImGui::GetIO();
+	config.MergeMode = true;
+	io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f, &config, io.Fonts->GetGlyphRangesJapanese());
+	io.Fonts->Build();
 }
 
 void WindowBackend::showDockSpace(bool *open) {
@@ -461,22 +472,25 @@ void WindowBackend::beginRenderDX12() {
 }
 
 void WindowBackend::endRenderVulkan() {
-	VKRenderWindow *renderWindow = (VKRenderWindow *)this->proxyWindow;
+	VKRenderWindow *renderWindow = static_cast<VKRenderWindow *>(this->proxyWindow);
 
-	VkCommandBuffer cmd = renderWindow->getCurrentCommandBuffer();
+	VkCommandBuffer currentCmd = renderWindow->getCurrentCommandBuffer();
 
 	int width, height;
 	renderWindow->getSize(&width, &height);
 
 	VKS_VALIDATE(vkQueueWaitIdle(renderWindow->getDefaultGraphicQueue()));
 
-	VKS_VALIDATE(vkResetCommandBuffer(cmd, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT));
+	VKS_VALIDATE(
+		vkResetCommandPool(renderWindow->getVKDevice()->getHandle(), renderWindow->getGraphicCommandPool(), 0));
 
 	VkCommandBufferBeginInfo beginInfo = {};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-	VKS_VALIDATE(vkBeginCommandBuffer(cmd, &beginInfo));
+	VKS_VALIDATE(vkBeginCommandBuffer(currentCmd, &beginInfo));
+
+	// TOOD execute the command line.
 
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -489,24 +503,27 @@ void WindowBackend::endRenderVulkan() {
 	std::array<VkClearValue, 2> clearValues{};
 	clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
 	clearValues[1].depthStencil = {1.0f, 0};
+
 	renderPassInfo.clearValueCount = clearValues.size();
 	renderPassInfo.pClearValues = clearValues.data();
 
-	vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(currentCmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), renderWindow->getCurrentCommandBuffer());
 
-	vkCmdEndRenderPass(cmd);
+	vkCmdEndRenderPass(currentCmd);
 
-	VKS_VALIDATE(vkEndCommandBuffer(cmd));
+	VKS_VALIDATE(vkEndCommandBuffer(currentCmd));
 
 	renderWindow->swapBuffer();
 }
+
 void WindowBackend::endRenderOpenGL() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	SDL_GL_SwapWindow((SDL_Window *)getNativePtr());
 }
+
 void WindowBackend::endRenderTerminal() {
 	// ImTui_ImplText_RenderDrawData(ImGui::GetDrawData(), this->imtuiScreen);
 	// ImTui_ImplNcurses_DrawScreen();
@@ -547,7 +564,7 @@ void WindowBackend::beginRender() {
 					windowWidth = event.window.data1;
 					windowHeight = event.window.data2;
 
-					this->commandList->setViewport(0, 0, windowWidth, windowHeight);
+					// this->commandList->setViewport(0, 0, windowWidth, windowHeight);
 					this->requestResize = true;
 					break;
 				case SDL_WINDOWEVENT_CLOSE:
@@ -562,6 +579,8 @@ void WindowBackend::beginRender() {
 			}
 		}
 	}
+
+	this->commandList->end();
 
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
@@ -604,8 +623,8 @@ void WindowBackend::endRender() {
 		break;
 	}
 	/*	Finalize and execute.	*/
-	this->commandList->end();
-	this->renderer->execute(this->commandList.get());
+
+	// this->renderer->execute(this->commandList.get());
 }
 void WindowBackend::show() { this->proxyWindow->show(); }
 

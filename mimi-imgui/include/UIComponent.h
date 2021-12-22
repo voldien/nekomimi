@@ -31,6 +31,8 @@ namespace MIMIIMGUI {
 		void setName(const std::string &name) { this->name = name; }
 		const std::string &getName() const { return this->name; }
 
+		//TODO get size
+
 	  protected:
 		virtual void draw() = 0;
 

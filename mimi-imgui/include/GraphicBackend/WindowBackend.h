@@ -107,6 +107,8 @@ namespace MIMIIMGUI {
 
 	  public:
 		WindowBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
+		// TODO add support to provide renderinterface.
+		// WindowBackend()
 		virtual ~WindowBackend();
 
 		/**
@@ -153,12 +155,19 @@ namespace MIMIIMGUI {
 		virtual void releaseRender();
 
 	  public:
+		void loadFont(const std::string &path);
+
+		void enableDocking();
+		void enableViewPorts();
 		virtual void showDockSpace(bool *open);
 
 	  public:
 		GfxBackEnd getBackendRenderer() const noexcept { return this->gfxBackend; }
 
 		WindowLibBackend getBackendWindowManager() const noexcept { return this->windowBackend; }
+
+		std::shared_ptr<fragcore::IRenderer> &getRenderInterface() noexcept { return this->renderer; }
+		const std::shared_ptr<fragcore::IRenderer> &getRenderInterface() const noexcept { return this->renderer; }
 
 	  public:
 		virtual void show() override;
@@ -226,7 +235,6 @@ namespace MIMIIMGUI {
 		WindowLibBackend windowBackend;
 
 		/*	*/
-		// SDL_Window *gfxWindow;
 		std::shared_ptr<fragcore::IRenderer> renderer;
 		std::shared_ptr<fragcore::CommandList> commandList;
 		/*	*/

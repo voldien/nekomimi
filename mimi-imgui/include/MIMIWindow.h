@@ -20,14 +20,16 @@ namespace MIMIIMGUI {
 
 		void quit();
 
-	  protected:
-		virtual void displayMenuBar() = 0;
-		virtual void renderUI() = 0;
-
+	  public:
 		virtual void addUIComponent(const std::shared_ptr<UIComponent> &component);
 		virtual void removeUIComponent(const std::shared_ptr<UIComponent> &component);
 		unsigned int getNrUIComponents() const;
 		std::shared_ptr<UIComponent> &getComponent(unsigned int index);
+
+	  protected:
+		virtual void displayMenuBar() = 0;
+		virtual void renderUI() = 0;
+
 		// std::shared_ptr<UIComponent> &getComponent(unsigned int index);
 
 	  private:
