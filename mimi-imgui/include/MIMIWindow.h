@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2021 Valdemar Lindberg
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 #ifndef _MIMI_MIMI_WINDOW_H_
 #define _MIMI_MIMI_WINDOW_H_ 1
 #include "GraphicBackend/WindowBackend.h"
@@ -18,6 +39,11 @@ namespace MIMIIMGUI {
 	  public:
 		void run();
 
+		/**
+		 * @brief Request for the application
+		 * to quit.
+		 *
+		 */
 		void quit();
 
 	  public:
@@ -25,6 +51,9 @@ namespace MIMIIMGUI {
 		virtual void removeUIComponent(const std::shared_ptr<UIComponent> &component);
 		unsigned int getNrUIComponents() const;
 		std::shared_ptr<UIComponent> &getComponent(unsigned int index);
+
+		void setStatusBar(bool enabled);
+		void setUIComponentEnabled(bool enabled);
 
 	  protected:
 		virtual void displayMenuBar() = 0;

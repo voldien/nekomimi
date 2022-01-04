@@ -82,11 +82,16 @@ TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
 	$<INSTALL_INTERFACE:mimi-imgui/include>
 )
 
+TARGET_LINK_LIBRARIES(mimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-shader-compiler fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
+ADD_DEPENDENCIES(mimi-window observable fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
 
-TARGET_LINK_LIBRARIES(mimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
-ADD_DEPENDENCIES(mimi-window observable vkcommon-core fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
+IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required
+	SET_PROPERTY(TARGET mimi-window PROPERTY POSITION_INDEPENDENT_CODE ON)
+ENDIF()
 
-#####
+########################
+# Samples codes
+########################
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/samples)
 
 INSTALL(TARGETS mimi-window DESTINATION lib COMPONENT ${LIBMIMIIMGUIFRAGCORE_COMPONENT})

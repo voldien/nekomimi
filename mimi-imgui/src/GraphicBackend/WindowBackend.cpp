@@ -1,9 +1,5 @@
 #include "GraphicBackend/WindowBackend.h"
-
-#include "GraphicBackend/SDLWindow.h"
-
 #include <GL/glew.h>
-
 #include <RendererFactory.h>
 #include <SDL_events.h>
 #include <SDL_video.h>
@@ -394,6 +390,9 @@ void WindowBackend::loadFont(const std::string &path) {
 	io.Fonts->Build();
 }
 
+void WindowBackend::enableDocking(bool enabled){}
+void WindowBackend::enableViewPorts(bool enabled){}
+
 void WindowBackend::showDockSpace(bool *open) {
 	static bool opt_fullscreen_persistant = true;
 	bool opt_fullscreen = opt_fullscreen_persistant;
@@ -440,6 +439,9 @@ void WindowBackend::showDockSpace(bool *open) {
 	}
 
 	ImGui::End();
+}
+void WindowBackend::showViewPorts(bool *open){
+	
 }
 
 void WindowBackend::beginRenderVulkan() {
