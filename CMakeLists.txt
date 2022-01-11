@@ -59,6 +59,7 @@ FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_widgets.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/misc/cpp/*.cpp
 )
 
 FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/*.h
@@ -71,7 +72,6 @@ FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/*.h
 # Core Window Management Library.
 #########################################
 ADD_LIBRARY(mimi-window ${SOURCE_FILES} ${HEADER_FILES} )
-TARGET_COMPILE_OPTIONS(mimi-window  PRIVATE  "-fPIC")
 TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
 	${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS}
 	PUBLIC
