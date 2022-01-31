@@ -2,7 +2,10 @@
 
 using namespace MIMIIMGUI;
 
-UIComponent::UIComponent() : window_flags(ImGuiWindowFlags_None) { this->m_show = true; }
+UIComponent::UIComponent() : window_flags(ImGuiWindowFlags_None) {
+	this->m_show = true;
+	this->setName("Default");
+}
 
 void UIComponent::begin() {
 
@@ -25,9 +28,7 @@ void UIComponent::drawUI() {
 	}
 }
 
-void UIComponent::end() {
-		ImGui::End();
-}
+void UIComponent::end() { ImGui::End(); }
 
 void UIComponent::show(bool state) noexcept { this->m_show = state; }
 void UIComponent::showTitle(bool state) {
