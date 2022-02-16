@@ -2,6 +2,7 @@
 #ifndef _MIMI_IMGUI_UI_WINDOW_BACKEND_H_
 #define _MIMI_IMGUI_UI_WINDOW_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
+#include "UIViewModel.h"
 #include "Window/Window.h"
 #include <CommandList.h>
 #include <IRenderer.h>
@@ -159,6 +160,14 @@ namespace MIMIIMGUI {
 		GfxBackEnd getBackendRenderer() const noexcept { return this->gfxBackend; }
 
 		WindowLibBackend getBackendWindowManager() const noexcept { return this->windowBackend; }
+
+		const std::shared_ptr<fragcore::IRenderer> &getRenderInterface() const noexcept { return this->renderer; }
+		std::shared_ptr<fragcore::IRenderer> &getRenderInterface() noexcept { return this->renderer; }
+
+		const std::shared_ptr<fragcore::CommandList> &getRenderCommandBuffer() const noexcept {
+			return this->commandList;
+		}
+		std::shared_ptr<fragcore::CommandList> &getRenderCommandBuffer() noexcept { return this->commandList; }
 
 	  public:
 		virtual void show() override;

@@ -16,7 +16,6 @@ ELSE()
 ENDIF(NOT BUILD_SHARED_LIBS)
 
 
-
 ################################################
 # Find all dependices libraries and etc.
 ################################################
@@ -54,24 +53,37 @@ FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_opengl3.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_vulkan.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_sdl.cpp
-	#${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx9.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_draw.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_widgets.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui.cpp
 )
 
+#Only add directX for Windows platforms.
+IF(WINDOWS)
+	FILE(GLOB APPEND SOURCE_FILES
+		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx9.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx10.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx11.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx12.cpp
+	)
+ENDIF()
+
+IF(ANDROID)
+	FILE(GLOB APPEND SOURCE_FILES
+		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_android.cpp
+	)
+ENDIF()
+
 FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/UIComponents/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/GraphicBackend/*.h
 )
 
-
 #########################################
 # Core Window Management Library.
 #########################################
 ADD_LIBRARY(mimi-window ${SOURCE_FILES} ${HEADER_FILES} )
-TARGET_COMPILE_OPTIONS(mimi-window  PRIVATE  "-fPIC")
 TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
 	${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS}
 	PUBLIC
@@ -82,9 +94,13 @@ TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
 	$<INSTALL_INTERFACE:mimi-imgui/include>
 )
 
+IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required
+	SET_PROPERTY(TARGET mimi-window PROPERTY POSITION_INDEPENDENT_CODE ON)
+ENDIF()
+
 
 TARGET_LINK_LIBRARIES(mimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
-ADD_DEPENDENCIES(mimi-window observable vkcommon-core fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
+ADD_DEPENDENCIES(mimi-window observable fvkcore fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
 
 #####
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/samples)

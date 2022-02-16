@@ -24,7 +24,7 @@ class SampleComponent : public UIComponent {
 		auto b = observable::value<int>{5};
 		observable::observe((a + b) / 2.0f).subscribe([](auto val) { std::cout << val << std::endl; });
 		this->textView.text.getObserver([this](std::string &text) {
-			text.append("Hell");
+			text.append("Hello");
 			return;
 		});
 	}
@@ -39,7 +39,7 @@ class SampleComponent : public UIComponent {
 class SampleWindow : public MIMIWindow {
   public:
 	SampleWindow(WindowBackend::GfxBackEnd gfx = WindowBackend::GfxBackEnd::ImGUI_OpenGL) : MIMIWindow(gfx) {
-		this->setTitle("Sample Main Window");
+		this->setTitle(fmt::format("Sample Main Window: {}", this->getRenderInterface()->getName()));
 
 		/*	*/
 		std::shared_ptr<SampleComponent> com = std::make_shared<SampleComponent>();
