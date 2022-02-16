@@ -57,6 +57,7 @@ FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_widgets.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/misc/cpp/*.cpp
 )
 
 #Only add directX for Windows platforms.
@@ -94,15 +95,16 @@ TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
 	$<INSTALL_INTERFACE:mimi-imgui/include>
 )
 
+TARGET_LINK_LIBRARIES(mimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-shader-compiler fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
+ADD_DEPENDENCIES(mimi-window observable fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
+
 IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required
 	SET_PROPERTY(TARGET mimi-window PROPERTY POSITION_INDEPENDENT_CODE ON)
 ENDIF()
 
-
-TARGET_LINK_LIBRARIES(mimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
-ADD_DEPENDENCIES(mimi-window observable fvkcore fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
-
-#####
+########################
+# Samples codes
+########################
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/samples)
 
 INSTALL(TARGETS mimi-window DESTINATION lib COMPONENT ${LIBMIMIIMGUIFRAGCORE_COMPONENT})

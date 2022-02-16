@@ -5,13 +5,15 @@ MIMIWindow::MIMIWindow(GfxBackEnd backend)
 	: WindowBackend(WindowBackend::WindowLibBackend::WindowBackendSDL2, backend) {}
 
 void MIMIWindow::run() {
+
 	this->show();
 	this->maximize();
 	this->focus();
 
 	bool show_dockspace = true;
+	bool show_viewports = false;
 
-	while (!requestQuit) {
+	while (!this->requestQuit) {
 
 		/*	*/
 		this->beginRender();
@@ -19,6 +21,7 @@ void MIMIWindow::run() {
 		ImGui::NewFrame();
 
 		this->showDockSpace(&show_dockspace);
+		//this->showViewPorts(&show_viewports);
 
 		this->displayMenuBar();
 
