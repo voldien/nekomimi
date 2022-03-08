@@ -39,7 +39,11 @@ template <typename T> class LiveData {
 		this->observers[0].onChanged(value);
 	}
 
-	void setValue(T &value) {}
+	void setValue(const T &value) {
+		this->value = value;
+		this->observers[0].onChanged(value);
+	}
+	void setValue(T &&value) { this->value = value; }
 	T &getValue() { return this->value; }
 
   private:

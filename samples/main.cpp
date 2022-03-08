@@ -31,8 +31,9 @@ class SampleComponent : public UIComponent {
 	virtual void draw() override {
 
 		if (ImGui::Button("Press me")) {
-			textView.text2 = "";
+			textView.text.setValue("");
 		}
+		ImGui::TextUnformatted(textView.text.getValue().c_str());
 	}
 };
 

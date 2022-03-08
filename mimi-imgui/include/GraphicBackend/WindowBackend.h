@@ -130,6 +130,7 @@ namespace MIMIIMGUI {
 		WindowBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
 		// TODO add support to provide renderinterface.
 		// WindowBackend()
+		//WindowBackend(std::shared_ptr<fragcore::IRenderer> &render);
 		virtual ~WindowBackend();
 
 		/**
