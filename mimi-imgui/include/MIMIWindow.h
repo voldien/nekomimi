@@ -32,7 +32,7 @@ namespace MIMIIMGUI {
 	 * @brief
 	 *
 	 */
-	class MIMIWindow : public WindowBackend {
+	class FVDECLSPEC MIMIWindow : public WindowBackend {
 	  public:
 		MIMIWindow(GfxBackEnd backend);
 

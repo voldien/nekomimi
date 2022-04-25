@@ -6,7 +6,6 @@ MIMIWindow::MIMIWindow(GfxBackEnd backend)
 
 void MIMIWindow::run() {
 
-	this->show();
 	this->maximize();
 	this->focus();
 
@@ -20,19 +19,21 @@ void MIMIWindow::run() {
 
 		ImGui::NewFrame();
 
-		this->showDockSpace(&show_dockspace);
-		//this->showViewPorts(&show_viewports);
-
 		this->displayMenuBar();
+
+		/*	User Callback.	*/
+		this->renderUI();
+		
+		if(this->useDocking){
+			this->showDockSpace(&show_dockspace);
+		}
+		this->showViewPorts(&show_viewports);
 
 		/*	Draw each UI elements on screen.	*/
 		for (unsigned int i = 0; i < components.size(); i++) {
 			std::shared_ptr<UIComponent> &uiComponent = this->components[i];
 			uiComponent->drawUI();
 		}
-
-		/*	User Callback.	*/
-		this->renderUI();
 
 		ImGui::Render();
 

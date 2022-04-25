@@ -88,8 +88,8 @@ WindowBackend::WindowBackend(WindowLibBackend windowBackend, GfxBackEnd gfxBacke
 		throw RuntimeException("Graphic Backed not Supported {}", getGfxBackEndSymbol(gfxBackend));
 	}
 	/*	*/
-	initWindow(windowBackend);
-	initGfx(gfxBackend);
+	this->initWindow(windowBackend);
+	this->initGfx(gfxBackend);
 }
 
 WindowBackend::~WindowBackend() { releaseRender(); }
@@ -113,7 +113,6 @@ void WindowBackend::releaseRender() {
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Vulkan:
 	case GfxBackEnd::ImGUI_OpenGL:
-		// ImGui_ImplSDL2_Shutdown();
 		break;
 	default:
 		break;
@@ -187,7 +186,6 @@ void WindowBackend::initWindow(WindowLibBackend windowBackend) {
 	this->windowBackend = windowBackend;
 	switch (getBackendWindowManager()) {
 	case WindowLibBackend::WindowBackendSDL2:
-
 		// this->proxyWindow = new SDLWindow();
 		break;
 	case WindowLibBackend::WindowBackendGLFW3:
@@ -228,7 +226,6 @@ void WindowBackend::initVulkan() {
 
 	std::unordered_map<const char *, bool> required_instance_layer = {{"VK_LAYER_LUNARG_standard_validation", false}};
 	std::unordered_map<const char *, bool> required_device_extensions = {{VK_KHR_SWAPCHAIN_EXTENSION_NAME, true}};
-
 
 	// ImGui_ImplVulkanH_Window wd = {};
 	// renderWindow->getSize(&wd.Width, &wd.Height);
@@ -351,10 +348,14 @@ void WindowBackend::initVulkan() {
 
 void WindowBackend::initOpenGL() {
 
+	/*	*/
 	fragcore::GLRendererInterface *openGLRenderer = new fragcore::GLRendererInterface(nullptr);
 	this->renderer = std::shared_ptr<fragcore::IRenderer>(openGLRenderer);
+
+	/*	*/
 	void *gl_context = openGLRenderer->getOpenGLContext();
-	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(1, 1, 100, 100);
+	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(1, 1, 800, 600);
+	/*	*/
 	this->commandList = std::shared_ptr<fragcore::CommandList>(openGLRenderer->createCommandBuffer());
 
 	std::string glsl_version = "";
@@ -373,9 +374,11 @@ void WindowBackend::initOpenGL() {
 	// TODO replace with the renderwindow.
 	int rc = SDL_GL_SetSwapInterval(1);
 
+	/*	*/
 	if (!ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)this->getNativePtr(), gl_context)) {
 		throw fragcore::RuntimeException("Failed to Init ImGUI SDL2 OpenGL");
 	}
+	/*	*/
 	if (!ImGui_ImplOpenGL3_Init(glsl_version.c_str())) {
 		throw fragcore::RuntimeException("Failed to Init ImGUI OpenGL3");
 	}
@@ -390,8 +393,9 @@ void WindowBackend::loadFont(const std::string &path) {
 	io.Fonts->Build();
 }
 
-void WindowBackend::enableDocking(bool enabled){}
-void WindowBackend::enableViewPorts(bool enabled){}
+void WindowBackend::enableImGUI(bool enabled) { useImGUI = enabled; }
+void WindowBackend::enableDocking(bool enabled) { this->useDocking = enabled; }
+void WindowBackend::enableViewPorts(bool enabled) {}
 
 void WindowBackend::showDockSpace(bool *open) {
 	static bool opt_fullscreen_persistant = true;
@@ -440,9 +444,7 @@ void WindowBackend::showDockSpace(bool *open) {
 
 	ImGui::End();
 }
-void WindowBackend::showViewPorts(bool *open){
-	
-}
+void WindowBackend::showViewPorts(bool *open) {}
 
 void WindowBackend::beginRenderVulkan() {
 	ImGui_ImplVulkan_NewFrame();
@@ -521,9 +523,16 @@ void WindowBackend::endRenderVulkan() {
 }
 
 void WindowBackend::endRenderOpenGL() {
-	glClear(GL_COLOR_BUFFER_BIT);
+	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	ImGuiIO &io = ImGui::GetIO();
+
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	SDL_GL_SwapWindow((SDL_Window *)getNativePtr());
+	// TODO check if can be removed or configured with flag.
+	glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
+	glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
+				 clear_color.w);
+	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void WindowBackend::endRenderTerminal() {
@@ -560,17 +569,26 @@ void WindowBackend::beginRender() {
 			case SDL_QUIT:
 				requestQuit = false;
 				break;
+			case SDL_KEYDOWN:
+				break;
 			case SDL_WINDOWEVENT:
 				switch (event.window.event) {
 				case SDL_WINDOWEVENT_RESIZED:
 					windowWidth = event.window.data1;
 					windowHeight = event.window.data2;
-
 					// this->commandList->setViewport(0, 0, windowWidth, windowHeight);
 					this->requestResize = true;
 					break;
 				case SDL_WINDOWEVENT_CLOSE:
 					requestQuit = true;
+					break;
+				case SDL_WINDOWEVENT_HIDDEN:
+				case SDL_WINDOWEVENT_MINIMIZED:
+					this->visible = false;
+					break;
+				case SDL_WINDOWEVENT_EXPOSED:
+				case SDL_WINDOWEVENT_SHOWN:
+					this->visible = true;
 					break;
 				default:
 					break;

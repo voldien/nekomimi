@@ -44,7 +44,7 @@ namespace MIMIIMGUI {
 	 * @brief
 	 *
 	 */
-	class WindowBackend : public fragcore::Window {
+	class FVDECLSPEC WindowBackend : public fragcore::Window {
 	  public:
 		enum class GfxBackEnd {
 			/**
@@ -81,7 +81,8 @@ namespace MIMIIMGUI {
 			 * @brief
 			 *
 			 */
-			ImGUI_DirectX12
+			ImGUI_DirectX12,
+			ImGUI_Default,
 		};
 
 		/**
@@ -103,7 +104,12 @@ namespace MIMIIMGUI {
 			 * @brief
 			 *
 			 */
-			WindowBackendWindows
+			WindowBackendWindows,
+			/**
+			 * @brief
+			 *
+			 */
+			WindowBaclendDefault,
 		};
 
 		static const char *getGfxBackEndSymbol(GfxBackEnd v) noexcept;
@@ -130,7 +136,7 @@ namespace MIMIIMGUI {
 		WindowBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
 		// TODO add support to provide renderinterface.
 		// WindowBackend()
-		//WindowBackend(std::shared_ptr<fragcore::IRenderer> &render);
+		// WindowBackend(std::shared_ptr<fragcore::IRenderer> &render);
 		virtual ~WindowBackend();
 
 		/**
@@ -176,9 +182,10 @@ namespace MIMIIMGUI {
 
 		virtual void releaseRender();
 
-	  public:
+	  public: /*	*/
 		virtual void loadFont(const std::string &path);
 
+		virtual void enableImGUI(bool enabled);
 		virtual void enableDocking(bool enabled);
 		virtual void enableViewPorts(bool enabled);
 		virtual void showDockSpace(bool *open);
@@ -257,8 +264,13 @@ namespace MIMIIMGUI {
 		//		virtual Image* setIcon(Image* image) = 0;
 
 		virtual intptr_t getNativePtr() const override; /*  Get native window reference object. */
+	  protected:
+		bool useImGUI = true;
+		bool useDocking = true;
 
 	  private:
+		bool visible;
+
 		GfxBackEnd gfxBackend;
 		WindowLibBackend windowBackend;
 

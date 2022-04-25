@@ -38,10 +38,21 @@ ELSE()
 	MESSAGE(WARNING "Some library dependices may not be able to be found automatically.")
 ENDIF()
 
+############################################
+# Backend libraries
+############################################
 
 IF (NOT TARGET fragcore)
 	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore EXCLUDE_FROM_ALL)
 ENDIF()
+
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window/sdl EXCLUDE_FROM_ALL)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window/glfw3 EXCLUDE_FROM_ALL)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/imageloader EXCLUDE_FROM_ALL)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer EXCLUDE_FROM_ALL)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer/opengl EXCLUDE_FROM_ALL)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer/vulkan EXCLUDE_FROM_ALL)
+
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/observable/observable EXCLUDE_FROM_ALL)
 
 FILE(GLOB SOURCE_FILES
