@@ -4,7 +4,7 @@
 #include <SDL_events.h>
 #include <SDL_video.h>
 #include <VKDevice.h>
-#include <Window/WindowManager.h>
+#include <WindowManager.h>
 #include <algorithm>
 #include <fmt/format.h>
 #include <imgui/backends/imgui_impl_dx9.h>
@@ -676,16 +676,8 @@ std::string WindowBackend::getTitle() const { return this->proxyWindow->getTitle
 
 // 	return y;
 // }
-// int WindowBackend::width() const noexcept {
-// 	int w, h;
-// 	getSize(&w, &h);
-// 	return w;
-// }
-// int WindowBackend::height() const noexcept {
-// 	int w, h;
-// 	getSize(&w, &h);
-// 	return h;
-// }
+int WindowBackend::width() const noexcept { return this->proxyWindow->width(); }
+int WindowBackend::height() const noexcept { return this->proxyWindow->height(); }
 
 void WindowBackend::resizable(bool resizable) noexcept {}
 

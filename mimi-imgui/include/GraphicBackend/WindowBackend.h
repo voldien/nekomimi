@@ -23,11 +23,11 @@
 #define _MIMI_IMGUI_UI_WINDOW_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
 #include "UIViewModel.h"
-#include "Window/Window.h"
 #include <CommandList.h>
 #include <IRenderer.h>
 #include <VKDevice.h>
 #include <VulkanCore.h>
+#include <Window.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 #include <map>
 #include <memory>
@@ -226,8 +226,8 @@ namespace MIMIIMGUI {
 		// virtual int x() const noexcept override;
 		// virtual int y() const noexcept override;
 
-		// virtual int width() const noexcept override;
-		// virtual int height() const noexcept override;
+		virtual int width() const noexcept override;
+		virtual int height() const noexcept override;
 
 		virtual void getPosition(int *x, int *y) const override;
 
