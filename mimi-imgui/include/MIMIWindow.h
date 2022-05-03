@@ -65,7 +65,7 @@ namespace MIMIIMGUI {
 		void removeUIComponent(uint32_t uid);
 
 		std::vector<std::shared_ptr<UIComponent>> components;
-		bool requestQuit = false;
+
 	};
 } // namespace MIMIIMGUI
 

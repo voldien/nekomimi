@@ -19,8 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef _MIMI_IMGUI_UI_WINDOW_BACKEND_H_
-#define _MIMI_IMGUI_UI_WINDOW_BACKEND_H_ 1
+#ifndef _MIMI_IMGUI_UI_RENDERING_BACKEND_H_
+#define _MIMI_IMGUI_UI_RENDERING_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
 #include "UIViewModel.h"
 #include <CommandList.h>
@@ -34,17 +34,12 @@
 #include <string>
 #include <vector>
 
-namespace ImTui {
-	struct TScreen;
-} // namespace ImTui
-
 namespace MIMIIMGUI {
-
 	/**
 	 * @brief
 	 *
 	 */
-	class FVDECLSPEC WindowBackend : public fragcore::Window {
+	class FVDECLSPEC RenderBackend {
 	  public:
 		enum class GfxBackEnd {
 			/**
@@ -133,11 +128,11 @@ namespace MIMIIMGUI {
 		static bool isWindowBackendSupported(WindowLibBackend windowBackend);
 
 	  public:
-		WindowBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
+		RenderBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
 		// TODO add support to provide renderinterface.
 		// WindowBackend()
 		// WindowBackend(std::shared_ptr<fragcore::IRenderer> &render);
-		virtual ~WindowBackend();
+		virtual ~RenderBackend();
 
 		/**
 		 * @brief
@@ -191,84 +186,6 @@ namespace MIMIIMGUI {
 		virtual void showDockSpace(bool *open);
 		virtual void showViewPorts(bool *open);
 
-	  public:
-		GfxBackEnd getBackendRenderer() const noexcept { return this->gfxBackend; }
-
-		WindowLibBackend getBackendWindowManager() const noexcept { return this->windowBackend; }
-
-		const std::shared_ptr<fragcore::IRenderer> &getRenderInterface() const noexcept { return this->renderer; }
-		std::shared_ptr<fragcore::IRenderer> &getRenderInterface() noexcept { return this->renderer; }
-
-		const std::shared_ptr<fragcore::CommandList> &getRenderCommandBuffer() const noexcept {
-			return this->commandList;
-		}
-		std::shared_ptr<fragcore::CommandList> &getRenderCommandBuffer() noexcept { return this->commandList; }
-
-	  public:
-		virtual void show() override;
-
-		virtual void hide() override;
-
-		virtual void close() override;
-
-		virtual void focus() override;
-
-		virtual void restore() override;
-
-		virtual void maximize() override;
-
-		virtual void minimize() override;
-
-		virtual void setTitle(const std::string &title) override;
-
-		virtual std::string getTitle() const override;
-
-		// virtual int x() const noexcept override;
-		// virtual int y() const noexcept override;
-
-		virtual int width() const noexcept override;
-		virtual int height() const noexcept override;
-
-		virtual void getPosition(int *x, int *y) const override;
-
-		virtual void setPosition(int x, int y) override;
-		virtual void setSize(int width, int height) override;
-
-		virtual void getSize(int *width, int *height) const override;
-
-		virtual void resizable(bool resizable) noexcept override;
-
-		virtual void setFullScreen(bool fullscreen) override;
-
-		virtual bool isFullScreen() const override;
-
-		virtual void setBordered(bool borded) override;
-
-		virtual float getGamma() const override;
-
-		virtual void setGamma(float gamma) override;
-
-		virtual void setMinimumSize(int width, int height) override;
-		virtual void getMinimumSize(int *width, int *height) override;
-		virtual void setMaximumSize(int width, int height) override;
-		virtual void getMaximumSize(int *width, int *height) override;
-
-		// TODO change the type to image.
-		virtual void setIcon(void *) override{};
-		//		virtual void setIcon(Image* image) = 0;
-
-		virtual void *getIcon() const override { return nullptr; }
-		virtual fragcore::Display *getCurrentDisplay() const override { return this->proxyWindow->getCurrentDisplay(); }
-		virtual void setFullScreen(fragcore::Display &display) override {}
-
-		//		virtual Image* setIcon(Image* image) = 0;
-
-		virtual intptr_t getNativePtr() const override; /*  Get native window reference object. */
-	  protected:
-		bool useImGUI = true;
-		bool useDocking = true;
-		bool requestQuit = false;
-
 	  private:
 		bool visible;
 
@@ -279,13 +196,8 @@ namespace MIMIIMGUI {
 		std::shared_ptr<fragcore::IRenderer> renderer;
 		std::shared_ptr<fragcore::CommandList> commandList;
 		/*	*/
-
-		ImTui::TScreen *imtuiScreen;
-		/*	*/
-		fragcore::Window *proxyWindow;
-
-		bool requestResize{false};
 	};
+
 } // namespace MIMIIMGUI
 
 #endif

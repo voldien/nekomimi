@@ -555,7 +555,6 @@ void WindowBackend::beginRender() {
 		int windowWidth;
 		int windowHeight;
 
-		bool requestQuit = false;
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			// without it you won't have keyboard input and other things
@@ -567,7 +566,7 @@ void WindowBackend::beginRender() {
 
 			switch (event.type) {
 			case SDL_QUIT:
-				requestQuit = false;
+				this->requestQuit = true;
 				break;
 			case SDL_KEYDOWN:
 				break;
@@ -580,7 +579,7 @@ void WindowBackend::beginRender() {
 					this->requestResize = true;
 					break;
 				case SDL_WINDOWEVENT_CLOSE:
-					requestQuit = true;
+					this->requestQuit = true;
 					break;
 				case SDL_WINDOWEVENT_HIDDEN:
 				case SDL_WINDOWEVENT_MINIMIZED:
