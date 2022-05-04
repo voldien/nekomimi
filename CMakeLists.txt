@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 3.8 )
-PROJECT(mimi-imgui)
+PROJECT(nekomimi)
 INCLUDE(GNUInstallDirs)
 
 # Ouput directory for both library and executables.
@@ -57,10 +57,10 @@ ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer/vu
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/observable/observable EXCLUDE_FROM_ALL)
 
 FILE(GLOB SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/*.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/UIComponents/*.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/util/*.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/src/GraphicBackend/WindowBackend*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/UIComponents/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/util/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/GraphicBackend/WindowBackend*.cpp
 
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_opengl3.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_vulkan.cpp
@@ -88,30 +88,30 @@ IF(ANDROID)
 	)
 ENDIF()
 
-FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/*.h
-		${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/UIComponents/*.h
-		${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include/GraphicBackend/*.h
+FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include/*.h
+		${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include/UIComponents/*.h
+		${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include/GraphicBackend/*.h
 )
 
 #########################################
 # Core Window Management Library.
 #########################################
-ADD_LIBRARY(mimi-window ${SOURCE_FILES} ${HEADER_FILES} )
-TARGET_INCLUDE_DIRECTORIES (mimi-window  PRIVATE
+ADD_LIBRARY(nekomimi-window ${SOURCE_FILES} ${HEADER_FILES} )
+TARGET_INCLUDE_DIRECTORIES (nekomimi-window  PRIVATE
 	${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS}
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui
 	${CMAKE_CURRENT_SOURCE_DIR}/extern
-	${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/mimi-imgui/include>
-	$<INSTALL_INTERFACE:mimi-imgui/include>
+	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include>
+	$<INSTALL_INTERFACE:nekomimi/include>
 )
 
-TARGET_LINK_LIBRARIES(mimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-shader-compiler fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
-ADD_DEPENDENCIES(mimi-window observable fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
+TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-shader-compiler fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
+ADD_DEPENDENCIES(nekomimi-window observable fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
 
 IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required
-	SET_PROPERTY(TARGET mimi-window PROPERTY POSITION_INDEPENDENT_CODE ON)
+	SET_PROPERTY(TARGET nekomimi-window PROPERTY POSITION_INDEPENDENT_CODE ON)
 ENDIF()
 
 ########################
@@ -119,5 +119,5 @@ ENDIF()
 ########################
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/samples)
 
-INSTALL(TARGETS mimi-window DESTINATION lib COMPONENT ${LIBMIMIIMGUIFRAGCORE_COMPONENT})
+INSTALL(TARGETS nekomimi-window DESTINATION lib COMPONENT ${LIBMIMIIMGUIFRAGCORE_COMPONENT})
 
