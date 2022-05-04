@@ -24,7 +24,7 @@
 #include "GraphicBackend/WindowBackend.h"
 #include "MIMIDef.h"
 #include "UIComponent.h"
-#include "util/imgui-ext.h"
+#include "Util/imgui-ext.h"
 #include <memory>
 
 namespace nekomimi {
