@@ -5,7 +5,7 @@
 #include "UIViewModel.h"
 #include <imgui.h>
 
-using namespace MIMIIMGUI;
+using namespace nekomimi;
 
 class TextViewModel : public UIViewModel {
   public:

@@ -27,7 +27,7 @@
 #include "util/imgui-ext.h"
 #include <memory>
 
-namespace MIMIIMGUI {
+namespace nekomimi {
 	/**
 	 * @brief
 	 *
@@ -67,6 +67,6 @@ namespace MIMIIMGUI {
 		std::vector<std::shared_ptr<UIComponent>> components;
 
 	};
-} // namespace MIMIIMGUI
+} // namespace nekomimi
 
 #endif

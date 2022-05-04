@@ -19,14 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef _MIMI_IMGUI_UICOMPONENT_H_
-#define _MIMI_IMGUI_UICOMPONENT_H_ 1
+#ifndef _NEKO_MIMI_UICOMPONENT_H_
+#define _NEKO_MIMI_UICOMPONENT_H_ 1
 #include <Core/UIDObject.h>
 #include <Core/dataStructure/ITree.h>
 #include <imgui/imgui.h>
 #include <string>
 
-namespace MIMIIMGUI {
+namespace nekomimi {
 	/**
 	 * @brief
 	 *
@@ -67,6 +67,6 @@ namespace MIMIIMGUI {
 		bool isContentVisible;
 		std::string name;
 	};
-} // namespace MIMIIMGUI
+} // namespace nekomimi
 
 #endif

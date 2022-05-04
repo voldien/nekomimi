@@ -1,5 +1,5 @@
-#ifndef _MIMI_IMGUI_IMGUI_UI_UTIL_HELPER_H_
-#define _MIMI_IMGUI_IMGUI_UI_UTIL_HELPER_H_ 1
+#ifndef _NEKO_MIMI_IMGUI_UI_UTIL_HELPER_H_
+#define _NEKO_MIMI_IMGUI_UI_UTIL_HELPER_H_ 1
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <time.h>

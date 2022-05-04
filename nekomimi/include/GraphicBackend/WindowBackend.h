@@ -19,8 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef _MIMI_IMGUI_UI_WINDOW_BACKEND_H_
-#define _MIMI_IMGUI_UI_WINDOW_BACKEND_H_ 1
+#ifndef _NEKO_MIMI_UI_WINDOW_BACKEND_H_
+#define _NEKO_MIMI_UI_WINDOW_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
 #include "UIViewModel.h"
 #include <CommandList.h>
@@ -38,7 +38,7 @@ namespace ImTui {
 	struct TScreen;
 } // namespace ImTui
 
-namespace MIMIIMGUI {
+namespace nekomimi {
 
 	/**
 	 * @brief
@@ -286,6 +286,6 @@ namespace MIMIIMGUI {
 
 		bool requestResize{false};
 	};
-} // namespace MIMIIMGUI
+} // namespace nekomimi
 
 #endif

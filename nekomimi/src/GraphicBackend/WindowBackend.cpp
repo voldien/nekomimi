@@ -20,7 +20,7 @@
 #include <imgui/imgui.h>
 #include <memory>
 
-using namespace MIMIIMGUI;
+using namespace nekomimi;
 using namespace fragcore;
 
 const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {

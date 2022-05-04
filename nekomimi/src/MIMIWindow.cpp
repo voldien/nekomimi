@@ -1,5 +1,5 @@
 #include "MIMIWindow.h"
-using namespace MIMIIMGUI;
+using namespace nekomimi;
 
 MIMIWindow::MIMIWindow(GfxBackEnd backend)
 	: WindowBackend(WindowBackend::WindowLibBackend::WindowBackendSDL2, backend) {}

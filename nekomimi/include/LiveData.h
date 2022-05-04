@@ -19,8 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef _MIMI_IMGUI_LIVEDATA_H_
-#define _MIMI_IMGUI_LIVEDATA_H_ 1
+#ifndef _NEKO_MIMI_LIVEDATA_H_
+#define _NEKO_MIMI_LIVEDATA_H_ 1
 #include "UIObserver.h"
 #include <functional>
 #include <vector>

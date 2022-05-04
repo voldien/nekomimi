@@ -19,8 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef _MIMI_IMGUI_ACTION_H_
-#define _MIMI_IMGUI_ACTION_H_ 1
+#ifndef _NEKO_MIMI_ACTION_H_
+#define _NEKO_MIMI_ACTION_H_ 1
 #include <cstdio>
 #include <functional>
 

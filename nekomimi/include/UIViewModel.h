@@ -20,6 +20,6 @@
  * THE SOFTWARE.
  */
 #pragma once
-namespace MIMIIMGUI {
+namespace nekomimi {
 	/*template <typename... T> */ class UIViewModel { public: };
-} // namespace MIMIIMGUI
+} // namespace nekomimi

@@ -1,6 +1,6 @@
 #include "UIComponent.h"
 
-using namespace MIMIIMGUI;
+using namespace nekomimi;
 
 UIComponent::UIComponent() : window_flags(ImGuiWindowFlags_None) {
 	this->m_show = true;

@@ -23,7 +23,7 @@
 #include <Exception.hpp>
 #include <observable/observable.hpp>
 
-namespace MIMIIMGUI {
+namespace nekomimi {
 
 
 	/**

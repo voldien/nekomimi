@@ -21,7 +21,7 @@
  */
 #pragma once
 
-namespace MIMIIMGUI{
+namespace nekomimi{
 template <typename... T> class UIView {
   public:
 
