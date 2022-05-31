@@ -22,6 +22,7 @@
 
 using namespace nekomimi;
 using namespace fragcore;
+using namespace fvkcore;
 
 const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
 	switch (v) {
