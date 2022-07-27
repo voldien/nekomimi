@@ -248,7 +248,7 @@ void WindowBackend::initVulkan() {
 	// }
 	// assert(gpu_index < (int)renderWindow->getVKDevice()->getNrPhysicalDevices());
 
-	const std::shared_ptr<PhysicalDevice> &gpuDevice = renderWindow->getVKDevice()->getPhysicalDevice(0);
+	const std::shared_ptr<fvkcore::PhysicalDevice> &gpuDevice = renderWindow->getVKDevice()->getPhysicalDevice(0);
 
 	VkDescriptorPool desc_pool;
 	VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
@@ -271,7 +271,7 @@ void WindowBackend::initVulkan() {
 	pool_info.pPoolSizes = pool_sizes;
 	VKS_VALIDATE(vkCreateDescriptorPool(renderWindow->getVKDevice()->getHandle(), &pool_info, nullptr, &desc_pool));
 
-	VkPipelineCache cache = VKHelper::createPipelineCache(vkRenderer->getDevice()->getHandle(), 0, nullptr);
+	VkPipelineCache cache = fvkcore::VKHelper::createPipelineCache(vkRenderer->getDevice()->getHandle(), 0, nullptr);
 
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = vkRenderer->getInstance()->getHandle();
@@ -314,7 +314,7 @@ void WindowBackend::initVulkan() {
 	{
 		// TODO relocate.
 		VkCommandBuffer command_buffer =
-			VKHelper::beginSingleTimeCommands(renderWindow->getVKDevice()->getHandle(), command_pool);
+			fvkcore::VKHelper::beginSingleTimeCommands(renderWindow->getVKDevice()->getHandle(), command_pool);
 
 		VkCommandBufferBeginInfo begin_info = {};
 		begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
