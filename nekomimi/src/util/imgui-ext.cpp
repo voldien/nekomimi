@@ -183,7 +183,7 @@ bool UIUtilHelper::ComboFilter__DrawPopup(ComboFilterState &state, int START, co
 			state.activeIdx = i;
 			clicked = 1;
 		}
-		if (IsItemFocused() && IsKeyPressed(GetIO().KeyMap[ImGuiKey_Enter])) {
+		if (IsItemFocused() && IsKeyPressed(static_cast<ImGuiKey>(GetIO().KeyMap[ImGuiKey_Enter]))) {
 			// Allow ENTER key to select current highlighted item (w/ keyboard navigation)
 			state.activeIdx = i;
 			clicked = 1;
