@@ -26,8 +26,7 @@ class SampleComponent : public UIComponent {
 
 		//		auto c = observable::observe((a + b) / 2.0f).subscribe([](auto val) { std::cout << val << std::endl; });
 
-		//		this->textView.text.getObserver([this](std::string &text) { textView.text.getValue().append("Hello");
-		//});
+		this->textView.text.subscribe([this] { textView.text.setValue(textView.text.getValue() + "Was"); });
 
 		a.subscribe([this] {
 			std::string text = "Hello Thre ";
@@ -38,9 +37,9 @@ class SampleComponent : public UIComponent {
 	virtual void draw() override {
 
 		if (ImGui::Button("Press me - ")) {
-			//	textView.text.setValue("Added some text");
+			textView.text.set("Added some text");
 
-			a = a.get() + 1;
+			// a = a.get() + 1;
 		}
 		ImGui::TextUnformatted(textView.text.getValue().c_str());
 	}
