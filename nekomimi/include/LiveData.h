@@ -20,32 +20,44 @@
 #define _NEKO_MIMI_LIVEDATA_H_ 1
 #include "UIObserver.h"
 #include <functional>
+#include <observable/observable.hpp>
 #include <vector>
 
 template <typename T> class LiveData {
   public:
-	using Func = std::function<void(T)>;
-	template <typename F> UIObserver<T> &getObserver(const F &lambda) { /**/
-		auto ob = UIObserver<T>();
-		observers.push_back(ob);
-		return observers.back();
+	template <typename Func> auto &getObserver(Func &lambda) { /**/
+		return observer.subscribe(lambda);
 	}
 
 	void postValue(const T &value) {
-		this->value = value;
-		this->observers[0].onChanged(value);
+		// this->value = value;
+		observer = value;
+		// for (size_t i = 0; i < observers.size(); i++) {
+		//	// this->observers[i].onChanged(value);
+		//}
 	}
 
 	void setValue(const T &value) {
-		this->value = value;
-		this->observers[0].onChanged(value);
+		// this->value = value;
+		observer = value;
+		// for (size_t i = 0; i < observers.size(); i++) {
+		//	// this->observers[i].onChanged(value);
+		//}
 	}
-	void setValue(T &&value) { this->value = value; }
-	T &getValue() { return this->value; }
+	void setValue(T &&value) {
+		observer = value;
+		// this->value = std::move(value);
+		// for (size_t i = 0; i < observers.size(); i++) {
+		//	// this->observers[i].onChanged(value);
+		//}
+	}
+	// T &getValue() { return this->observer.get(); }
+	const T &getValue() const { return this->observer.get(); }
 
   private:
-	std::vector<UIObserver<T>> observers;
+	observable::value<T> observer;
+	// std::vector<observable::value<T>> observers;
 
-	T value;
+	// T value;
 };
 #endif
