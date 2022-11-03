@@ -23,41 +23,15 @@
 #include <observable/observable.hpp>
 #include <vector>
 
-template <typename T> class LiveData {
+template <typename T> class LiveData : public observable::value<T> {
   public:
-	template <typename Func> auto &getObserver(Func &lambda) { /**/
-		return observer.subscribe(lambda);
-	}
+	void postValue(const T &value) { *this = value; }
 
-	void postValue(const T &value) {
-		// this->value = value;
-		observer = value;
-		// for (size_t i = 0; i < observers.size(); i++) {
-		//	// this->observers[i].onChanged(value);
-		//}
-	}
-
-	void setValue(const T &value) {
-		// this->value = value;
-		observer = value;
-		// for (size_t i = 0; i < observers.size(); i++) {
-		//	// this->observers[i].onChanged(value);
-		//}
-	}
-	void setValue(T &&value) {
-		observer = value;
-		// this->value = std::move(value);
-		// for (size_t i = 0; i < observers.size(); i++) {
-		//	// this->observers[i].onChanged(value);
-		//}
-	}
-	// T &getValue() { return this->observer.get(); }
-	const T &getValue() const { return this->observer.get(); }
+	void setValue(const T &value) { this->set(value); }
+	// void setValue(T &&value) { *this = value; }
+	const T &getValue() const { return this->get(); }
 
   private:
-	observable::value<T> observer;
-	// std::vector<observable::value<T>> observers;
-
-	// T value;
+	// observable::value<T> observer;
 };
 #endif
