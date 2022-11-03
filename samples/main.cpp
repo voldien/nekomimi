@@ -16,22 +16,31 @@ class TextViewModel : public UIViewModel {
 class SampleComponent : public UIComponent {
   private:
 	TextViewModel textView;
+	observable::value<int> a;
 
   public:
 	SampleComponent() {
 		this->setName("Sample Window");
-		auto a = observable::value<int>{5};
-		auto b = observable::value<int>{5};
-		observable::observe((a + b) / 2.0f).subscribe([](auto val) { std::cout << val << std::endl; });
-		this->textView.text.getObserver([this](std::string &text) {
-			text.append("Hello");
-			return;
+		a = observable::value<int>{0};
+		auto b = observable::value<int>{0};
+
+		//		auto c = observable::observe((a + b) / 2.0f).subscribe([](auto val) { std::cout << val << std::endl; });
+
+		//		this->textView.text.getObserver([this](std::string &text) { textView.text.getValue().append("Hello");
+		//});
+
+		a.subscribe([this] {
+			std::string text = "Hello Thre ";
+			text += (a.get() + '0');
+			textView.text.setValue(text);
 		});
 	}
 	virtual void draw() override {
 
-		if (ImGui::Button("Press me")) {
-			textView.text.setValue("");
+		if (ImGui::Button("Press me - ")) {
+			//	textView.text.setValue("Added some text");
+
+			a = a.get() + 1;
 		}
 		ImGui::TextUnformatted(textView.text.getValue().c_str());
 	}

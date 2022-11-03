@@ -18,12 +18,14 @@
 /*	TODO include directX if supported.	*/
 #include <cstdint>
 #include <imgui/imgui.h>
+#include <magic_enum.hpp>
 #include <memory>
 
 using namespace nekomimi;
 using namespace fragcore;
 
 const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
+	//	return magic_enum::
 	switch (v) {
 	case GfxBackEnd::ImGUI_OpenGL:
 		return "OpenGL";

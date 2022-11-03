@@ -5,6 +5,8 @@
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/voldien/nekomimi.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/voldien/nekomimi/context:cpp)
 [![GitHub release](https://img.shields.io/github/release/voldien/nekomimi.svg)](https://github.com/voldien/nekomimi/releases)
 
+ImGUI integration with the fragcore library with Model View Controller Support.
+
 ## Features
 
 ## Motivation
