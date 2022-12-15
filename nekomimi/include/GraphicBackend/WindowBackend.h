@@ -43,7 +43,7 @@ namespace nekomimi {
 	 */
 	class FVDECLSPEC WindowBackend : public fragcore::Window {
 	  public:
-		enum class GfxBackEnd {
+		enum class GfxBackEnd : size_t {
 			/**
 			 * @brief
 			 *

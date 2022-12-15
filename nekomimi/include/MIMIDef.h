@@ -21,20 +21,47 @@
 #include <observable/observable.hpp>
 
 namespace nekomimi {
-
-
 	/**
 	 * @brief
 	 *
 	 */
-	enum class GfxBackEnd {
+	enum class GfxBackEnd : size_t {
+		/**
+		 * @brief
+		 *
+		 */
 		ImGUI_Terminal,
+		/**
+		 * @brief
+		 *
+		 */
 		ImGUI_OpenGL,
+		/**
+		 * @brief
+		 *
+		 */
 		ImGUI_Vulkan,
+		/**
+		 * @brief
+		 *
+		 */
 		ImGUI_DirectX9,
+		/**
+		 * @brief
+		 *
+		 */
 		ImGUI_DirectX10,
+		/**
+		 * @brief
+		 *
+		 */
 		ImGUI_DirectX11,
-		ImGUI_DirectX12
+		/**
+		 * @brief
+		 *
+		 */
+		ImGUI_DirectX12,
+		ImGUI_Default,
 	};
 
 	/**
@@ -43,4 +70,4 @@ namespace nekomimi {
 	 */
 	enum class WindowLibBackend { WindowBackendSDL2, WindowBackendGLFW3, WindowBackendWindows };
 
-}
+} // namespace nekomimi

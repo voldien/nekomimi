@@ -46,8 +46,8 @@ namespace nekomimi {
 	  public:
 		virtual void addUIComponent(const std::shared_ptr<UIComponent> &component);
 		virtual void removeUIComponent(const std::shared_ptr<UIComponent> &component);
-		unsigned int getNrUIComponents() const;
-		std::shared_ptr<UIComponent> &getComponent(unsigned int index);
+		size_t getNrUIComponents() const;
+		std::shared_ptr<UIComponent> &getComponent(size_t index);
 
 		void setStatusBar(bool enabled);
 		void setUIComponentEnabled(bool enabled);
