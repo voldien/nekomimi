@@ -31,7 +31,5 @@ template <typename T> class LiveData : public observable::value<T> {
 	// void setValue(T &&value) { *this = value; }
 	const T &getValue() const { return this->get(); }
 
-  private:
-	// observable::value<T> observer;
 };
 #endif

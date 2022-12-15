@@ -48,5 +48,5 @@ void MIMIWindow::addUIComponent(const std::shared_ptr<UIComponent> &component) {
 }
 
 void MIMIWindow::removeUIComponent(const std::shared_ptr<UIComponent> &component) {}
-unsigned int MIMIWindow::getNrUIComponents() const { return this->components.size(); }
-std::shared_ptr<UIComponent> &MIMIWindow::getComponent(unsigned int index) { return this->components[index]; }
+size_t MIMIWindow::getNrUIComponents() const { return this->components.size(); }
+std::shared_ptr<UIComponent> &MIMIWindow::getComponent(size_t index) { return this->components[index]; }

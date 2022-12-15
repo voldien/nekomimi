@@ -3,6 +3,7 @@
 #include "UIObserver.h"
 #include "UIViewController.h"
 #include "UIViewModel.h"
+#include <Util/imgui-ext.h>
 #include <imgui.h>
 
 using namespace nekomimi;
@@ -28,19 +29,19 @@ class SampleComponent : public UIComponent {
 
 		this->textView.text.subscribe([this] { textView.text.setValue(textView.text.getValue() + "Was"); });
 
-		a.subscribe([this] {
-			std::string text = "Hello Thre ";
-			text += (a.get() + '0');
-			textView.text.setValue(text);
-		});
+		//a.subscribe([this] {
+		//	std::string text = "Hello Thre ";
+		//	text += (a.get() + '0');
+		//	textView.text.setValue(text);
+		//});
 	}
 	virtual void draw() override {
 
 		if (ImGui::Button("Press me - ")) {
 			textView.text.set("Added some text");
-
 			// a = a.get() + 1;
 		}
+		
 		ImGui::TextUnformatted(textView.text.getValue().c_str());
 	}
 };
@@ -58,6 +59,7 @@ class SampleWindow : public MIMIWindow {
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("New")) {
 			}
+
 			if (ImGui::MenuItem("Open", "Ctrl+O")) {
 			}
 			if (ImGui::BeginMenu("Open Recent")) {
@@ -84,8 +86,13 @@ class SampleWindow : public MIMIWindow {
 
 int main(int argc, const char **argv) {
 
+	size_t defaultGFX = static_cast<size_t>(WindowBackend::GfxBackEnd::ImGUI_Default);
+	if(argc > 1){
+		defaultGFX = std::atoi(argv[1]);
+	} 
+
 	try {
-		SampleWindow *window = new SampleWindow(static_cast<WindowBackend::GfxBackEnd>(std::atoi(argv[1])));
+		SampleWindow *window = new SampleWindow(static_cast<WindowBackend::GfxBackEnd>(defaultGFX));
 
 		window->run();
 		return EXIT_SUCCESS;
