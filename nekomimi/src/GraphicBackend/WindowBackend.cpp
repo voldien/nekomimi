@@ -682,7 +682,7 @@ int WindowBackend::height() const noexcept { return this->proxyWindow->height();
 
 void WindowBackend::resizable(bool resizable) noexcept {}
 
-void WindowBackend::setFullScreen(bool fullscreen) {}
+void WindowBackend::setFullScreen(bool fullscreen) { return this->proxyWindow->setFullScreen(fullscreen); }
 
 bool WindowBackend::isFullScreen() const { return false; }
 
