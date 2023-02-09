@@ -1,12 +1,10 @@
 #include "Util/imgui-ext.h"
-
 #include <imgui_internal.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
-
 #include "imgui.h"
 
 using namespace ImGui;

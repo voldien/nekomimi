@@ -26,7 +26,6 @@ using namespace fragcore;
 using namespace fvkcore;
 
 const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
-	//	return magic_enum::
 	switch (v) {
 	case GfxBackEnd::ImGUI_OpenGL:
 		return "OpenGL";
