@@ -1,7 +1,7 @@
 # NekoMimi
 
 [![Linux Build](https://github.com/voldien/nekomimi/actions/workflows/linux-build.yml/badge.svg)](https://github.com/voldien/nekomimi/actions/workflows/linux-build.yml)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![GitHub release](https://img.shields.io/github/release/voldien/nekomimi.svg)](https://github.com/voldien/nekomimi/releases)
 
 ImGUI integration with the fragcore library with Model View Controller Support.
@@ -29,4 +29,4 @@ cmake --build .
 
 ## License
 
-This project is licensed under the GPL+3 License - see the [LICENSE](LICENSE) file for details
+This project is licensed under the LGPL+3 License - see the [LICENSE](LICENSE) file for details
