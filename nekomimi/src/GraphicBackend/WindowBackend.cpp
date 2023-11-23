@@ -9,7 +9,7 @@
 #include <fmt/format.h>
 #include <imgui/backends/imgui_impl_dx9.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
-#include <imgui/backends/imgui_impl_sdl.h>
+#include <imgui/backends/imgui_impl_sdl2.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
 #include <opengl/GLRenderWindow.h>
 #include <opengl/GLRendererInterface.h>
@@ -303,6 +303,8 @@ void WindowBackend::initVulkan() {
 		throw fragcore::RuntimeException("Failed init ImGUI Vulkan");
 	}
 
+	this->nrFrameBuffer = init_info.MinImageCount;
+
 	/*  Create command pool.    */
 	VkCommandPool command_pool;
 	VkCommandPoolCreateInfo cmdPoolCreateInfo = {};
@@ -323,7 +325,7 @@ void WindowBackend::initVulkan() {
 		VKS_VALIDATE(vkBeginCommandBuffer(command_buffer, &begin_info));
 
 		/*	*/
-		if (!ImGui_ImplVulkan_CreateFontsTexture(command_buffer)) {
+		if (!ImGui_ImplVulkan_CreateFontsTexture()) {
 			throw fragcore::RuntimeException("Failed to generate font ImGUI Vulkan");
 		}
 
@@ -343,7 +345,7 @@ void WindowBackend::initVulkan() {
 
 		vkFreeCommandBuffers(renderWindow->getVKDevice()->getHandle(), command_pool, 1, &command_buffer);
 
-		ImGui_ImplVulkan_DestroyFontUploadObjects();
+		//ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
 }
 
@@ -383,6 +385,8 @@ void WindowBackend::initOpenGL() {
 	if (!ImGui_ImplOpenGL3_Init(glsl_version.c_str())) {
 		throw fragcore::RuntimeException("Failed to Init ImGUI OpenGL3");
 	}
+
+	this->nrFrameBuffer = 2;
 }
 
 void WindowBackend::loadFont(const std::string &path) {
@@ -646,6 +650,9 @@ void WindowBackend::endRender() {
 
 	// this->renderer->execute(this->commandList.get());
 }
+
+size_t WindowBackend::getNumberFrameBuffers() const { return this->nrFrameBuffer; }
+
 void WindowBackend::show() { this->proxyWindow->show(); }
 
 void WindowBackend::hide() { this->proxyWindow->hide(); }

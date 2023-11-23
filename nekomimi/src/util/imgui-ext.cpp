@@ -1,11 +1,11 @@
 #include "Util/imgui-ext.h"
+#include "imgui.h"
 #include <imgui_internal.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
-#include "imgui.h"
 
 using namespace ImGui;
 
@@ -495,7 +495,7 @@ int UIUtilHelper::Bezier(const char *label, float P[5]) {
 		return changed;
 
 	const ImGuiID id = Window->GetID(label);
-	hovered |= 0 != ItemHoverable(ImRect(bb.Min, bb.Min + ImVec2(avail, dim)), id);
+	hovered |= 0 != ItemHoverable(ImRect(bb.Min, bb.Min + ImVec2(avail, dim)), id, ImGuiItemFlags_None);
 
 	RenderFrame(bb.Min, bb.Max, GetColorU32(ImGuiCol_FrameBg, 1), true, Style.FrameRounding);
 

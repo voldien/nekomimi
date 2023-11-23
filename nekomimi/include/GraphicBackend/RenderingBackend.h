@@ -19,7 +19,7 @@
 #ifndef _NEKO_MIMI_UI_RENDERING_BACKEND_H_
 #define _NEKO_MIMI_UI_RENDERING_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
-#include "UIViewModel.h"
+#include "GraphicBackendDef.h"
 #include <CommandList.h>
 #include <IRenderer.h>
 #include <VKDevice.h>
@@ -38,72 +38,6 @@ namespace nekomimi {
 	 */
 	class FVDECLSPEC RenderBackend {
 	  public:
-		enum class GfxBackEnd {
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_Terminal,
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_OpenGL,
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_Vulkan,
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_DirectX9,
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_DirectX10,
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_DirectX11,
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_DirectX12,
-			ImGUI_Default,
-		};
-
-		/**
-		 * @brief
-		 *
-		 */
-		enum class WindowLibBackend {
-			/**
-			 * @brief
-			 *
-			 */
-			WindowBackendSDL2,
-			/**
-			 * @brief
-			 *
-			 */
-			WindowBackendGLFW3,
-			/**
-			 * @brief
-			 *
-			 */
-			WindowBackendWindows,
-			/**
-			 * @brief
-			 *
-			 */
-			WindowBaclendDefault,
-		};
-
 		static const char *getGfxBackEndSymbol(GfxBackEnd v) noexcept;
 		static const char *getWindowBackEndSymbol(WindowLibBackend v) noexcept;
 

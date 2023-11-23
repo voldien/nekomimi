@@ -199,7 +199,10 @@ namespace nekomimi {
 		const std::shared_ptr<fragcore::CommandList> &getRenderCommandBuffer() const noexcept {
 			return this->commandList;
 		}
+		
 		std::shared_ptr<fragcore::CommandList> &getRenderCommandBuffer() noexcept { return this->commandList; }
+
+		size_t getNumberFrameBuffers() const;
 
 	  public:
 		virtual void show() override;
@@ -280,6 +283,7 @@ namespace nekomimi {
 		ImTui::TScreen *imtuiScreen;
 		/*	*/
 		fragcore::Window *proxyWindow;
+		size_t nrFrameBuffer;
 
 		bool requestResize{false};
 	};
