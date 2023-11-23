@@ -64,7 +64,7 @@ FILE(GLOB SOURCE_FILES
 
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_opengl3.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_vulkan.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_sdl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_sdl2.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_draw.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_widgets.cpp
