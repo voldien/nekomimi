@@ -5,7 +5,6 @@
 #include <SDL_video.h>
 #include <VKDevice.h>
 #include <WindowManager.h>
-#include <algorithm>
 #include <fmt/format.h>
 #include <imgui/backends/imgui_impl_dx9.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
@@ -345,7 +344,7 @@ void WindowBackend::initVulkan() {
 
 		vkFreeCommandBuffers(renderWindow->getVKDevice()->getHandle(), command_pool, 1, &command_buffer);
 
-		//ImGui_ImplVulkan_DestroyFontUploadObjects();
+		// ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
 }
 
@@ -651,7 +650,7 @@ void WindowBackend::endRender() {
 	// this->renderer->execute(this->commandList.get());
 }
 
-size_t WindowBackend::getNumberFrameBuffers() const { return this->nrFrameBuffer; }
+size_t WindowBackend::getNumberFrameBuffers() const noexcept { return this->nrFrameBuffer; }
 
 void WindowBackend::show() { this->proxyWindow->show(); }
 

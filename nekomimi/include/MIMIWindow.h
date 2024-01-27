@@ -19,12 +19,11 @@
 #ifndef _MIMI_MIMI_WINDOW_H_
 #define _MIMI_MIMI_WINDOW_H_ 1
 #include "GraphicBackend/WindowBackend.h"
-#include "MIMIDef.h"
 #include "UIComponent.h"
-#include "Util/imgui-ext.h"
 #include <memory>
 
 namespace nekomimi {
+
 	/**
 	 * @brief
 	 *
@@ -46,7 +45,7 @@ namespace nekomimi {
 	  public:
 		virtual void addUIComponent(const std::shared_ptr<UIComponent> &component);
 		virtual void removeUIComponent(const std::shared_ptr<UIComponent> &component);
-		size_t getNrUIComponents() const;
+		size_t getNrUIComponents() const noexcept;
 		std::shared_ptr<UIComponent> &getComponent(size_t index);
 
 		void setStatusBar(bool enabled);
