@@ -491,8 +491,9 @@ int UIUtilHelper::Bezier(const char *label, float P[5]) {
 
 	ImRect bb(Window->DC.CursorPos, Window->DC.CursorPos + Canvas);
 	ItemSize(bb);
-	if (!ItemAdd(bb, NULL))
+	if (!ItemAdd(bb, 0)) {
 		return changed;
+	}
 
 	const ImGuiID id = Window->GetID(label);
 	hovered |= 0 != ItemHoverable(ImRect(bb.Min, bb.Min + ImVec2(avail, dim)), id, ImGuiItemFlags_None);

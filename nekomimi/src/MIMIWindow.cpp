@@ -1,4 +1,5 @@
 #include "MIMIWindow.h"
+
 using namespace nekomimi;
 
 MIMIWindow::MIMIWindow(GfxBackEnd backend)
@@ -23,8 +24,8 @@ void MIMIWindow::run() {
 
 		/*	User Callback.	*/
 		this->renderUI();
-		
-		if(this->useDocking){
+
+		if (this->useDocking) {
 			this->showDockSpace(&show_dockspace);
 		}
 		this->showViewPorts(&show_viewports);
@@ -48,5 +49,5 @@ void MIMIWindow::addUIComponent(const std::shared_ptr<UIComponent> &component) {
 }
 
 void MIMIWindow::removeUIComponent(const std::shared_ptr<UIComponent> &component) {}
-size_t MIMIWindow::getNrUIComponents() const { return this->components.size(); }
+size_t MIMIWindow::getNrUIComponents() const noexcept { return this->components.size(); }
 std::shared_ptr<UIComponent> &MIMIWindow::getComponent(size_t index) { return this->components[index]; }

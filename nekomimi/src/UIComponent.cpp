@@ -22,8 +22,9 @@ void UIComponent::begin() {
 void UIComponent::drawUI() {
 	if (this->isVisible()) {
 		this->begin();
-		if (this->isContentVisible)
+		if (this->isContentVisible) {
 			this->draw();
+		}
 		this->end();
 	}
 }
@@ -32,10 +33,11 @@ void UIComponent::end() { ImGui::End(); }
 
 void UIComponent::show(bool state) noexcept { this->m_show = state; }
 void UIComponent::showTitle(bool state) {
-	if (state)
+	if (state) {
 		this->window_flags |= ImGuiWindowFlags_NoTitleBar;
-	else
+	} else {
 		this->window_flags &= ~ImGuiWindowFlags_NoTitleBar;
+	}
 }
 
 bool UIComponent::isVisible() const noexcept { return this->m_show; }

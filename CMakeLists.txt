@@ -21,10 +21,6 @@ ENDIF(NOT BUILD_SHARED_LIBS)
 ################################################
 SET(OpenGL_GL_PREFERENCE "GLVND")
 FIND_PACKAGE(OpenGL REQUIRED)
-FIND_PACKAGE(GLEW REQUIRED)
-IF(GLEW_FOUND)
-    MESSAGE(STATUS "Glew found: ${GLEW_LIBRARIES}.")
-ENDIF()
 
 IF(OPENGL_FOUND)
     MESSAGE(STATUS "OpenGL found: ${OPENGL_LIBRARIES}.")
@@ -98,7 +94,7 @@ FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include/*.h
 #########################################
 ADD_LIBRARY(nekomimi-window ${SOURCE_FILES} ${HEADER_FILES} )
 TARGET_INCLUDE_DIRECTORIES (nekomimi-window  PRIVATE
-	${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS}
+	${OPENGL_INCLUDE_DIR}
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui
 	${CMAKE_CURRENT_SOURCE_DIR}/extern
@@ -107,7 +103,7 @@ TARGET_INCLUDE_DIRECTORIES (nekomimi-window  PRIVATE
 	$<INSTALL_INTERFACE:nekomimi/include>
 )
 
-TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-shader-compiler fragcore-rgl fragcore-rvk ${GLEW_LIBRARIES} OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
+TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-shader-compiler fragcore-rgl fragcore-rvk glew OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
 ADD_DEPENDENCIES(nekomimi-window observable fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
 
 IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required
