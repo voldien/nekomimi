@@ -298,7 +298,7 @@ void WindowBackend::initVulkan() {
 	}
 
 	/*	*/
-	if (!ImGui_ImplVulkan_Init(&init_info, renderWindow->getDefaultRenderPass())) {
+	if (!ImGui_ImplVulkan_Init(&init_info)) {
 		throw fragcore::RuntimeException("Failed init ImGUI Vulkan");
 	}
 
