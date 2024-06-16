@@ -1,4 +1,5 @@
 #include "GraphicBackend/WindowBackend.h"
+#include "vulkan/vulkan_core.h"
 #include <GL/glew.h>
 #include <RendererFactory.h>
 #include <SDL_events.h>
@@ -273,12 +274,15 @@ void WindowBackend::initVulkan() {
 
 	VkPipelineCache cache = fvkcore::VKHelper::createPipelineCache(vkRenderer->getDevice()->getHandle(), 0, nullptr);
 
+	VkQueue queue = renderWindow->getVKDevice()->getQueue(0, 0);
+	const size_t queue_family = 0;
+
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = vkRenderer->getInstance()->getHandle();
 	init_info.PhysicalDevice = gpuDevice->getHandle();
 	init_info.Device = renderWindow->getVKDevice()->getHandle();
-	init_info.QueueFamily = renderWindow->getVKDevice()->getDefaultGraphicQueueIndex();
-	init_info.Queue = renderWindow->getVKDevice()->getDefaultGraphicQueue();
+	init_info.QueueFamily = queue_family;
+	init_info.Queue = queue;
 	init_info.PipelineCache = cache;
 	init_info.DescriptorPool = desc_pool;
 	init_info.Subpass = 0;
@@ -308,7 +312,7 @@ void WindowBackend::initVulkan() {
 	VkCommandPool command_pool;
 	VkCommandPoolCreateInfo cmdPoolCreateInfo = {};
 	cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	cmdPoolCreateInfo.queueFamilyIndex = renderWindow->getVKDevice()->getDefaultGraphicQueueIndex();
+	// cmdPoolCreateInfo.queueFamilyIndex = renderWindow->getVKDevice()->getDefaultGraphicQueueIndex();
 	cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	VKS_VALIDATE(
 		vkCreateCommandPool(renderWindow->getVKDevice()->getHandle(), &cmdPoolCreateInfo, NULL, &command_pool));
@@ -335,8 +339,8 @@ void WindowBackend::initVulkan() {
 		VKS_VALIDATE(vkEndCommandBuffer(command_buffer));
 
 		// VKHelper::endSingleTimeCommands
-		VKS_VALIDATE(
-			vkQueueSubmit(renderWindow->getVKDevice()->getDefaultGraphicQueue(), 1, &end_info, VK_NULL_HANDLE));
+		// VKS_VALIDATE(
+		//	vkQueueSubmit(renderWindow->getVKDevice()->getDefaultGraphicQueue(), 1, &end_info, VK_NULL_HANDLE));
 
 		VKS_VALIDATE(vkDeviceWaitIdle(renderWindow->getVKDevice()->getHandle()));
 
