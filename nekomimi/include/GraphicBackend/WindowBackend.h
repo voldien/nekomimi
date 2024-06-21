@@ -93,12 +93,12 @@ namespace nekomimi {
 			 * @brief
 			 *
 			 */
-			WindowBackendGLFW3,
+			WindowBackendGLFW3, /*	Not supported.	*/
 			/**
 			 * @brief
 			 *
 			 */
-			WindowBackendWindows,
+			WindowBackendWindows, /*	Not Supported.	*/
 			/**
 			 * @brief
 			 *
@@ -201,7 +201,7 @@ namespace nekomimi {
 
 		size_t getNumberFrameBuffers() const noexcept;
 
-	  public:
+	  public:	/*	Window override.	*/
 		void show() override;
 
 		void hide() override;

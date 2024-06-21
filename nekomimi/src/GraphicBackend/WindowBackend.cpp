@@ -118,6 +118,16 @@ void WindowBackend::releaseRender() {
 	default:
 		break;
 	}
+
+	switch (this->windowBackend) {
+	case WindowLibBackend::WindowBackendSDL2:
+		ImGui_ImplSDL2_Shutdown();
+		break;
+	case WindowLibBackend::WindowBackendGLFW3:
+	default:
+		break;
+	}
+
 	delete this->proxyWindow;
 
 	ImGui::DestroyContext();
@@ -626,7 +636,7 @@ void WindowBackend::beginRender() {
 
 void WindowBackend::endRender() {
 
-	ImGuiIO &io = ImGui::GetIO();
+	const ImGuiIO &io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
