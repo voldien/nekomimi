@@ -1,12 +1,12 @@
-CMAKE_MINIMUM_REQUIRED( VERSION 3.10)
-PROJECT(nekomimi)
+CMAKE_MINIMUM_REQUIRED( VERSION 3.9...3.20)
+PROJECT(nekomimi CXX C)
 INCLUDE(GNUInstallDirs)
 
 # Ouput directory for both library and executables.
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin CACHE INTERNAL "" FORCE)
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib CACHE INTERNAL "" FORCE)
 
-
+## Shared Library.
 OPTION(BUILD_SHARED_LIBS "Build package with shared libraries." ON)
 IF(NOT BUILD_SHARED_LIBS)
 	SET(CMAKE_EXE_LINKER_FLAGS "-static")
@@ -52,6 +52,9 @@ ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer/vu
 
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/observable/observable EXCLUDE_FROM_ALL)
 
+###################################
+# Source Code For Main Libary.
+###################################
 FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/UIComponents/*.cpp
@@ -116,5 +119,3 @@ ENDIF()
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/samples)
 
 INSTALL(TARGETS nekomimi-window DESTINATION lib)
-
-#Bug found
