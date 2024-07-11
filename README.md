@@ -10,7 +10,6 @@ ImGUI integration with the fragcore library with Model View Controller Support.
 
 ## Motivation
 
-
 ## Installation
 
 First, download the repository, with the following command. It will download the repository along with all the dependent git submodules it uses.

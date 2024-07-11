@@ -18,6 +18,7 @@
  */
 #ifndef _NEKO_MIMI_UICOMPONENT_H_
 #define _NEKO_MIMI_UICOMPONENT_H_ 1
+#include "FragDef.h"
 #include <Core/UIDObject.h>
 #include <Core/dataStructure/ITree.h>
 #include <imgui/imgui.h>
@@ -28,7 +29,7 @@ namespace nekomimi {
 	 * @brief
 	 *
 	 */
-	class UIComponent : public fragcore::UIDObject {
+	class FVDECLSPEC UIComponent : public fragcore::UIDObject {
 	  public:
 		UIComponent();
 		virtual ~UIComponent() = default;
