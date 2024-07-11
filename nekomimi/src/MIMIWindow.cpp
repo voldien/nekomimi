@@ -2,7 +2,7 @@
 
 using namespace nekomimi;
 
-MIMIWindow::MIMIWindow(GfxBackEnd backend)
+MIMIWindow::MIMIWindow(const GfxBackEnd backend)
 	: WindowBackend(WindowBackend::WindowLibBackend::WindowBackendSDL2, backend) {}
 
 void MIMIWindow::run() {

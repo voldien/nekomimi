@@ -30,7 +30,7 @@ namespace nekomimi {
 	 */
 	class FVDECLSPEC MIMIWindow : public WindowBackend {
 	  public:
-		MIMIWindow(GfxBackEnd backend);
+		MIMIWindow(const GfxBackEnd backend);
 
 	  public:
 		void run();
@@ -61,7 +61,6 @@ namespace nekomimi {
 		void removeUIComponent(uint32_t uid);
 
 		std::vector<std::shared_ptr<UIComponent>> components;
-
 	};
 } // namespace nekomimi
 

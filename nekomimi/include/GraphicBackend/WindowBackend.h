@@ -276,8 +276,8 @@ namespace nekomimi {
 		std::shared_ptr<fragcore::IRenderer> renderer;
 		std::shared_ptr<fragcore::CommandList> commandList;
 		/*	*/
-
 		ImTui::TScreen *imtuiScreen;
+
 		/*	*/
 		fragcore::Window *proxyWindow;
 		size_t nrFrameBuffer;
