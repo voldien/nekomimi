@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3 of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program;
  */
@@ -20,10 +20,7 @@
 #define IMTERM_USE_FMT 1
 #include <CommandList.h>
 #include <IRenderer.h>
-#include <VKDevice.h>
-#include <VulkanCore.h>
 #include <Window.h>
-#include <imgui/backends/imgui_impl_vulkan.h>
 #include <memory>
 #include <string>
 
@@ -200,7 +197,7 @@ namespace nekomimi {
 
 		size_t getNumberFrameBuffers() const noexcept;
 
-	  public:	/*	Window override.	*/
+	  public: /*	Window override.	*/
 		void show() override;
 
 		void hide() override;
@@ -218,9 +215,6 @@ namespace nekomimi {
 		void setTitle(const std::string &title) override;
 
 		std::string getTitle() const override;
-
-		// virtual int x() const noexcept override;
-		// virtual int y() const noexcept override;
 
 		int width() const noexcept override;
 		int height() const noexcept override;
@@ -249,15 +243,8 @@ namespace nekomimi {
 		void setMaximumSize(int width, int height) override;
 		void getMaximumSize(int *width, int *height) override;
 
-		// TODO change the type to image.
-		void setIcon(void *) override{};
-		//		virtual void setIcon(Image* image) = 0;
-
-		void *getIcon() const override { return nullptr; }
 		fragcore::Display *getCurrentDisplay() const override { return this->proxyWindow->getCurrentDisplay(); }
 		void setFullScreen(fragcore::Display &display) override {}
-
-		//		virtual Image* setIcon(Image* image) = 0;
 
 		intptr_t getNativePtr() const override; /*  Get native window reference object. */
 	  protected:

@@ -1,21 +1,4 @@
 #include "GraphicBackend/RenderBackend.h"
-#include <GL/glew.h>
-#include <RendererFactory.h>
-#include <SDL_events.h>
-#include <SDL_video.h>
-#include <VKDevice.h>
-#include <WindowManager.h>
-#include <algorithm>
-#include <fmt/format.h>
-#include <imgui/backends/imgui_impl_dx9.h>
-#include <imgui/backends/imgui_impl_opengl3.h>
-#include <imgui/backends/imgui_impl_sdl.h>
-#include <imgui/backends/imgui_impl_vulkan.h>
-#include <opengl/GLRenderWindow.h>
-#include <opengl/GLRendererInterface.h>
-#include <vulkan/VKRenderInterface.h>
-#include <vulkan/VKRenderWindow.h>
-/*	TODO include directX if supported.	*/
 #include <cstdint>
 #include <imgui/imgui.h>
 #include <memory>
