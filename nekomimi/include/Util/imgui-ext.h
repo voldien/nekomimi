@@ -7,7 +7,7 @@
 /**
  * @brief a helper class with
  * various additional imgui features.
- * 
+ *
  */
 class UIUtilHelper {
   public:

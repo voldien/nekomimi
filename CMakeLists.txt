@@ -15,15 +15,24 @@ ELSE()
 	MESSAGE(STATUS "Shared libraries enabled")
 ENDIF(NOT BUILD_SHARED_LIBS)
 
+########################################
+#	Build Options
+#########################################
+OPTION(MIMI_OPENGL_SUPPORT "Enable OpenGL Backend" ON)
+OPTION(MIMI_VULKAN_SUPPORT "Enable Vulkan Backend" ON)
+OPTION(MIMI_TERMINAL_SUPPORT "Enable Terminal Backend" ON)
+OPTION(MIMI_DIRECTX_SUPPORT "Enable DirectX Backend" OFF)
 
 ################################################
 # Find all dependices libraries and etc.
 ################################################
-SET(OpenGL_GL_PREFERENCE "GLVND")
-FIND_PACKAGE(OpenGL REQUIRED)
+IF(MIMI_OPENGL_SUPPORT)
+	SET(OpenGL_GL_PREFERENCE "GLVND")
+	FIND_PACKAGE(OpenGL REQUIRED)
 
-IF(OPENGL_FOUND)
-    MESSAGE(STATUS "OpenGL found: ${OPENGL_LIBRARIES}.")
+	IF(OPENGL_FOUND)
+		MESSAGE(STATUS "OpenGL found: ${OPENGL_LIBRARIES}.")
+	ENDIF()
 ENDIF()
 
 # Find package that is not part of a Module
@@ -61,8 +70,6 @@ FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/util/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/GraphicBackend/WindowBackend*.cpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_opengl3.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_vulkan.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_sdl2.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_draw.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_tables.cpp
@@ -71,9 +78,17 @@ FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/misc/cpp/*.cpp
 )
 
+IF(MIMI_OPENGL_SUPPORT)
+	FILE(GLOB BACKEND_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_opengl3.cpp) 
+ENDIF()
+
+IF(MIMI_VULKAN_SUPPORT)
+	FILE(GLOB BACKEND_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_vulkan.cpp)
+ENDIF()
+
 #Only add directX for Windows platforms.
-IF(WINDOWS)
-	FILE(GLOB APPEND SOURCE_FILES
+IF(WINDOWS AND MIMI_DIRECTX_SUPPORT)
+	FILE(APPEND BACKEND_SOURCE_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx9.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx10.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx11.cpp
@@ -82,7 +97,7 @@ IF(WINDOWS)
 ENDIF()
 
 IF(ANDROID)
-	FILE(GLOB APPEND SOURCE_FILES
+	FILE(GLOB APPEND BACKEND_SOURCE_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_android.cpp
 	)
 ENDIF()
@@ -95,7 +110,7 @@ FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include/*.h
 #########################################
 # Core Window Management Library.
 #########################################
-ADD_LIBRARY(nekomimi-window ${SOURCE_FILES} ${HEADER_FILES} )
+ADD_LIBRARY(nekomimi-window ${SOURCE_FILES} ${BACKEND_SOURCE_FILES} ${HEADER_FILES} )
 TARGET_INCLUDE_DIRECTORIES (nekomimi-window  PRIVATE
 	${OPENGL_INCLUDE_DIR}
 	PUBLIC
@@ -106,8 +121,22 @@ TARGET_INCLUDE_DIRECTORIES (nekomimi-window  PRIVATE
 	$<INSTALL_INTERFACE:nekomimi/include>
 )
 
-TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC observable fragcore fragcore-render-interface fragcore-shader-compiler fragcore-rgl fragcore-rvk glew OpenGL::OpenGL OpenGL::GLU OpenGL::EGL  )
-ADD_DEPENDENCIES(nekomimi-window observable fragcore fragcore-render-interface fragcore-rgl fragcore-rvk)
+TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC observable fragcore-render-interface fragcore-shader-compiler)
+ADD_DEPENDENCIES(nekomimi-window observable fragcore-render-interface)
+
+IF(MIMI_OPENGL_SUPPORT)
+	TARGET_COMPILE_DEFINITIONS(nekomimi-window PRIVATE MIMI_IMPL_OPENGL)
+	TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC fragcore-rgl glew OpenGL::OpenGL OpenGL::GLU OpenGL::EGL)
+ENDIF()
+
+IF(MIMI_VULKAN_SUPPORT)
+	TARGET_COMPILE_DEFINITIONS(nekomimi-window PRIVATE MIMI_IMPL_VULKAN)
+	TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC fragcore-rvk)
+ENDIF()
+
+IF(MIMI_DIRECTX_SUPPORT)
+	TARGET_COMPILE_DEFINITIONS(nekomimi-window PRIVATE MIMI_IMPL_DX9)
+ENDIF()
 
 IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required
 	SET_PROPERTY(TARGET nekomimi-window PROPERTY POSITION_INDEPENDENT_CODE ON)

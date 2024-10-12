@@ -1,25 +1,34 @@
 #include "GraphicBackend/WindowBackend.h"
-#include "vulkan/vulkan_core.h"
-#include <GL/glew.h>
 #include <RendererFactory.h>
 #include <SDL_events.h>
 #include <SDL_video.h>
-#include <VKDevice.h>
 #include <WindowManager.h>
-#include <fmt/format.h>
-#include <imgui/backends/imgui_impl_dx9.h>
-#include <imgui/backends/imgui_impl_opengl3.h>
-#include <imgui/backends/imgui_impl_sdl2.h>
-#include <imgui/backends/imgui_impl_vulkan.h>
-#include <opengl/GLRenderWindow.h>
-#include <opengl/GLRendererInterface.h>
-#include <vulkan/VKRenderInterface.h>
-#include <vulkan/VKRenderWindow.h>
-/*	TODO include directX if supported.	*/
 #include <cstdint>
+#include <fmt/format.h>
 #include <imgui/imgui.h>
 #include <magic_enum.hpp>
 #include <memory>
+
+#include <imgui/backends/imgui_impl_sdl2.h>
+
+#ifdef MIMI_IMPL_DX9
+#include <imgui/backends/imgui_impl_dx9.h>
+#endif
+
+#ifdef MIMI_IMPL_OPENGL
+#include <GL/glew.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
+#include <opengl/GLRenderWindow.h>
+#include <opengl/GLRendererInterface.h>
+#endif
+
+#ifdef MIMI_IMPL_VULKAN
+#include "vulkan/vulkan_core.h"
+#include <VKDevice.h>
+#include <imgui/backends/imgui_impl_vulkan.h>
+#include <vulkan/VKRenderInterface.h>
+#include <vulkan/VKRenderWindow.h>
+#endif
 
 using namespace nekomimi;
 using namespace fragcore;
@@ -103,10 +112,14 @@ void WindowBackend::releaseRender() {
 		// ImTui_ImplNcurses_Shutdown();
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
+#ifdef MIMI_IMPL_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
+#endif
 		break;
 	case GfxBackEnd::ImGUI_Vulkan:
+#ifdef MIMI_IMPL_VULKAN
 		ImGui_ImplVulkan_Shutdown();
+#endif
 		break;
 	default:
 		break;
@@ -215,7 +228,7 @@ void WindowBackend::initTerminal() {
 }
 
 void WindowBackend::initVulkan() {
-
+#ifdef MIMI_IMPL_VULKAN
 	int width = 800;
 	int height = 600;
 
@@ -360,10 +373,12 @@ void WindowBackend::initVulkan() {
 
 		// ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
+
+#endif
 }
 
 void WindowBackend::initOpenGL() {
-
+#ifdef MIMI_IMPL_OPENGL
 	/*	*/
 	fragcore::GLRendererInterface *openGLRenderer = new fragcore::GLRendererInterface(nullptr);
 	this->renderer = std::shared_ptr<fragcore::IRenderer>(openGLRenderer);
@@ -400,6 +415,8 @@ void WindowBackend::initOpenGL() {
 	}
 
 	this->nrFrameBuffer = 2;
+
+#endif
 }
 
 void WindowBackend::loadFont(const std::string &path) {
@@ -465,11 +482,17 @@ void WindowBackend::showDockSpace(bool *open) {
 void WindowBackend::showViewPorts(bool *open) {}
 
 void WindowBackend::beginRenderVulkan() {
+#ifdef MIMI_IMPL_VULKAN
 	ImGui_ImplVulkan_NewFrame();
+
+#endif
 	ImGui_ImplSDL2_NewFrame();
 }
 void WindowBackend::beginRenderOpenGL() {
+#ifdef MIMI_IMPL_OPENGL
 	ImGui_ImplOpenGL3_NewFrame();
+
+#endif
 	ImGui_ImplSDL2_NewFrame();
 }
 void WindowBackend::beginRenderTerminal() {
@@ -494,6 +517,7 @@ void WindowBackend::beginRenderDX12() {
 }
 
 void WindowBackend::endRenderVulkan() {
+#ifdef MIMI_IMPL_VULKAN
 	VKRenderWindow *renderWindow = static_cast<VKRenderWindow *>(this->proxyWindow);
 
 	VkCommandBuffer currentCmd = renderWindow->getCurrentCommandBuffer();
@@ -538,9 +562,12 @@ void WindowBackend::endRenderVulkan() {
 	VKS_VALIDATE(vkEndCommandBuffer(currentCmd));
 
 	renderWindow->swapBuffer();
+
+#endif
 }
 
 void WindowBackend::endRenderOpenGL() {
+#ifdef MIMI_IMPL_OPENGL
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	ImGuiIO &io = ImGui::GetIO();
 
@@ -551,6 +578,7 @@ void WindowBackend::endRenderOpenGL() {
 	glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
 				 clear_color.w);
 	glClear(GL_COLOR_BUFFER_BIT);
+#endif
 }
 
 void WindowBackend::endRenderTerminal() {
@@ -644,13 +672,13 @@ void WindowBackend::endRender() {
 
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
-		endRenderTerminal();
+		this->endRenderTerminal();
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
-		endRenderOpenGL();
+		this->endRenderOpenGL();
 		break;
 	case GfxBackEnd::ImGUI_Vulkan: {
-		endRenderVulkan();
+		this->endRenderVulkan();
 	} break;
 	case GfxBackEnd::ImGUI_DirectX9:
 	case GfxBackEnd::ImGUI_DirectX10:
