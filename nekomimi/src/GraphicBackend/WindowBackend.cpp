@@ -85,15 +85,19 @@ bool WindowBackend::isGfxBackendSupported(GfxBackEnd gfxBackend) {
 }
 bool WindowBackend::isWindowBackendSupported(WindowLibBackend windowBackend) {
 	switch (windowBackend) {
-	default:
+	case WindowLibBackend::WindowBackendSDL2:
 		return true;
+	default:
+		return false;
 	}
 }
 
 WindowBackend::WindowBackend(WindowLibBackend windowBackend, GfxBackEnd gfxBackend) {
+	/*	Validate requested backends.	*/
 	if (!isWindowBackendSupported(windowBackend)) {
 		throw RuntimeException("Window Backed not Supported {}", getWindowBackEndSymbol(windowBackend));
 	}
+
 	if (!isGfxBackendSupported(gfxBackend)) {
 		throw RuntimeException("Graphic Backed not Supported {}", getGfxBackEndSymbol(gfxBackend));
 	}
@@ -107,9 +111,10 @@ WindowBackend::~WindowBackend() { releaseRender(); }
 void WindowBackend::releaseRender() {
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
-
+#ifdef MIMI_IMPL_TERMINAL
 		// ImTui_ImplText_Shutdown();
 		// ImTui_ImplNcurses_Shutdown();
+#endif
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
 #ifdef MIMI_IMPL_OPENGL
@@ -379,13 +384,17 @@ void WindowBackend::initVulkan() {
 
 void WindowBackend::initOpenGL() {
 #ifdef MIMI_IMPL_OPENGL
+
+	const int width = 800;
+	const int height = 600;
 	/*	*/
 	fragcore::GLRendererInterface *openGLRenderer = new fragcore::GLRendererInterface(nullptr);
 	this->renderer = std::shared_ptr<fragcore::IRenderer>(openGLRenderer);
 
-	/*	*/
+	/*	Create window with default size.	*/
 	void *gl_context = openGLRenderer->getOpenGLContext();
-	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(1, 1, 800, 600);
+	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(1, 1, width, height);
+
 	/*	*/
 	this->commandList = std::shared_ptr<fragcore::CommandList>(openGLRenderer->createCommandBuffer());
 
@@ -407,7 +416,7 @@ void WindowBackend::initOpenGL() {
 
 	/*	*/
 	if (!ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)this->getNativePtr(), gl_context)) {
-		throw fragcore::RuntimeException("Failed to Init ImGUI SDL2 OpenGL");
+		throw fragcore::RuntimeException("Failed to Init ImGUI SDL2 for OpenGL");
 	}
 	/*	*/
 	if (!ImGui_ImplOpenGL3_Init(glsl_version.c_str())) {
@@ -428,8 +437,8 @@ void WindowBackend::loadFont(const std::string &path) {
 	io.Fonts->Build();
 }
 
-void WindowBackend::enableImGUI(bool enabled) { useImGUI = enabled; }
-void WindowBackend::enableDocking(bool enabled) { this->useDocking = enabled; }
+void WindowBackend::enableImGUI(bool enabled) noexcept { this->useImGUI = enabled; }
+void WindowBackend::enableDocking(bool enabled) noexcept { this->useDocking = enabled; }
 void WindowBackend::enableViewPorts(bool enabled) {}
 
 void WindowBackend::showDockSpace(bool *open) {
@@ -453,8 +462,9 @@ void WindowBackend::showDockSpace(bool *open) {
 
 	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
 	// and handle the pass-thru hole, so we ask Begin() to not render a background.
-	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) {
 		window_flags |= ImGuiWindowFlags_NoBackground;
+	}
 
 	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
 	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
@@ -465,8 +475,9 @@ void WindowBackend::showDockSpace(bool *open) {
 	ImGui::Begin("###DockSpace", open, window_flags);
 	ImGui::PopStyleVar();
 
-	if (opt_fullscreen)
+	if (opt_fullscreen) {
 		ImGui::PopStyleVar(2);
+	}
 
 	// DockSpace
 	ImGuiIO &io = ImGui::GetIO();
@@ -702,7 +713,8 @@ void WindowBackend::close() { this->hide(); }
 
 void WindowBackend::setPosition(int x, int y) { this->proxyWindow->setPosition(x, y); }
 
-void WindowBackend::setSize(int width, int height) { /*	TODO determine if it shall update framebuffera as well.	*/
+void WindowBackend::setSize(int width, int height) {
+	/*	TODO determine if it shall update framebuffera as well.	*/
 	this->proxyWindow->setSize(width, height);
 	//						recreateSwapChain();
 }
@@ -714,16 +726,6 @@ void WindowBackend::setTitle(const std::string &title) { this->proxyWindow->setT
 
 std::string WindowBackend::getTitle() const { return this->proxyWindow->getTitle(); }
 
-// int WindowBackend::x() const noexcept {
-// 	int x, y;
-
-// 	return x;
-// }
-// int WindowBackend::y() const noexcept {
-// 	int x, y;
-
-// 	return y;
-// }
 int WindowBackend::width() const noexcept { return this->proxyWindow->width(); }
 int WindowBackend::height() const noexcept { return this->proxyWindow->height(); }
 

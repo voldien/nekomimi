@@ -24,10 +24,6 @@
 #include <memory>
 #include <string>
 
-namespace ImTui {
-	struct TScreen;
-} // namespace ImTui
-
 namespace nekomimi {
 
 	/**
@@ -41,7 +37,7 @@ namespace nekomimi {
 			 * @brief
 			 *
 			 */
-			ImGUI_Terminal,
+			ImGUI_Terminal, /*	Not supported.	*/
 			/**
 			 * @brief
 			 *
@@ -56,22 +52,22 @@ namespace nekomimi {
 			 * @brief
 			 *
 			 */
-			ImGUI_DirectX9,
+			ImGUI_DirectX9, /*	Not supported.	*/
 			/**
 			 * @brief
 			 *
 			 */
-			ImGUI_DirectX10,
+			ImGUI_DirectX10, /*	Not supported.	*/
 			/**
 			 * @brief
 			 *
 			 */
-			ImGUI_DirectX11,
+			ImGUI_DirectX11, /*	Not supported.	*/
 			/**
 			 * @brief
 			 *
 			 */
-			ImGUI_DirectX12,
+			ImGUI_DirectX12, /*	Not supported.	*/
 			ImGUI_Default,
 		};
 
@@ -124,9 +120,6 @@ namespace nekomimi {
 
 	  public:
 		WindowBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
-		// TODO add support to provide renderinterface.
-		// WindowBackend()
-		// WindowBackend(std::shared_ptr<fragcore::IRenderer> &render);
 		virtual ~WindowBackend();
 
 		/**
@@ -175,8 +168,8 @@ namespace nekomimi {
 	  public: /*	*/
 		virtual void loadFont(const std::string &path);
 
-		virtual void enableImGUI(bool enabled);
-		virtual void enableDocking(bool enabled);
+		virtual void enableImGUI(bool enabled) noexcept;
+		virtual void enableDocking(bool enabled) noexcept;
 		virtual void enableViewPorts(bool enabled);
 		virtual void showDockSpace(bool *open);
 		virtual void showViewPorts(bool *open);
@@ -247,6 +240,7 @@ namespace nekomimi {
 		void setFullScreen(fragcore::Display &display) override {}
 
 		intptr_t getNativePtr() const override; /*  Get native window reference object. */
+
 	  protected:
 		bool useImGUI = true;
 		bool useDocking = true;
@@ -261,8 +255,6 @@ namespace nekomimi {
 		/*	*/
 		std::shared_ptr<fragcore::IRenderer> renderer;
 		std::shared_ptr<fragcore::CommandList> commandList;
-		/*	*/
-		ImTui::TScreen *imtuiScreen;
 
 		/*	*/
 		fragcore::Window *proxyWindow;

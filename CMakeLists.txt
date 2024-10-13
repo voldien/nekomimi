@@ -23,6 +23,9 @@ OPTION(MIMI_VULKAN_SUPPORT "Enable Vulkan Backend" ON)
 OPTION(MIMI_TERMINAL_SUPPORT "Enable Terminal Backend" ON)
 OPTION(MIMI_DIRECTX_SUPPORT "Enable DirectX Backend" OFF)
 
+OPTION(MIMI_WINDOW_SDL2_SUPPORT "Enable SDL2 Backend" OFF)
+OPTION(MIMI_WINDOW_GLFW3_SUPPORT "Enable GLFW3 Backend" OFF)
+
 ################################################
 # Find all dependices libraries and etc.
 ################################################
@@ -52,8 +55,8 @@ IF (NOT TARGET fragcore)
 ENDIF()
 
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window EXCLUDE_FROM_ALL)
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window/sdl EXCLUDE_FROM_ALL)
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window/glfw3 EXCLUDE_FROM_ALL)
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window/sdl EXCLUDE_FROM_ALL)	#
+ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window/glfw3 EXCLUDE_FROM_ALL)	#
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/image EXCLUDE_FROM_ALL)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer EXCLUDE_FROM_ALL)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer/opengl EXCLUDE_FROM_ALL)
@@ -88,7 +91,7 @@ ENDIF()
 
 #Only add directX for Windows platforms.
 IF(WINDOWS AND MIMI_DIRECTX_SUPPORT)
-	FILE(APPEND BACKEND_SOURCE_FILES
+	FILE(GLOB BACKEND_SOURCE_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx9.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx10.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx11.cpp
@@ -102,6 +105,7 @@ IF(ANDROID)
 	)
 ENDIF()
 
+# Headers
 FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include/UIComponents/*.h
 		${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include/GraphicBackend/*.h
