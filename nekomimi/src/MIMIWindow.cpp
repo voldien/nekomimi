@@ -2,14 +2,16 @@
 
 using namespace nekomimi;
 
-MIMIWindow::MIMIWindow(const GfxBackEnd backend)
-	: WindowBackend(WindowBackend::WindowLibBackend::WindowBackendSDL2, backend) {}
+MIMIWindow::MIMIWindow(const GfxBackEnd backend, const WindowBackend::WindowLibBackend window_backend)
+	: WindowBackend(window_backend, backend) {}
 
 void MIMIWindow::run() {
 
+	/*	*/
 	this->maximize();
 	this->focus();
 
+	/*	*/
 	bool show_dockspace = true;
 	bool show_viewports = false;
 
@@ -50,4 +52,4 @@ void MIMIWindow::addUIComponent(const std::shared_ptr<UIComponent> &component) {
 
 void MIMIWindow::removeUIComponent(const std::shared_ptr<UIComponent> &component) {}
 size_t MIMIWindow::getNrUIComponents() const noexcept { return this->components.size(); }
-std::shared_ptr<UIComponent> &MIMIWindow::getComponent(size_t index) { return this->components[index]; }
+std::shared_ptr<UIComponent> &MIMIWindow::getComponent(const size_t index) { return this->components[index]; }

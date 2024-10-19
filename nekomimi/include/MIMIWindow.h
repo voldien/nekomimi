@@ -29,7 +29,7 @@ namespace nekomimi {
 	 */
 	class FVDECLSPEC MIMIWindow : public WindowBackend {
 	  public:
-		MIMIWindow(const GfxBackEnd backend);
+		MIMIWindow(const GfxBackEnd backend, const WindowBackend::WindowLibBackend window_backend = WindowBackend::WindowLibBackend::WindowBackendSDL2);
 
 	  public:
 		void run();
@@ -45,7 +45,7 @@ namespace nekomimi {
 		virtual void addUIComponent(const std::shared_ptr<UIComponent> &component);
 		virtual void removeUIComponent(const std::shared_ptr<UIComponent> &component);
 		size_t getNrUIComponents() const noexcept;
-		std::shared_ptr<UIComponent> &getComponent(size_t index);
+		std::shared_ptr<UIComponent> &getComponent(const size_t index);
 
 		void setStatusBar(bool enabled);
 		void setUIComponentEnabled(bool enabled);
@@ -53,8 +53,6 @@ namespace nekomimi {
 	  protected:
 		virtual void displayMenuBar() = 0;
 		virtual void renderUI() = 0;
-
-		// std::shared_ptr<UIComponent> &getComponent(unsigned int index);
 
 	  private:
 		void removeUIComponent(uint32_t uid);
