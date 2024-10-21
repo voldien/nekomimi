@@ -508,23 +508,33 @@ void WindowBackend::beginRenderOpenGL() {
 	ImGui_ImplSDL2_NewFrame();
 }
 void WindowBackend::beginRenderTerminal() {
-	// ImTui_ImplNcurses_NewFrame();
-	// ImTui_ImplText_NewFrame();
+#ifdef MIMI_IMPL_TERMINAL
+	ImTui_ImplNcurses_NewFrame();
+	ImTui_ImplText_NewFrame();
+#endif
 }
 void WindowBackend::beginRenderDX9() {
-	// ImGui_ImplDX9_NewFrame();
+#ifdef MIMI_IMPL_DIRECTX
+// ImGui_ImplDX9_NewFrame();
+#endif
 	ImGui_ImplSDL2_NewFrame();
 }
 void WindowBackend::beginRenderDX10() {
+#ifdef MIMI_IMPL_DIRECTX
 	// ImGui_ImplDX10_NewFrame();
+#endif
 	ImGui_ImplSDL2_NewFrame();
 }
 void WindowBackend::beginRenderDX11() {
-	// ImGui_ImplDX11_NewFrame();
+#ifdef MIMI_IMPL_DIRECTX
+// ImGui_ImplDX11_NewFrame();
+#endif
 	ImGui_ImplSDL2_NewFrame();
 }
 void WindowBackend::beginRenderDX12() {
+#ifdef MIMI_IMPL_DIRECTX
 	// ImGui_ImplDX12_NewFrame();
+#endif
 	ImGui_ImplSDL2_NewFrame();
 }
 
@@ -584,7 +594,9 @@ void WindowBackend::endRenderOpenGL() {
 	ImGuiIO &io = ImGui::GetIO();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	SDL_GL_SwapWindow((SDL_Window *)getNativePtr());
+	// TODO: fix
+	SDL_GL_SwapWindow((SDL_Window *)this->getNativePtr());
+
 	// TODO check if can be removed or configured with flag.
 	glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
 	glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
@@ -594,8 +606,10 @@ void WindowBackend::endRenderOpenGL() {
 }
 
 void WindowBackend::endRenderTerminal() {
-	// ImTui_ImplText_RenderDrawData(ImGui::GetDrawData(), this->imtuiScreen);
-	// ImTui_ImplNcurses_DrawScreen();
+#ifdef MIMI_IMPL_TERMINAL
+// ImTui_ImplText_RenderDrawData(ImGui::GetDrawData(), this->imtuiScreen);
+// ImTui_ImplNcurses_DrawScreen();
+#endif
 }
 void WindowBackend::endRenderDX9() {}
 void WindowBackend::endRenderDX10() {}
@@ -661,13 +675,13 @@ void WindowBackend::beginRender() {
 
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
-		beginRenderTerminal();
+		this->beginRenderTerminal();
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
-		beginRenderOpenGL();
+		this->beginRenderOpenGL();
 		break;
 	case GfxBackEnd::ImGUI_Vulkan:
-		beginRenderVulkan();
+		this->beginRenderVulkan();
 		break;
 	default:
 		break;
@@ -715,9 +729,7 @@ void WindowBackend::close() { this->hide(); }
 void WindowBackend::setPosition(int x, int y) { this->proxyWindow->setPosition(x, y); }
 
 void WindowBackend::setSize(int width, int height) {
-	/*	TODO determine if it shall update framebuffera as well.	*/
 	this->proxyWindow->setSize(width, height);
-	//						recreateSwapChain();
 }
 
 void WindowBackend::getPosition(int *x, int *y) const { this->proxyWindow->getPosition(x, y); }
