@@ -18,6 +18,7 @@
 #ifndef _NEKO_MIMI_UI_WINDOW_BACKEND_H_
 #define _NEKO_MIMI_UI_WINDOW_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
+#include "WindowManager.h"
 #include <CommandList.h>
 #include <IRenderer.h>
 #include <Window.h>
@@ -247,7 +248,7 @@ namespace nekomimi {
 		bool requestQuit = false;
 
 	  private:
-		bool visible;
+		bool visible = false;
 
 		GfxBackEnd gfxBackend;
 		WindowLibBackend windowBackend;
@@ -255,10 +256,11 @@ namespace nekomimi {
 		/*	*/
 		std::shared_ptr<fragcore::IRenderer> renderer;
 		std::shared_ptr<fragcore::CommandList> commandList;
+		fragcore::WindowManager *windowManager;
 
 		/*	*/
-		fragcore::Window *proxyWindow;
-		size_t nrFrameBuffer;
+		fragcore::Window *proxyWindow = {nullptr};
+		size_t nrFrameBuffer = 0;
 
 		bool requestResize{false};
 	};

@@ -1,4 +1,6 @@
 #include "GraphicBackend/WindowBackend.h"
+#include "RendererWindow.h"
+#include "SDLWindowManager.h"
 #include <RendererFactory.h>
 #include <SDL_events.h>
 #include <SDL_video.h>
@@ -216,7 +218,7 @@ void WindowBackend::initWindow(WindowLibBackend windowBackend) {
 	this->windowBackend = windowBackend;
 	switch (getBackendWindowManager()) {
 	case WindowLibBackend::WindowBackendSDL2:
-		// this->proxyWindow = new SDLWindow();
+		this->windowManager = new fragcore::SDLWindowManager();
 		break;
 	case WindowLibBackend::WindowBackendGLFW3:
 		break;
@@ -388,6 +390,7 @@ void WindowBackend::initOpenGL() {
 
 	const int width = 800;
 	const int height = 600;
+
 	/*	*/
 	fragcore::GLRendererInterface *openGLRenderer = new fragcore::GLRendererInterface(nullptr);
 	this->renderer = std::shared_ptr<fragcore::IRenderer>(openGLRenderer);
@@ -411,9 +414,7 @@ void WindowBackend::initOpenGL() {
 	glsl_version = "#version 130";
 #endif
 
-	// enable VSync
-	// TODO replace with the renderwindow.
-	int rc = SDL_GL_SetSwapInterval(1);
+	this->proxyWindow->as<RendererWindow>().vsync(true);
 
 	/*	*/
 	if (!ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)this->getNativePtr(), gl_context)) {
@@ -597,8 +598,9 @@ void WindowBackend::endRenderOpenGL() {
 	// TODO: fix
 	SDL_GL_SwapWindow((SDL_Window *)this->getNativePtr());
 
-	// TODO check if can be removed or configured with flag.
 	glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
+
+	// TODO check if can be removed or configured with flag.
 	glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
 				 clear_color.w);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -724,13 +726,14 @@ void WindowBackend::show() { this->proxyWindow->show(); }
 
 void WindowBackend::hide() { this->proxyWindow->hide(); }
 
-void WindowBackend::close() { this->hide(); }
+void WindowBackend::close() {
+	this->hide();
+	this->proxyWindow->close();
+}
 
 void WindowBackend::setPosition(int x, int y) { this->proxyWindow->setPosition(x, y); }
 
-void WindowBackend::setSize(int width, int height) {
-	this->proxyWindow->setSize(width, height);
-}
+void WindowBackend::setSize(int width, int height) { this->proxyWindow->setSize(width, height); }
 
 void WindowBackend::getPosition(int *x, int *y) const { this->proxyWindow->getPosition(x, y); }
 
@@ -742,13 +745,13 @@ std::string WindowBackend::getTitle() const { return this->proxyWindow->getTitle
 int WindowBackend::width() const noexcept { return this->proxyWindow->width(); }
 int WindowBackend::height() const noexcept { return this->proxyWindow->height(); }
 
-void WindowBackend::resizable(bool resizable) noexcept {}
+void WindowBackend::resizable(bool resizable) noexcept { this->proxyWindow->resizable(resizable); }
 
 void WindowBackend::setFullScreen(bool fullscreen) { return this->proxyWindow->setFullScreen(fullscreen); }
 
-bool WindowBackend::isFullScreen() const { return false; }
+bool WindowBackend::isFullScreen() const { return this->proxyWindow->isFullScreen(); }
 
-void WindowBackend::setBordered(bool bordered) {}
+void WindowBackend::setBordered(bool bordered) { this->proxyWindow->setBordered(bordered); }
 
 float WindowBackend::getGamma() const { return this->proxyWindow->getGamma(); }
 
