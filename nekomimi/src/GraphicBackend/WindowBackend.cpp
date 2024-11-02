@@ -25,6 +25,7 @@
 #endif
 
 #ifdef MIMI_IMPL_VULKAN
+using namespace fvkcore;
 #include "vulkan/vulkan_core.h"
 #include <VKDevice.h>
 #include <imgui/backends/imgui_impl_vulkan.h>
@@ -34,7 +35,7 @@
 
 using namespace nekomimi;
 using namespace fragcore;
-using namespace fvkcore;
+
 
 const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
 	switch (v) {
