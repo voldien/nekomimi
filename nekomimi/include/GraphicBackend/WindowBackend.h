@@ -92,6 +92,8 @@ namespace nekomimi {
 			 *
 			 */
 			WindowBackendWindows, /*	Not Supported.	*/
+
+			WindowTerminal,
 			/**
 			 * @brief
 			 *
@@ -256,11 +258,13 @@ namespace nekomimi {
 		/*	*/
 		std::shared_ptr<fragcore::IRenderer> renderer;
 		std::shared_ptr<fragcore::CommandList> commandList;
-		fragcore::WindowManager *windowManager;
 
+		fragcore::WindowManager *windowManager;
 		/*	*/
 		fragcore::Window *proxyWindow = {nullptr};
+
 		size_t nrFrameBuffer = 0;
+		void *screen;
 
 		bool requestResize{false};
 	};

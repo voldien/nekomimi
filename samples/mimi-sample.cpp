@@ -29,7 +29,7 @@ class SampleComponent : public UIComponent {
 
 		this->textView.text.subscribe([this] { textView.text.setValue(textView.text.getValue() + "Was"); });
 
-		//a.subscribe([this] {
+		// a.subscribe([this] {
 		//	std::string text = "Hello Thre ";
 		//	text += (a.get() + '0');
 		//	textView.text.setValue(text);
@@ -41,15 +41,20 @@ class SampleComponent : public UIComponent {
 			textView.text.set("Added some text");
 			// a = a.get() + 1;
 		}
-		
+
 		ImGui::TextUnformatted(textView.text.getValue().c_str());
 	}
 };
 
 class SampleWindow : public MIMIWindow {
   public:
-	SampleWindow(WindowBackend::GfxBackEnd gfx = WindowBackend::GfxBackEnd::ImGUI_OpenGL) : MIMIWindow(gfx) {
-		this->setTitle(fmt::format("Sample Main Window: {}", this->getRenderInterface()->getName()));
+	SampleWindow(
+		WindowBackend::GfxBackEnd gfx = WindowBackend::GfxBackEnd::ImGUI_OpenGL,
+		const WindowBackend::WindowLibBackend window_backend = WindowBackend::WindowLibBackend::WindowBackendSDL2)
+		: MIMIWindow(gfx, window_backend) {
+		if (this->getRenderInterface()) {
+			this->setTitle(fmt::format("Sample Main Window: {}", this->getRenderInterface()->getName()));
+		}
 
 		/*	*/
 		std::shared_ptr<SampleComponent> com = std::make_shared<SampleComponent>();
@@ -87,12 +92,17 @@ class SampleWindow : public MIMIWindow {
 int main(int argc, const char **argv) {
 
 	size_t defaultGFX = static_cast<size_t>(WindowBackend::GfxBackEnd::ImGUI_Default);
-	if(argc > 1){
+	size_t defaultWIndow = static_cast<size_t>(WindowBackend::WindowLibBackend::WindowTerminal);
+	if (argc > 1) {
 		defaultGFX = std::atoi(argv[1]);
-	} 
+	}
+	if (argc > 2) {
+		defaultGFX = std::atoi(argv[1]);
+	}
 
 	try {
-		SampleWindow *window = new SampleWindow(static_cast<WindowBackend::GfxBackEnd>(defaultGFX));
+		SampleWindow *window = new SampleWindow(static_cast<WindowBackend::GfxBackEnd>(defaultGFX),
+												static_cast<WindowBackend::WindowLibBackend>(defaultWIndow));
 
 		window->run();
 		return EXIT_SUCCESS;

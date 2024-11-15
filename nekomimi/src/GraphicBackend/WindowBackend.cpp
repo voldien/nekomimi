@@ -8,10 +8,13 @@
 #include <cstdint>
 #include <fmt/format.h>
 #include <imgui/imgui.h>
+#include <imgui/misc/cpp/imgui_stdlib.h>
 #include <magic_enum.hpp>
 #include <memory>
 
+#ifdef MIMI_IMPL_WINDOW_SDL2
 #include <imgui/backends/imgui_impl_sdl2.h>
+#endif
 
 #ifdef MIMI_IMPL_DX9
 #include <imgui/backends/imgui_impl_dx9.h>
@@ -25,17 +28,21 @@
 #endif
 
 #ifdef MIMI_IMPL_VULKAN
-using namespace fvkcore;
 #include "vulkan/vulkan_core.h"
 #include <VKDevice.h>
+using namespace fvkcore;
 #include <imgui/backends/imgui_impl_vulkan.h>
 #include <vulkan/VKRenderInterface.h>
 #include <vulkan/VKRenderWindow.h>
 #endif
 
+#ifdef MIMI_IMPL_TERMINAL
+#include <imtui/imtui-impl-ncurses.h>
+#include <imtui/imtui.h>
+#endif
+
 using namespace nekomimi;
 using namespace fragcore;
-
 
 const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
 	switch (v) {
@@ -67,6 +74,8 @@ const char *WindowBackend::getWindowBackEndSymbol(WindowLibBackend v) noexcept {
 		return "GLFW3";
 	case WindowLibBackend::WindowBackendWindows:
 		return "Windows";
+	case WindowLibBackend::WindowTerminal:
+		return "Terminal";
 	default:
 		assert(0);
 		return "";
@@ -77,8 +86,8 @@ bool WindowBackend::isGfxBackendSupported(GfxBackEnd gfxBackend) {
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_OpenGL:
 	case GfxBackEnd::ImGUI_Vulkan:
-		return true;
 	case GfxBackEnd::ImGUI_Terminal:
+		return true;
 	case GfxBackEnd::ImGUI_DirectX9:
 	case GfxBackEnd::ImGUI_DirectX10:
 	case GfxBackEnd::ImGUI_DirectX11:
@@ -90,6 +99,8 @@ bool WindowBackend::isGfxBackendSupported(GfxBackEnd gfxBackend) {
 bool WindowBackend::isWindowBackendSupported(WindowLibBackend windowBackend) {
 	switch (windowBackend) {
 	case WindowLibBackend::WindowBackendSDL2:
+		return true;
+	case WindowLibBackend::WindowTerminal:
 		return true;
 	default:
 		return false;
@@ -116,8 +127,8 @@ void WindowBackend::releaseRender() {
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
 #ifdef MIMI_IMPL_TERMINAL
-		// ImTui_ImplText_Shutdown();
-		// ImTui_ImplNcurses_Shutdown();
+		ImTui_ImplText_Shutdown();
+		ImTui_ImplNcurses_Shutdown();
 #endif
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
@@ -143,7 +154,9 @@ void WindowBackend::releaseRender() {
 
 	switch (this->windowBackend) {
 	case WindowLibBackend::WindowBackendSDL2:
+#ifdef MIMI_IMPL_WINDOW_SDL2
 		ImGui_ImplSDL2_Shutdown();
+#endif
 		break;
 	case WindowLibBackend::WindowBackendGLFW3:
 	default:
@@ -194,6 +207,7 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 	/*	*/
 	switch (this->getBackendRenderer()) {
 	case GfxBackEnd::ImGUI_Terminal:
+
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
 		this->initOpenGL();
@@ -217,13 +231,15 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 
 void WindowBackend::initWindow(WindowLibBackend windowBackend) {
 	this->windowBackend = windowBackend;
-	switch (getBackendWindowManager()) {
+	switch (this->getBackendWindowManager()) {
 	case WindowLibBackend::WindowBackendSDL2:
+#ifdef MIMI_IMPL_WINDOW_SDL2
 		this->windowManager = new fragcore::SDLWindowManager();
+#endif
 		break;
 	case WindowLibBackend::WindowBackendGLFW3:
-		break;
 	case WindowLibBackend::WindowBackendWindows:
+	case WindowLibBackend::WindowTerminal:
 		break;
 	default:
 		assert(0);
@@ -232,8 +248,11 @@ void WindowBackend::initWindow(WindowLibBackend windowBackend) {
 }
 
 void WindowBackend::initTerminal() {
-	// this->imtuiScreen = ImTui_ImplNcurses_Init(true);
-	// ImTui_ImplText_Init();
+	/*	*/
+#ifdef MIMI_IMPL_TERMINAL
+	this->screen = ImTui_ImplNcurses_Init(true);
+	ImTui_ImplText_Init();
+#endif
 }
 
 void WindowBackend::initVulkan() {
@@ -328,10 +347,12 @@ void WindowBackend::initVulkan() {
 	/*	*/
 	SDL_Window *window = SDL_CreateWindowFrom((const void *)renderWindow->getNativePtr());
 
+#ifdef MIMI_IMPL_WINDOW_SDL2
 	/*	*/
 	if (!ImGui_ImplSDL2_InitForVulkan(window)) {
 		throw fragcore::RuntimeException("Failed init SDL2 ImGUI Vulkan");
 	}
+#endif
 
 	/*	*/
 	if (!ImGui_ImplVulkan_Init(&init_info)) {
@@ -417,10 +438,12 @@ void WindowBackend::initOpenGL() {
 
 	this->proxyWindow->as<RendererWindow>().vsync(true);
 
+#ifdef MIMI_IMPL_WINDOW_SDL2
 	/*	*/
 	if (!ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)this->getNativePtr(), gl_context)) {
 		throw fragcore::RuntimeException("Failed to Init ImGUI SDL2 for OpenGL");
 	}
+#endif
 	/*	*/
 	if (!ImGui_ImplOpenGL3_Init(glsl_version.c_str())) {
 		throw fragcore::RuntimeException("Failed to Init ImGUI OpenGL3");
@@ -500,14 +523,18 @@ void WindowBackend::beginRenderVulkan() {
 	ImGui_ImplVulkan_NewFrame();
 
 #endif
+#ifdef MIMI_IMPL_WINDOW_SDL2
 	ImGui_ImplSDL2_NewFrame();
+#endif
 }
 void WindowBackend::beginRenderOpenGL() {
 #ifdef MIMI_IMPL_OPENGL
 	ImGui_ImplOpenGL3_NewFrame();
 
 #endif
+#ifdef MIMI_IMPL_WINDOW_SDL2
 	ImGui_ImplSDL2_NewFrame();
+#endif
 }
 void WindowBackend::beginRenderTerminal() {
 #ifdef MIMI_IMPL_TERMINAL
@@ -519,25 +546,33 @@ void WindowBackend::beginRenderDX9() {
 #ifdef MIMI_IMPL_DIRECTX
 // ImGui_ImplDX9_NewFrame();
 #endif
+#ifdef MIMI_IMPL_WINDOW_SDL2
 	ImGui_ImplSDL2_NewFrame();
+#endif
 }
 void WindowBackend::beginRenderDX10() {
 #ifdef MIMI_IMPL_DIRECTX
 	// ImGui_ImplDX10_NewFrame();
 #endif
+#ifdef MIMI_IMPL_WINDOW_SDL2
 	ImGui_ImplSDL2_NewFrame();
+#endif
 }
 void WindowBackend::beginRenderDX11() {
 #ifdef MIMI_IMPL_DIRECTX
 // ImGui_ImplDX11_NewFrame();
 #endif
+#ifdef MIMI_IMPL_WINDOW_SDL2
 	ImGui_ImplSDL2_NewFrame();
+#endif
 }
 void WindowBackend::beginRenderDX12() {
 #ifdef MIMI_IMPL_DIRECTX
 	// ImGui_ImplDX12_NewFrame();
 #endif
+#ifdef MIMI_IMPL_WINDOW_SDL2
 	ImGui_ImplSDL2_NewFrame();
+#endif
 }
 
 void WindowBackend::endRenderVulkan() {
@@ -610,8 +645,8 @@ void WindowBackend::endRenderOpenGL() {
 
 void WindowBackend::endRenderTerminal() {
 #ifdef MIMI_IMPL_TERMINAL
-// ImTui_ImplText_RenderDrawData(ImGui::GetDrawData(), this->imtuiScreen);
-// ImTui_ImplNcurses_DrawScreen();
+	ImTui_ImplText_RenderDrawData(ImGui::GetDrawData(), (ImTui::TScreen *)this->screen);
+	ImTui_ImplNcurses_DrawScreen();
 #endif
 }
 void WindowBackend::endRenderDX9() {}
@@ -621,6 +656,7 @@ void WindowBackend::endRenderDX12() {}
 
 void WindowBackend::beginRender() {
 
+#ifdef MIMI_IMPL_WINDOW_SDL2
 	this->commandList->begin();
 
 	if (this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_Vulkan ||
@@ -675,6 +711,7 @@ void WindowBackend::beginRender() {
 	}
 
 	this->commandList->end();
+#endif
 
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Terminal:
@@ -761,15 +798,50 @@ void WindowBackend::setGamma(float gamma) { return this->proxyWindow->setGamma(g
 void WindowBackend::setMinimumSize(int width, int height) { this->proxyWindow->setMinimumSize(width, height); }
 void WindowBackend::getMinimumSize(int *width, int *height) { this->proxyWindow->getMinimumSize(width, height); }
 
-void WindowBackend::setMaximumSize(int width, int height) { this->proxyWindow->setMaximumSize(width, height); }
-void WindowBackend::getMaximumSize(int *width, int *height) { this->proxyWindow->getMaximumSize(width, height); }
+void WindowBackend::setMaximumSize(int width, int height) {
+	if (!this->proxyWindow) {
+		return;
+	}
+	this->proxyWindow->setMaximumSize(width, height);
+}
+void WindowBackend::getMaximumSize(int *width, int *height) {
+	if (!this->proxyWindow) {
+		return;
+	}
+	this->proxyWindow->getMaximumSize(width, height);
+}
 
-void WindowBackend::focus() { this->proxyWindow->focus(); }
+void WindowBackend::focus() {
+	if (!this->proxyWindow) {
+		return;
+	}
+	this->proxyWindow->focus();
+}
 
-void WindowBackend::restore() { this->proxyWindow->restore(); }
+void WindowBackend::restore() {
+	if (!this->proxyWindow) {
+		return;
+	}
+	this->proxyWindow->restore();
+}
 
-void WindowBackend::maximize() { this->proxyWindow->maximize(); }
+void WindowBackend::maximize() {
+	if (!this->proxyWindow) {
+		return;
+	}
+	this->proxyWindow->maximize();
+}
 
-void WindowBackend::minimize() { this->proxyWindow->minimize(); }
+void WindowBackend::minimize() {
+	if (!this->proxyWindow) {
+		return;
+	}
+	this->proxyWindow->minimize();
+}
 
-intptr_t WindowBackend::getNativePtr() const { return this->proxyWindow->getNativePtr(); }
+intptr_t WindowBackend::getNativePtr() const {
+	if (!this->proxyWindow) {
+		return 0;
+	}
+	return this->proxyWindow->getNativePtr();
+}

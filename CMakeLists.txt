@@ -23,20 +23,12 @@ OPTION(MIMI_VULKAN_SUPPORT "Enable Vulkan Backend" ON)
 OPTION(MIMI_TERMINAL_SUPPORT "Enable Terminal Backend" ON)
 OPTION(MIMI_DIRECTX_SUPPORT "Enable DirectX Backend" OFF)
 # Window Backend.
-OPTION(MIMI_WINDOW_SDL2_SUPPORT "Enable SDL2 Backend" OFF)
+OPTION(MIMI_WINDOW_SDL2_SUPPORT "Enable SDL2 Backend" ON)
 OPTION(MIMI_WINDOW_GLFW3_SUPPORT "Enable GLFW3 Backend" OFF)
 
 ################################################
 # Find all dependices libraries and etc.
 ################################################
-IF(MIMI_OPENGL_SUPPORT)
-	SET(OpenGL_GL_PREFERENCE "GLVND")
-	FIND_PACKAGE(OpenGL REQUIRED)
-
-	IF(OPENGL_FOUND)
-		MESSAGE(STATUS "OpenGL found: ${OPENGL_LIBRARIES}.")
-	ENDIF()
-ENDIF()
 
 # Find package that is not part of a Module
 FIND_PACKAGE(PkgConfig QUIET)
@@ -50,18 +42,33 @@ ENDIF()
 # Backend libraries
 ############################################
 
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+
 IF (NOT TARGET fragcore)
 	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore EXCLUDE_FROM_ALL)
 ENDIF()
 
+IF(MIMI_TERMINAL_SUPPORT)
+	INCLUDE(imtui)
+ENDIF()
+
 #
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window EXCLUDE_FROM_ALL)
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window/sdl EXCLUDE_FROM_ALL)	#
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window/glfw3 EXCLUDE_FROM_ALL)	#
+IF(MIMI_WINDOW_SDL2_SUPPORT)
+	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window/sdl EXCLUDE_FROM_ALL)	#
+ENDIF()
+IF(MIMI_WINDOW_GLFW3_SUPPORT)
+	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/window/glfw3 EXCLUDE_FROM_ALL)	#
+ENDIF()
+
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/image EXCLUDE_FROM_ALL)
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer EXCLUDE_FROM_ALL)
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer/opengl EXCLUDE_FROM_ALL)
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer/vulkan EXCLUDE_FROM_ALL)
+IF(MIMI_OPENGL_SUPPORT AND MIMI_WINDOW_SDL2_SUPPORT)
+	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer/opengl EXCLUDE_FROM_ALL)
+ENDIF()
+IF(MIMI_VULKAN_SUPPORT AND MIMI_WINDOW_SDL2_SUPPORT)
+	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/modules/renderer/vulkan EXCLUDE_FROM_ALL)
+ENDIF()
 
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/observable/observable EXCLUDE_FROM_ALL)
 
@@ -74,7 +81,6 @@ FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/util/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/GraphicBackend/WindowBackend*.cpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_sdl2.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_draw.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_widgets.cpp
@@ -82,27 +88,24 @@ FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/misc/cpp/*.cpp
 )
 
+IF(MIMI_WINDOW_SDL2_SUPPORT)
+	LIST(APPEND BACKEND_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_sdl2.cpp) 
+ENDIF()
 IF(MIMI_OPENGL_SUPPORT)
-	FILE(GLOB BACKEND_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_opengl3.cpp) 
+	LIST(APPEND BACKEND_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_opengl3.cpp) 
 ENDIF()
 
 IF(MIMI_VULKAN_SUPPORT)
-	FILE(GLOB BACKEND_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_vulkan.cpp)
+	LIST(APPEND BACKEND_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_vulkan.cpp)
 ENDIF()
 
 #Only add directX for Windows platforms.
 IF(WINDOWS AND MIMI_DIRECTX_SUPPORT)
-	FILE(GLOB BACKEND_SOURCE_FILES
+	LIST(APPEND BACKEND_SOURCE_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx9.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx10.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx11.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_dx12.cpp
-	)
-ENDIF()
-
-IF(ANDROID)
-	FILE(GLOB APPEND BACKEND_SOURCE_FILES
-		${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/backends/imgui_impl_android.cpp
 	)
 ENDIF()
 
@@ -116,35 +119,44 @@ FILE(GLOB HEADER_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include/*.h
 # Core Window Management Library.
 #########################################
 ADD_LIBRARY(nekomimi-window ${SOURCE_FILES} ${BACKEND_SOURCE_FILES} ${HEADER_FILES} )
-TARGET_INCLUDE_DIRECTORIES (nekomimi-window  PRIVATE
-	${OPENGL_INCLUDE_DIR}
+TARGET_INCLUDE_DIRECTORIES (nekomimi-window PRIVATE
 	PUBLIC
-	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui
 	${CMAKE_CURRENT_SOURCE_DIR}/extern
+	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/include>
 	$<INSTALL_INTERFACE:nekomimi/include>
 )
 
+IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required
+	SET_PROPERTY(TARGET nekomimi-window PROPERTY POSITION_INDEPENDENT_CODE ON)
+ENDIF()
+
 TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC observable fragcore-render-interface fragcore-shader-compiler)
 ADD_DEPENDENCIES(nekomimi-window observable fragcore-render-interface)
 
+IF(MIMI_WINDOW_SDL2_SUPPORT)
+	TARGET_COMPILE_DEFINITIONS(nekomimi-window PRIVATE MIMI_IMPL_WINDOW_SDL2)
+ENDIF()
+
 IF(MIMI_OPENGL_SUPPORT)
 	TARGET_COMPILE_DEFINITIONS(nekomimi-window PRIVATE MIMI_IMPL_OPENGL)
-	TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC fragcore-rgl glew OpenGL::OpenGL OpenGL::GLU OpenGL::EGL)
+	TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC fragcore-rgl glew)
 ENDIF()
 
 IF(MIMI_VULKAN_SUPPORT)
 	TARGET_COMPILE_DEFINITIONS(nekomimi-window PRIVATE MIMI_IMPL_VULKAN)
 	TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC fragcore-rvk)
+	SET_PROPERTY(TARGET backward PROPERTY POSITION_INDEPENDENT_CODE ON)
 ENDIF()
 
 IF(MIMI_DIRECTX_SUPPORT)
 	TARGET_COMPILE_DEFINITIONS(nekomimi-window PRIVATE MIMI_IMPL_DX9)
 ENDIF()
 
-IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required
-	SET_PROPERTY(TARGET nekomimi-window PROPERTY POSITION_INDEPENDENT_CODE ON)
+IF(MIMI_TERMINAL_SUPPORT)
+	TARGET_COMPILE_DEFINITIONS(nekomimi-window PRIVATE MIMI_IMPL_TERMINAL)
+	TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC imtui imtui-ncurses)
 ENDIF()
 
 ########################
