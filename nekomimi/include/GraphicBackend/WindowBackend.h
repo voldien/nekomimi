@@ -185,12 +185,6 @@ namespace nekomimi {
 		const std::shared_ptr<fragcore::IRenderer> &getRenderInterface() const noexcept { return this->renderer; }
 		std::shared_ptr<fragcore::IRenderer> &getRenderInterface() noexcept { return this->renderer; }
 
-		const std::shared_ptr<fragcore::CommandList> &getRenderCommandBuffer() const noexcept {
-			return this->commandList;
-		}
-
-		std::shared_ptr<fragcore::CommandList> &getRenderCommandBuffer() noexcept { return this->commandList; }
-
 		size_t getNumberFrameBuffers() const noexcept;
 
 	  public: /*	Window override.	*/
@@ -257,7 +251,6 @@ namespace nekomimi {
 
 		/*	*/
 		std::shared_ptr<fragcore::IRenderer> renderer;
-		std::shared_ptr<fragcore::CommandList> commandList;
 
 		fragcore::WindowManager *windowManager;
 		/*	*/

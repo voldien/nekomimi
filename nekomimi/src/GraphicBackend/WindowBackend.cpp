@@ -271,7 +271,6 @@ void WindowBackend::initVulkan() {
 
 	/*	Create command buffer.	*/
 	VKRenderWindow *renderWindow = static_cast<VKRenderWindow *>(this->proxyWindow);
-	this->commandList = std::shared_ptr<CommandList>(renderer->createCommandBuffer());
 
 	std::unordered_map<const char *, bool> required_instance_extensions = {{VK_KHR_SURFACE_EXTENSION_NAME, true},
 																		   {"VK_KHR_xlib_surface", true}};
@@ -421,8 +420,6 @@ void WindowBackend::initOpenGL() {
 	void *gl_context = openGLRenderer->getOpenGLContext();
 	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(1, 1, width, height);
 
-	/*	*/
-	this->commandList = std::shared_ptr<fragcore::CommandList>(openGLRenderer->createCommandBuffer());
 
 	std::string glsl_version = "";
 #ifdef __APPLE__
@@ -657,7 +654,6 @@ void WindowBackend::endRenderDX12() {}
 void WindowBackend::beginRender() {
 
 #ifdef MIMI_IMPL_WINDOW_SDL2
-	this->commandList->begin();
 
 	if (this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_Vulkan ||
 		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_OpenGL ||
@@ -686,7 +682,6 @@ void WindowBackend::beginRender() {
 				case SDL_WINDOWEVENT_RESIZED:
 					windowWidth = event.window.data1;
 					windowHeight = event.window.data2;
-					// this->commandList->setViewport(0, 0, windowWidth, windowHeight);
 					this->requestResize = true;
 					break;
 				case SDL_WINDOWEVENT_CLOSE:
@@ -710,7 +705,6 @@ void WindowBackend::beginRender() {
 		}
 	}
 
-	this->commandList->end();
 #endif
 
 	switch (gfxBackend) {
@@ -753,9 +747,7 @@ void WindowBackend::endRender() {
 	default:
 		break;
 	}
-	/*	Finalize and execute.	*/
 
-	// this->renderer->execute(this->commandList.get());
 }
 
 size_t WindowBackend::getNumberFrameBuffers() const noexcept { return this->nrFrameBuffer; }
