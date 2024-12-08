@@ -21,10 +21,7 @@
 #include "GraphicBackendDef.h"
 #include <CommandList.h>
 #include <IRenderer.h>
-#include <VKDevice.h>
-#include <VulkanCore.h>
 #include <Window.h>
-#include <imgui/backends/imgui_impl_vulkan.h>
 #include <memory>
 #include <string>
 
@@ -56,6 +53,10 @@ namespace nekomimi {
 		static bool isWindowBackendSupported(WindowLibBackend windowBackend);
 
 	  public:
+		RenderBackend(const RenderBackend &) = default;
+		RenderBackend(RenderBackend &&) = delete;
+		RenderBackend &operator=(const RenderBackend &) = default;
+		RenderBackend &operator=(RenderBackend &&) = delete;
 		RenderBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
 		// TODO add support to provide renderinterface.
 		// WindowBackend()

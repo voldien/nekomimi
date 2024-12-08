@@ -1,11 +1,11 @@
 #include "Util/imgui-ext.h"
 #include "imgui.h"
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <imgui_internal.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/time.h>
-#include <time.h>
 
 using namespace ImGui;
 
@@ -23,8 +23,9 @@ void UIUtilHelper::HelpMarker(const char *desc) {
 bool UIUtilHelper::BufferingBar(const char *label, float value, const ImVec2 &size_arg, const ImU32 &bg_col,
 								const ImU32 &fg_col) {
 	ImGuiWindow *window = GetCurrentWindow();
-	if (window->SkipItems)
+	if (window->SkipItems) {
 		return false;
+	}
 
 	ImGuiContext &g = *GImGui;
 	const ImGuiStyle &style = g.Style;
@@ -36,8 +37,9 @@ bool UIUtilHelper::BufferingBar(const char *label, float value, const ImVec2 &si
 
 	const ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
 	ItemSize(bb, style.FramePadding.y);
-	if (!ItemAdd(bb, id))
+	if (!ItemAdd(bb, id)) {
 		return false;
+	}
 
 	// Render
 	const float circleStart = size.x * 0.7f;
@@ -69,20 +71,22 @@ bool UIUtilHelper::BufferingBar(const char *label, float value, const ImVec2 &si
 // https://github.com/ocornut/imgui/issues/1901
 bool UIUtilHelper::Spinner(const char *label, float radius, int thickness, const ImU32 &color) {
 	ImGuiWindow *window = GetCurrentWindow();
-	if (window->SkipItems)
+	if (window->SkipItems) {
 		return false;
+	}
 
 	ImGuiContext &g = *GImGui;
 	const ImGuiStyle &style = g.Style;
 	const ImGuiID id = window->GetID(label);
 
 	ImVec2 pos = window->DC.CursorPos;
-	ImVec2 size((radius)*2, (radius + style.FramePadding.y) * 2);
+	ImVec2 size((radius) * 2, (radius + style.FramePadding.y) * 2);
 
 	const ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
 	ItemSize(bb, style.FramePadding.y);
-	if (!ItemAdd(bb, id))
+	if (!ItemAdd(bb, id)) {
 		return false;
+	}
 
 	// Render
 	window->DrawList->PathClear();
@@ -115,8 +119,9 @@ void UIUtilHelper::ToggleButton(const char *str_id, bool *v) {
 	float radius = height * 0.50f;
 
 	ImGui::InvisibleButton(str_id, ImVec2(width, height));
-	if (ImGui::IsItemClicked())
+	if (ImGui::IsItemClicked()) {
 		*v = !*v;
+	}
 
 	float t = *v ? 1.0f : 0.0f;
 
@@ -128,11 +133,12 @@ void UIUtilHelper::ToggleButton(const char *str_id, bool *v) {
 		t = *v ? (t_anim) : (1.0f - t_anim);
 	}
 
-	ImU32 col_bg;
-	if (ImGui::IsItemHovered())
+	ImU32 col_bg = 0;
+	if (ImGui::IsItemHovered()) {
 		col_bg = ImGui::GetColorU32(ImLerp(ImVec4(0.78f, 0.78f, 0.78f, 1.0f), ImVec4(0.64f, 0.83f, 0.34f, 1.0f), t));
-	else
+	} else {
 		col_bg = ImGui::GetColorU32(ImLerp(ImVec4(0.85f, 0.85f, 0.85f, 1.0f), ImVec4(0.56f, 0.83f, 0.26f, 1.0f), t));
+	}
 
 	draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), col_bg, height * 0.5f);
 	draw_list->AddCircleFilled(ImVec2(p.x + radius + t * (width - radius * 2.0f), p.y + radius), radius - 1.5f,
@@ -140,9 +146,9 @@ void UIUtilHelper::ToggleButton(const char *str_id, bool *v) {
 }
 
 // https://github.com/ocornut/imgui/issues/1658
-bool UIUtilHelper::ComboFilter__DrawPopup(ComboFilterState &state, int START, const char **ENTRIES, int ENTRY_COUNT) {
+bool UIUtilHelper::ComboFilter_DrawPopup(ComboFilterState &state, int START, const char **ENTRIES, int ENTRY_COUNT) {
 	using namespace ImGui;
-	bool clicked = 0;
+	bool clicked = false;
 
 	// Grab the position for the popup
 	ImVec2 pos = GetItemRectMin();
@@ -179,12 +185,12 @@ bool UIUtilHelper::ComboFilter__DrawPopup(ComboFilterState &state, int START, co
 			// And item was clicked, notify the input
 			// callback so that it can modify the input buffer
 			state.activeIdx = i;
-			clicked = 1;
+			clicked = true;
 		}
 		if (IsItemFocused() && IsKeyPressed(static_cast<ImGuiKey>(GetIO().KeysData[ImGuiKey_Enter].Down))) {
 			// Allow ENTER key to select current highlighted item (w/ keyboard navigation)
 			state.activeIdx = i;
-			clicked = 1;
+			clicked = true;
 		}
 		PopID();
 
@@ -238,10 +244,11 @@ bool UIUtilHelper::ComboFilter(const char *id, char *buffer, int bufferlen, cons
 				int draw = (score == scoremax);
 				if (record) {
 					scoremax = score;
-					if (!draw)
+					if (!draw) {
 						best = i;
-					else
+					} else {
 						best = best >= 0 && strlen(words[best]) < strlen(words[i]) ? best : i;
+					}
 				}
 			}
 			return best;
@@ -250,13 +257,13 @@ bool UIUtilHelper::ComboFilter(const char *id, char *buffer, int bufferlen, cons
 	using namespace ImGui;
 	bool done =
 		InputText(id, buffer, bufferlen, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
-	bool hot = s.activeIdx >= 0 && strcmp(buffer, hints[s.activeIdx]);
+	bool hot = s.activeIdx >= 0 && strcmp(buffer, hints[s.activeIdx]) != 0;
 	if (hot) {
 		int new_idx = fuzzy::search(buffer, num_hints, hints);
 		int idx = new_idx >= 0 ? new_idx : s.activeIdx;
 		s.selectionChanged = s.activeIdx != idx;
 		s.activeIdx = idx;
-		if (done || ComboFilter__DrawPopup(s, idx, hints, num_hints)) {
+		if (done || ComboFilter_DrawPopup(s, idx, hints, num_hints)) {
 			int i = s.activeIdx;
 			if (i >= 0) {
 				strcpy(buffer, hints[i]);
@@ -287,10 +294,12 @@ bool UIUtilHelper::MyKnob(const char *label, float *p_value, float v_min, float 
 	if (is_active && io.MouseDelta.x != 0.0f) {
 		float step = (v_max - v_min) / 200.0f;
 		*p_value += io.MouseDelta.x * step;
-		if (*p_value < v_min)
+		if (*p_value < v_min) {
 			*p_value = v_min;
-		if (*p_value > v_max)
+		}
+		if (*p_value > v_max) {
 			*p_value = v_max;
+		}
 		value_changed = true;
 	}
 
@@ -303,8 +312,9 @@ bool UIUtilHelper::MyKnob(const char *label, float *p_value, float v_min, float 
 					   ImVec2(center.x + angle_cos * (radius_outer - 2), center.y + angle_sin * (radius_outer - 2)),
 					   ImGui::GetColorU32(ImGuiCol_SliderGrabActive), 2.0f);
 	draw_list->AddCircleFilled(center, radius_inner,
-							   ImGui::GetColorU32(is_active ? ImGuiCol_FrameBgActive
-															: is_hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg),
+							   ImGui::GetColorU32(is_active	   ? ImGuiCol_FrameBgActive
+												  : is_hovered ? ImGuiCol_FrameBgHovered
+															   : ImGuiCol_FrameBg),
 							   16);
 	draw_list->AddText(ImVec2(pos.x, pos.y + radius_outer * 2 + style.ItemInnerSpacing.y),
 					   ImGui::GetColorU32(ImGuiCol_Text), label);
@@ -429,14 +439,15 @@ int UIUtilHelper::Bezier(const char *label, float P[5]) {
 
 	// preset selector
 
-	bool reload = 0;
+	bool reload = false;
 	ImGui::PushID(label);
 	if (ImGui::ArrowButton("##lt", ImGuiDir_Left)) { // ImGui::ArrowButton(ImGui::GetCurrentWindow()->GetID("##lt"),
 													 // ImGuiDir_Left, ImVec2(0, 0), 0)
-		if (--P[4] >= 0)
-			reload = 1;
-		else
+		if (--P[4] >= 0) {
+			reload = true;
+		} else {
 			++P[4];
+		}
 	}
 	ImGui::SameLine();
 
@@ -445,11 +456,12 @@ int UIUtilHelper::Bezier(const char *label, float P[5]) {
 	}
 	if (ImGui::BeginPopup("!Presets")) {
 		for (int i = 0; i < IM_ARRAYSIZE(presets); ++i) {
-			if (i == 1 || i == 9 || i == 17)
+			if (i == 1 || i == 9 || i == 17) {
 				ImGui::Separator();
+			}
 			if (ImGui::MenuItem(presets[i].name, nullptr, P[4] == i)) {
 				P[4] = i;
-				reload = 1;
+				reload = true;
 			}
 		}
 		ImGui::EndPopup();
@@ -459,10 +471,11 @@ int UIUtilHelper::Bezier(const char *label, float P[5]) {
 	if (ImGui::ArrowButton("##rt",
 						   ImGuiDir_Right)) { // ImGui::ArrowButton(ImGui::GetCurrentWindow()->GetID("##rt"),
 											  // ImGuiDir_Right, ImVec2(0, 0), 0)
-		if (++P[4] < IM_ARRAYSIZE(presets))
-			reload = 1;
-		else
+		if (++P[4] < IM_ARRAYSIZE(presets)) {
+			reload = true;
+		} else {
 			--P[4];
+		}
 	}
 	ImGui::SameLine();
 	ImGui::PopID();
@@ -476,8 +489,9 @@ int UIUtilHelper::Bezier(const char *label, float P[5]) {
 	const ImGuiStyle &Style = GetStyle();
 	ImDrawList *DrawList = GetWindowDrawList();
 	ImGuiWindow *Window = GetCurrentWindow();
-	if (Window->SkipItems)
+	if (Window->SkipItems) {
 		return false;
+	}
 
 	// header and spacing
 	int changed = SliderFloat4(label, P, 0, 1, "%.3f", 1.0f);
@@ -565,8 +579,9 @@ int UIUtilHelper::Bezier(const char *label, float P[5]) {
 		double now = ((clock() - epoch) / (double)CLOCKS_PER_SEC);
 		float delta = ((int)(now * 1000) % 1000) / 1000.f;
 		delta += i / 3.f;
-		if (delta > 1)
+		if (delta > 1) {
 			delta -= 1;
+		}
 		int idx = (int)(delta * SMOOTHNESS);
 		float evalx = results[idx].x; //
 		float evaly = results[idx].y; // ImGui::BezierValue( delta, P );

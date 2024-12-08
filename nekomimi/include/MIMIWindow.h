@@ -48,6 +48,7 @@ namespace nekomimi {
 		std::shared_ptr<UIComponent> &getComponent(const size_t index);
 
 		void setStatusBar(bool enabled);
+		bool getStatusbar() const noexcept;
 		void setUIComponentEnabled(bool enabled);
 
 	  protected:

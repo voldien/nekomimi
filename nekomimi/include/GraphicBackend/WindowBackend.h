@@ -123,7 +123,7 @@ namespace nekomimi {
 
 	  public:
 		WindowBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
-		virtual ~WindowBackend();
+		 ~WindowBackend() override;
 
 		/**
 		 * @brief
@@ -172,6 +172,7 @@ namespace nekomimi {
 		virtual void loadFont(const std::string &path);
 
 		virtual void enableImGUI(bool enabled) noexcept;
+		virtual bool isEnabled() const noexcept;
 		virtual void enableDocking(bool enabled) noexcept;
 		virtual void enableViewPorts(bool enabled);
 		virtual void showDockSpace(bool *open);

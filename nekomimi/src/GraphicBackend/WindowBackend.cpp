@@ -420,8 +420,7 @@ void WindowBackend::initOpenGL() {
 	void *gl_context = openGLRenderer->getOpenGLContext();
 	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(1, 1, width, height);
 
-
-	std::string glsl_version = "";
+	std::string glsl_version;
 #ifdef __APPLE__
 	// GL 3.2 Core + GLSL 150
 	glsl_version = "#version 150";
@@ -461,6 +460,7 @@ void WindowBackend::loadFont(const std::string &path) {
 }
 
 void WindowBackend::enableImGUI(bool enabled) noexcept { this->useImGUI = enabled; }
+bool WindowBackend::isEnabled() const noexcept { return this->useImGUI; }
 void WindowBackend::enableDocking(bool enabled) noexcept { this->useDocking = enabled; }
 void WindowBackend::enableViewPorts(bool enabled) {}
 
@@ -659,8 +659,8 @@ void WindowBackend::beginRender() {
 		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_OpenGL ||
 		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_DirectX9) {
 
-		int windowWidth;
-		int windowHeight;
+		int windowWidth = 0;
+		int windowHeight = 0;
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -747,7 +747,6 @@ void WindowBackend::endRender() {
 	default:
 		break;
 	}
-
 }
 
 size_t WindowBackend::getNumberFrameBuffers() const noexcept { return this->nrFrameBuffer; }

@@ -27,19 +27,21 @@ void MIMIWindow::run() {
 		/*	User Callback.	*/
 		this->renderUI();
 
-		if (this->useDocking) {
-			this->showDockSpace(&show_dockspace);
-		}
-		this->showViewPorts(&show_viewports);
+		if (this->isEnabled()) {
+			if (this->useDocking) {
+				this->showDockSpace(&show_dockspace);
+			}
+			this->showViewPorts(&show_viewports);
 
-		/*	Draw each UI elements on screen.	*/
-		for (unsigned int i = 0; i < components.size(); i++) {
-			std::shared_ptr<UIComponent> &uiComponent = this->components[i];
-			uiComponent->drawUI();
+			/*	Draw each UI elements on screen.	*/
+
+			for (unsigned int i = 0; i < components.size(); i++) {
+				std::shared_ptr<UIComponent> &uiComponent = this->components[i];
+				uiComponent->drawUI();
+			}
 		}
 
 		ImGui::Render();
-
 		this->endRender();
 	}
 }

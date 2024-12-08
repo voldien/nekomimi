@@ -31,6 +31,10 @@ namespace nekomimi {
 	class FVDECLSPEC UIComponent : public fragcore::UIDObject {
 	  public:
 		UIComponent();
+		UIComponent(const UIComponent &) = default;
+		UIComponent(UIComponent &&) = delete;
+		UIComponent &operator=(const UIComponent &) = default;
+		UIComponent &operator=(UIComponent &&) = delete;
 		virtual ~UIComponent() = default;
 		virtual void begin();
 

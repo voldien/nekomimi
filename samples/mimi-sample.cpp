@@ -1,7 +1,5 @@
 #include "MIMIWindow.h"
 #include "MutableLiveData.h"
-#include "UIObserver.h"
-#include "UIViewController.h"
 #include "UIViewModel.h"
 #include <Util/imgui-ext.h>
 #include <imgui.h>
@@ -35,7 +33,7 @@ class SampleComponent : public UIComponent {
 		//	textView.text.setValue(text);
 		//});
 	}
-	virtual void draw() override {
+	void draw() override {
 
 		if (ImGui::Button("Press me - ")) {
 			textView.text.set("Added some text");
@@ -60,7 +58,7 @@ class SampleWindow : public MIMIWindow {
 		std::shared_ptr<SampleComponent> com = std::make_shared<SampleComponent>();
 		this->addUIComponent(com);
 	}
-	virtual void displayMenuBar() override {
+	void displayMenuBar() override {
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("New")) {
 			}
@@ -86,7 +84,7 @@ class SampleWindow : public MIMIWindow {
 			ImGui::EndMenu();
 		}
 	}
-	virtual void renderUI() override {}
+	void renderUI() override {}
 };
 
 int main(int argc, const char **argv) {

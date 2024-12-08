@@ -2,7 +2,7 @@
 #define _NEKO_MIMI_IMGUI_UI_UTIL_HELPER_H_ 1
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
-#include <time.h>
+#include <ctime>
 
 /**
  * @brief a helper class with
@@ -28,7 +28,7 @@ class UIUtilHelper {
 		bool selectionChanged; // Flag to help focus the correct item when selecting active item
 	};
 
-	static bool ComboFilter__DrawPopup(ComboFilterState &state, int START, const char **ENTRIES, int ENTRY_COUNT);
+	static bool ComboFilter_DrawPopup(ComboFilterState &state, int START, const char **ENTRIES, int ENTRY_COUNT);
 
 	static bool ComboFilter(const char *id, char *buffer, int bufferlen, const char **hints, int num_hints,
 							ComboFilterState &s);
@@ -42,7 +42,7 @@ class UIUtilHelper {
 	static bool MyKnob(const char *label, float *p_value, float v_min, float v_max);
 	// https://github.com/ocornut/imgui/issues/786
 	template <int steps> static void bezier_table(ImVec2 P[4], ImVec2 results[steps + 1]) {
-		static float C[(steps + 1) * 4], *K = 0;
+		static float C[(steps + 1) * 4], *K = nullptr;
 		if (!K) {
 			K = C;
 			for (unsigned step = 0; step <= steps; ++step) {
