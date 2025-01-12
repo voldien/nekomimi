@@ -32,8 +32,8 @@ namespace nekomimi {
 	 */
 	class FVDECLSPEC RenderBackend {
 	  public:
-		static const char *getGfxBackEndSymbol(GfxBackEnd v) noexcept;
-		static const char *getWindowBackEndSymbol(WindowLibBackend v) noexcept;
+		static const char *getGfxBackEndSymbol(const GfxBackEnd v) noexcept;
+		static const char *getWindowBackEndSymbol(const WindowLibBackend v) noexcept;
 
 		/**
 		 * @brief
@@ -42,7 +42,7 @@ namespace nekomimi {
 		 * @return true
 		 * @return false
 		 */
-		static bool isGfxBackendSupported(GfxBackEnd gfxBackend);
+		static bool isGfxBackendSupported(const GfxBackEnd gfxBackend);
 		/**
 		 * @brief
 		 *
@@ -50,7 +50,7 @@ namespace nekomimi {
 		 * @return true
 		 * @return false
 		 */
-		static bool isWindowBackendSupported(WindowLibBackend windowBackend);
+		static bool isWindowBackendSupported(const WindowLibBackend windowBackend);
 
 	  public:
 		RenderBackend(const RenderBackend &) = default;

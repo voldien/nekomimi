@@ -29,7 +29,8 @@ namespace nekomimi {
 	 */
 	class FVDECLSPEC MIMIWindow : public WindowBackend {
 	  public:
-		MIMIWindow(const GfxBackEnd backend, const WindowBackend::WindowLibBackend window_backend = WindowBackend::WindowLibBackend::WindowBackendSDL2);
+		MIMIWindow(const GfxBackEnd backend,
+				   const WindowLibBackend window_backend = WindowLibBackend::WindowBackendSDL2);
 
 	  public:
 		void run();

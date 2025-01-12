@@ -1,4 +1,5 @@
 #include "GraphicBackend/WindowBackend.h"
+#include "FragDef.h"
 #include "RendererWindow.h"
 #include "SDLWindowManager.h"
 #include <RendererFactory.h>
@@ -44,7 +45,7 @@ using namespace fvkcore;
 using namespace nekomimi;
 using namespace fragcore;
 
-const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
+const char *WindowBackend::getGfxBackEndSymbol(const GfxBackEnd v) noexcept {
 	switch (v) {
 	case GfxBackEnd::ImGUI_OpenGL:
 		return "OpenGL";
@@ -66,7 +67,7 @@ const char *WindowBackend::getGfxBackEndSymbol(GfxBackEnd v) noexcept {
 	}
 }
 
-const char *WindowBackend::getWindowBackEndSymbol(WindowLibBackend v) noexcept {
+const char *WindowBackend::getWindowBackEndSymbol(const WindowLibBackend v) noexcept {
 	switch (v) {
 	case WindowLibBackend::WindowBackendSDL2:
 		return "SDL2";
@@ -82,7 +83,7 @@ const char *WindowBackend::getWindowBackEndSymbol(WindowLibBackend v) noexcept {
 	}
 }
 
-bool WindowBackend::isGfxBackendSupported(GfxBackEnd gfxBackend) {
+bool WindowBackend::isGfxBackendSupported(const GfxBackEnd gfxBackend) {
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_OpenGL:
 	case GfxBackEnd::ImGUI_Vulkan:
@@ -96,7 +97,7 @@ bool WindowBackend::isGfxBackendSupported(GfxBackEnd gfxBackend) {
 		return false;
 	}
 }
-bool WindowBackend::isWindowBackendSupported(WindowLibBackend windowBackend) {
+bool WindowBackend::isWindowBackendSupported(const WindowLibBackend windowBackend) {
 	switch (windowBackend) {
 	case WindowLibBackend::WindowBackendSDL2:
 		return true;
@@ -107,7 +108,7 @@ bool WindowBackend::isWindowBackendSupported(WindowLibBackend windowBackend) {
 	}
 }
 
-WindowBackend::WindowBackend(WindowLibBackend windowBackend, GfxBackEnd gfxBackend) {
+WindowBackend::WindowBackend(const WindowLibBackend windowBackend, const GfxBackEnd gfxBackend) {
 	/*	Validate requested backends.	*/
 	if (!isWindowBackendSupported(windowBackend)) {
 		throw RuntimeException("Window Backed not Supported {}", getWindowBackEndSymbol(windowBackend));
@@ -168,7 +169,7 @@ void WindowBackend::releaseRender() {
 	ImGui::DestroyContext();
 }
 
-void WindowBackend::initGfx(GfxBackEnd backend) {
+void WindowBackend::initGfx(const GfxBackEnd backend) {
 	this->gfxBackend = backend;
 
 	IMGUI_CHECKVERSION();
@@ -184,8 +185,6 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
 	if (backend == GfxBackEnd::ImGUI_OpenGL || backend == GfxBackEnd::ImGUI_Vulkan) {
-		// TODO relocate
-		// SDL_Init(SDL_INIT_EVERYTHING);
 
 		// setup Dear ImGui style
 		ImGui::StyleColorsDark();
@@ -207,7 +206,6 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 	/*	*/
 	switch (this->getBackendRenderer()) {
 	case GfxBackEnd::ImGUI_Terminal:
-
 		break;
 	case GfxBackEnd::ImGUI_OpenGL:
 		this->initOpenGL();
@@ -223,13 +221,12 @@ void WindowBackend::initGfx(GfxBackEnd backend) {
 		break;
 	case GfxBackEnd::ImGUI_DirectX12:
 		break;
-
 	default:
 		break;
 	}
 }
 
-void WindowBackend::initWindow(WindowLibBackend windowBackend) {
+void WindowBackend::initWindow(const WindowLibBackend windowBackend) {
 	this->windowBackend = windowBackend;
 	switch (this->getBackendWindowManager()) {
 	case WindowLibBackend::WindowBackendSDL2:
@@ -409,16 +406,19 @@ void WindowBackend::initVulkan() {
 void WindowBackend::initOpenGL() {
 #ifdef MIMI_IMPL_OPENGL
 
-	const int width = 800;
-	const int height = 600;
+	Display *display = windowManager->getDisplay(0);
 
 	/*	*/
 	fragcore::GLRendererInterface *openGLRenderer = new fragcore::GLRendererInterface(nullptr);
 	this->renderer = std::shared_ptr<fragcore::IRenderer>(openGLRenderer);
 
+	/*	*/
+	const unsigned int width = display->width() / 2;
+	const unsigned int height = display->height() / 2;
+
 	/*	Create window with default size.	*/
 	void *gl_context = openGLRenderer->getOpenGLContext();
-	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(1, 1, width, height);
+	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(width / 2, height / 2, width, height);
 
 	std::string glsl_version;
 #ifdef __APPLE__
@@ -426,20 +426,26 @@ void WindowBackend::initOpenGL() {
 	glsl_version = "#version 150";
 #elif __linux__
 	// GL 3.2 Core + GLSL 150
-	glsl_version = "#version 330";
+	glsl_version = "#version 150";
 #elif _WIN32
 	// GL 3.0 + GLSL 130
 	glsl_version = "#version 130";
 #endif
 
+	/*	Default to V-Syncu.	*/
 	this->proxyWindow->as<RendererWindow>().vsync(true);
 
 #ifdef MIMI_IMPL_WINDOW_SDL2
 	/*	*/
-	if (!ImGui_ImplSDL2_InitForOpenGL((SDL_Window *)this->getNativePtr(), gl_context)) {
-		throw fragcore::RuntimeException("Failed to Init ImGUI SDL2 for OpenGL");
+	if (this->getBackendWindowManager() == WindowLibBackend::WindowBackendSDL2) {
+		if (!ImGui_ImplSDL2_InitForOpenGL(reinterpret_cast<SDL_Window *>(this->getNativePtr()), gl_context)) {
+			throw fragcore::RuntimeException("Failed to Init ImGUI SDL2 for OpenGL");
+		}
+	} else {
+		throw RuntimeException("");
 	}
 #endif
+
 	/*	*/
 	if (!ImGui_ImplOpenGL3_Init(glsl_version.c_str())) {
 		throw fragcore::RuntimeException("Failed to Init ImGUI OpenGL3");
@@ -624,19 +630,24 @@ void WindowBackend::endRenderVulkan() {
 
 void WindowBackend::endRenderOpenGL() {
 #ifdef MIMI_IMPL_OPENGL
+	/*	*/
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	ImGuiIO &io = ImGui::GetIO();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 	// TODO: fix
-	SDL_GL_SwapWindow((SDL_Window *)this->getNativePtr());
+	if (this->getBackendWindowManager() == WindowLibBackend::WindowBackendSDL2) {
+		SDL_GL_SwapWindow((SDL_Window *)this->getNativePtr());
+	}
 
 	glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
 
+	/*	Optionally.	TODO: add*/
 	// TODO check if can be removed or configured with flag.
-	glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
-				 clear_color.w);
-	glClear(GL_COLOR_BUFFER_BIT);
+	// glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
+	//			 clear_color.w);
+	// glClear(GL_COLOR_BUFFER_BIT);
 #endif
 }
 
@@ -655,9 +666,8 @@ void WindowBackend::beginRender() {
 
 #ifdef MIMI_IMPL_WINDOW_SDL2
 
-	if (this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_Vulkan ||
-		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_OpenGL ||
-		this->gfxBackend == WindowBackend::GfxBackEnd::ImGUI_DirectX9) {
+	if (this->gfxBackend == GfxBackEnd::ImGUI_Vulkan || this->gfxBackend == GfxBackEnd::ImGUI_OpenGL ||
+		this->gfxBackend == GfxBackEnd::ImGUI_DirectX9) {
 
 		int windowWidth = 0;
 		int windowHeight = 0;
@@ -829,6 +839,9 @@ void WindowBackend::minimize() {
 	}
 	this->proxyWindow->minimize();
 }
+
+fragcore::Display *WindowBackend::getCurrentDisplay() const { return this->proxyWindow->getCurrentDisplay(); }
+void WindowBackend::setFullScreen(fragcore::Display &display) { this->proxyWindow->setFullScreen(display); }
 
 intptr_t WindowBackend::getNativePtr() const {
 	if (!this->proxyWindow) {

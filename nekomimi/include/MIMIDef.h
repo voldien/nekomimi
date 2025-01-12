@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3 of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program;
  */
@@ -19,54 +19,4 @@
 #include <Exception.hpp>
 #include <observable/observable.hpp>
 
-namespace nekomimi {
-	/**
-	 * @brief
-	 *
-	 */
-	enum class GfxBackEnd : size_t {
-		/**
-		 * @brief
-		 *
-		 */
-		ImGUI_Terminal,
-		/**
-		 * @brief
-		 *
-		 */
-		ImGUI_OpenGL,
-		/**
-		 * @brief
-		 *
-		 */
-		ImGUI_Vulkan,
-		/**
-		 * @brief
-		 *
-		 */
-		ImGUI_DirectX9,
-		/**
-		 * @brief
-		 *
-		 */
-		ImGUI_DirectX10,
-		/**
-		 * @brief
-		 *
-		 */
-		ImGUI_DirectX11,
-		/**
-		 * @brief
-		 *
-		 */
-		ImGUI_DirectX12,
-		ImGUI_Default,
-	};
-
-	/**
-	 * @brief
-	 *
-	 */
-	enum class WindowLibBackend { WindowBackendSDL2, WindowBackendGLFW3, WindowBackendWindows };
-
-} // namespace nekomimi
+namespace nekomimi {} // namespace nekomimi

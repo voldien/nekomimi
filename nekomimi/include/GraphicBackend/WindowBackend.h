@@ -18,6 +18,7 @@
 #ifndef _NEKO_MIMI_UI_WINDOW_BACKEND_H_
 #define _NEKO_MIMI_UI_WINDOW_BACKEND_H_ 1
 #define IMTERM_USE_FMT 1
+#include "GraphicBackend/GraphicBackendDef.h"
 #include "WindowManager.h"
 #include <CommandList.h>
 #include <IRenderer.h>
@@ -33,76 +34,8 @@ namespace nekomimi {
 	 */
 	class FVDECLSPEC WindowBackend : public fragcore::Window {
 	  public:
-		enum class GfxBackEnd : size_t {
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_Terminal, /*	Not supported.	*/
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_OpenGL,
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_Vulkan,
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_DirectX9, /*	Not supported.	*/
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_DirectX10, /*	Not supported.	*/
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_DirectX11, /*	Not supported.	*/
-			/**
-			 * @brief
-			 *
-			 */
-			ImGUI_DirectX12, /*	Not supported.	*/
-			ImGUI_Default,
-		};
-
-		/**
-		 * @brief
-		 *
-		 */
-		enum class WindowLibBackend {
-			/**
-			 * @brief
-			 *
-			 */
-			WindowBackendSDL2,
-			/**
-			 * @brief
-			 *
-			 */
-			WindowBackendGLFW3, /*	Not supported.	*/
-			/**
-			 * @brief
-			 *
-			 */
-			WindowBackendWindows, /*	Not Supported.	*/
-
-			WindowTerminal,
-			/**
-			 * @brief
-			 *
-			 */
-			WindowBaclendDefault,
-		};
-
-		static const char *getGfxBackEndSymbol(GfxBackEnd v) noexcept;
-		static const char *getWindowBackEndSymbol(WindowLibBackend v) noexcept;
+		static const char *getGfxBackEndSymbol(const GfxBackEnd v) noexcept;
+		static const char *getWindowBackEndSymbol(const WindowLibBackend v) noexcept;
 
 		/**
 		 * @brief
@@ -111,7 +44,7 @@ namespace nekomimi {
 		 * @return true
 		 * @return false
 		 */
-		static bool isGfxBackendSupported(GfxBackEnd gfxBackend);
+		static bool isGfxBackendSupported(const GfxBackEnd gfxBackend);
 		/**
 		 * @brief
 		 *
@@ -119,25 +52,25 @@ namespace nekomimi {
 		 * @return true
 		 * @return false
 		 */
-		static bool isWindowBackendSupported(WindowLibBackend windowBackend);
+		static bool isWindowBackendSupported(const WindowLibBackend windowBackend);
 
 	  public:
-		WindowBackend(WindowLibBackend windowBackend, GfxBackEnd backend);
-		 ~WindowBackend() override;
+		WindowBackend(const WindowLibBackend windowBackend, const GfxBackEnd backend);
+		~WindowBackend() override;
 
 		/**
 		 * @brief
 		 *
 		 * @param backend
 		 */
-		virtual void initGfx(GfxBackEnd backend);
+		virtual void initGfx(const GfxBackEnd backend);
 
 		/**
 		 * @brief
 		 *
 		 * @param windowBackend
 		 */
-		virtual void initWindow(WindowLibBackend windowBackend);
+		virtual void initWindow(const WindowLibBackend windowBackend);
 
 		void initTerminal();
 		void initVulkan();
@@ -234,8 +167,8 @@ namespace nekomimi {
 		void setMaximumSize(int width, int height) override;
 		void getMaximumSize(int *width, int *height) override;
 
-		fragcore::Display *getCurrentDisplay() const override { return this->proxyWindow->getCurrentDisplay(); }
-		void setFullScreen(fragcore::Display &display) override {}
+		fragcore::Display *getCurrentDisplay() const override;
+		void setFullScreen(fragcore::Display &display) override;
 
 		intptr_t getNativePtr() const override; /*  Get native window reference object. */
 
@@ -251,14 +184,14 @@ namespace nekomimi {
 		WindowLibBackend windowBackend;
 
 		/*	*/
-		std::shared_ptr<fragcore::IRenderer> renderer;
+		std::shared_ptr<fragcore::IRenderer> renderer = {nullptr};
 
-		fragcore::WindowManager *windowManager;
+		fragcore::WindowManager *windowManager = nullptr;
 		/*	*/
 		fragcore::Window *proxyWindow = {nullptr};
 
 		size_t nrFrameBuffer = 0;
-		void *screen;
+		void *screen = nullptr;
 
 		bool requestResize{false};
 	};
