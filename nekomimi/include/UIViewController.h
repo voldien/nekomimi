@@ -1,6 +1,6 @@
 /*
  *	NekoMimi - Window ImGUI Framework
- *	Copyright (C) 2021  Valdemar Lindberg
+ *	Copyright (c) 2025  Valdemar Lindberg
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
