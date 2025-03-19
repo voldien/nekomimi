@@ -178,11 +178,9 @@ void WindowBackend::initGfx(const GfxBackEnd backend) {
 	ImGuiIO &io = ImGui::GetIO();
 	(void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
 	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
-	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
-	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
 	if (backend == GfxBackEnd::ImGUI_OpenGL || backend == GfxBackEnd::ImGUI_Vulkan) {
 
@@ -195,6 +193,7 @@ void WindowBackend::initGfx(const GfxBackEnd backend) {
 		style.WindowRounding = 0.0f;
 		style.FramePadding = ImVec2(5, 7);
 		style.ItemSpacing = ImVec2(5, 5);
+
 		style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 		style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 		style.Colors[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.06f, 0.06f, 0.94f);
@@ -214,13 +213,9 @@ void WindowBackend::initGfx(const GfxBackEnd backend) {
 		this->initVulkan();
 		break;
 	case GfxBackEnd::ImGUI_DirectX9:
-		break;
 	case GfxBackEnd::ImGUI_DirectX10:
-		break;
 	case GfxBackEnd::ImGUI_DirectX11:
-		break;
 	case GfxBackEnd::ImGUI_DirectX12:
-		break;
 	default:
 		break;
 	}
@@ -468,9 +463,10 @@ void WindowBackend::loadFont(const std::string &path) {
 void WindowBackend::enableImGUI(bool enabled) noexcept { this->useImGUI = enabled; }
 bool WindowBackend::isEnabled() const noexcept { return this->useImGUI; }
 void WindowBackend::enableDocking(bool enabled) noexcept { this->useDocking = enabled; }
-void WindowBackend::enableViewPorts(bool enabled) {}
+void WindowBackend::enableViewPorts(bool enabled) { /*	*/ }
 
 void WindowBackend::showDockSpace(bool *open) {
+
 	static bool opt_fullscreen_persistant = true;
 	bool opt_fullscreen = opt_fullscreen_persistant;
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -631,8 +627,7 @@ void WindowBackend::endRenderVulkan() {
 void WindowBackend::endRenderOpenGL() {
 #ifdef MIMI_IMPL_OPENGL
 	/*	*/
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-	ImGuiIO &io = ImGui::GetIO();
+	const ImGuiIO &io = ImGui::GetIO();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -642,12 +637,6 @@ void WindowBackend::endRenderOpenGL() {
 	}
 
 	glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-
-	/*	Optionally.	TODO: add*/
-	// TODO check if can be removed or configured with flag.
-	// glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
-	//			 clear_color.w);
-	// glClear(GL_COLOR_BUFFER_BIT);
 #endif
 }
 
@@ -674,12 +663,9 @@ void WindowBackend::beginRender() {
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
-			// without it you won't have keyboard input and other things
 			if (ImGui_ImplSDL2_ProcessEvent(&event)) {
 				/*	*/
 			}
-			// you might also want to check io.WantCaptureMouse and io.WantCaptureKeyboard
-			// before processing events
 
 			switch (event.type) {
 			case SDL_QUIT:
@@ -713,6 +699,7 @@ void WindowBackend::beginRender() {
 				break;
 			}
 		}
+	} else {
 	}
 
 #endif

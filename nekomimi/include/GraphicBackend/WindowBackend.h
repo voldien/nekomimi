@@ -156,7 +156,7 @@ namespace nekomimi {
 
 		bool isFullScreen() const override;
 
-		void setBordered(bool borded) override;
+		void setBordered(bool bordered) override;
 
 		float getGamma() const override;
 
