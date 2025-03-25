@@ -122,7 +122,7 @@ WindowBackend::WindowBackend(const WindowLibBackend windowBackend, const GfxBack
 	this->initGfx(gfxBackend);
 }
 
-WindowBackend::~WindowBackend() { releaseRender(); }
+WindowBackend::~WindowBackend() { this->releaseRender(); }
 
 void WindowBackend::releaseRender() {
 	switch (gfxBackend) {
@@ -226,7 +226,7 @@ void WindowBackend::initWindow(const WindowLibBackend windowBackend) {
 	switch (this->getBackendWindowManager()) {
 	case WindowLibBackend::WindowBackendSDL2:
 #ifdef MIMI_IMPL_WINDOW_SDL2
-		this->windowManager = new fragcore::SDLWindowManager();
+		this->windowManager = std::make_shared<fragcore::SDLWindowManager>();
 #endif
 		break;
 	case WindowLibBackend::WindowBackendGLFW3:
@@ -594,7 +594,7 @@ void WindowBackend::endRenderVulkan() {
 
 	VKS_VALIDATE(vkBeginCommandBuffer(currentCmd, &beginInfo));
 
-	// TOOD execute the command line.
+	// TODO execute the command line.
 
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;

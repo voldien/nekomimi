@@ -8,6 +8,7 @@
 #include <sys/time.h>
 
 using namespace ImGui;
+using namespace nekomimi;
 
 void UIUtilHelper::HelpMarker(const char *desc) {
 	if (ImGui::IsItemHovered()) {

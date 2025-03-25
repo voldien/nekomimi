@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3 of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program;
  */
@@ -19,12 +19,15 @@
 #define _NEKO_MIMI_ACTION_H_ 1
 #include <cstdio>
 #include <functional>
+namespace nekomimi {
 
-template <typename Return> class Action {
-  public:
-	template <typename... Args> void invoke(Args &&... args) { _callback(args); }
+	template <typename Return> class Action {
+	  public:
+		template <typename... Args> void invoke(Args &&...args) { _callback(args); }
 
-  private:
-	std::function<void(void)> _callback = 0;
-};
+	  private:
+		std::function<void(void)> _callback = 0;
+	};
+
+} // namespace nekomimi
 #endif

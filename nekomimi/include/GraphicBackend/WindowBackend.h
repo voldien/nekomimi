@@ -184,9 +184,9 @@ namespace nekomimi {
 		WindowLibBackend windowBackend;
 
 		/*	*/
-		std::shared_ptr<fragcore::IRenderer> renderer = {nullptr};
+		std::shared_ptr<fragcore::IRenderer> renderer = nullptr;
 
-		fragcore::WindowManager *windowManager = nullptr;
+		std::shared_ptr<fragcore::WindowManager> windowManager = nullptr;
 		/*	*/
 		fragcore::Window *proxyWindow = {nullptr};
 
