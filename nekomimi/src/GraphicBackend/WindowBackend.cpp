@@ -126,29 +126,32 @@ WindowBackend::~WindowBackend() { this->releaseRender(); }
 
 void WindowBackend::releaseRender() {
 	switch (gfxBackend) {
-	case GfxBackEnd::ImGUI_Terminal:
+
 #ifdef MIMI_IMPL_TERMINAL
+	case GfxBackEnd::ImGUI_Terminal:
 		ImTui_ImplText_Shutdown();
 		ImTui_ImplNcurses_Shutdown();
-#endif
 		break;
-	case GfxBackEnd::ImGUI_OpenGL:
+#endif
+
 #ifdef MIMI_IMPL_OPENGL
+	case GfxBackEnd::ImGUI_OpenGL:
 		ImGui_ImplOpenGL3_Shutdown();
-#endif
 		break;
-	case GfxBackEnd::ImGUI_Vulkan:
+#endif
+
 #ifdef MIMI_IMPL_VULKAN
+	case GfxBackEnd::ImGUI_Vulkan:
 		ImGui_ImplVulkan_Shutdown();
 #endif
 		break;
 	default:
 		break;
 	}
+
 	switch (gfxBackend) {
 	case GfxBackEnd::ImGUI_Vulkan:
 	case GfxBackEnd::ImGUI_OpenGL:
-		break;
 	default:
 		break;
 	}
