@@ -2,8 +2,8 @@
 
 using namespace nekomimi;
 
-UIComponent::UIComponent() : window_flags(ImGuiWindowFlags_None) {
-	this->m_show = true;
+UIComponent::UIComponent() : m_show(true), window_flags(ImGuiWindowFlags_None) {
+	
 	this->setName("Default");
 }
 

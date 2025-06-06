@@ -776,7 +776,7 @@ int WindowBackend::height() const noexcept { return this->proxyWindow->height();
 
 void WindowBackend::resizable(bool resizable) noexcept { this->proxyWindow->resizable(resizable); }
 
-void WindowBackend::setFullScreen(bool fullscreen) { return this->proxyWindow->setFullScreen(fullscreen); }
+void WindowBackend::setFullScreen(bool fullscreen) {  this->proxyWindow->setFullScreen(fullscreen); }
 
 bool WindowBackend::isFullScreen() const { return this->proxyWindow->isFullScreen(); }
 
@@ -784,7 +784,7 @@ void WindowBackend::setBordered(bool bordered) { this->proxyWindow->setBordered(
 
 float WindowBackend::getGamma() const { return this->proxyWindow->getGamma(); }
 
-void WindowBackend::setGamma(float gamma) { return this->proxyWindow->setGamma(gamma); }
+void WindowBackend::setGamma(float gamma) {  this->proxyWindow->setGamma(gamma); }
 
 void WindowBackend::setMinimumSize(int width, int height) { this->proxyWindow->setMinimumSize(width, height); }
 void WindowBackend::getMinimumSize(int *width, int *height) { this->proxyWindow->getMinimumSize(width, height); }
