@@ -1,3 +1,4 @@
+#define IMTERM_USE_FMT 1
 #include "GraphicBackend/WindowBackend.h"
 #include "FragDef.h"
 #include "RendererWindow.h"
@@ -122,7 +123,10 @@ WindowBackend::WindowBackend(const WindowLibBackend windowBackend, const GfxBack
 	this->initGfx(gfxBackend);
 }
 
-WindowBackend::~WindowBackend() { this->releaseRender(); }
+WindowBackend::~WindowBackend() {
+	this->releaseRender();
+	// delete this->renderer; //TODO: fix why it won't delete
+}
 
 void WindowBackend::releaseRender() {
 	switch (gfxBackend) {
@@ -181,7 +185,8 @@ void WindowBackend::initGfx(const GfxBackEnd backend) {
 	ImGuiIO &io = ImGui::GetIO();
 	(void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+	/*	*/
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
 	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
 
@@ -192,11 +197,13 @@ void WindowBackend::initGfx(const GfxBackEnd backend) {
 
 		ImGuiStyle &style = ImGui::GetStyle();
 
+		/*	*/
 		style.WindowPadding = ImVec2(8, 6);
 		style.WindowRounding = 0.0f;
 		style.FramePadding = ImVec2(5, 7);
 		style.ItemSpacing = ImVec2(5, 5);
 
+		/*	*/
 		style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 		style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 		style.Colors[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.06f, 0.06f, 0.94f);
@@ -220,6 +227,7 @@ void WindowBackend::initGfx(const GfxBackEnd backend) {
 	case GfxBackEnd::ImGUI_DirectX11:
 	case GfxBackEnd::ImGUI_DirectX12:
 	default:
+		throw RuntimeException("Invalid Backend");
 		break;
 	}
 }
@@ -230,6 +238,11 @@ void WindowBackend::initWindow(const WindowLibBackend windowBackend) {
 	case WindowLibBackend::WindowBackendSDL2:
 #ifdef MIMI_IMPL_WINDOW_SDL2
 		this->windowManager = std::make_shared<fragcore::SDLWindowManager>();
+#endif
+
+		// From 2.0.18: Enable native IME.
+#ifdef SDL_HINT_IME_SHOW_UI
+		SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 #endif
 		break;
 	case WindowLibBackend::WindowBackendGLFW3:
@@ -251,13 +264,16 @@ void WindowBackend::initTerminal() {
 }
 
 void WindowBackend::initVulkan() {
+
 #ifdef MIMI_IMPL_VULKAN
+ 
+
 	int width = 800;
 	int height = 600;
 
 	/*	Create render interface.	*/
-	this->renderer = std::shared_ptr<VKRenderInterface>(new VKRenderInterface(nullptr));
-	VKRenderInterface *vkRenderer = (VKRenderInterface *)this->renderer.get();
+	this->renderer = new VKRenderInterface(nullptr);
+	VKRenderInterface *vkRenderer = (VKRenderInterface *)this->renderer;
 
 	fragcore::Display *mainDisplay;
 
@@ -408,7 +424,7 @@ void WindowBackend::initOpenGL() {
 
 	/*	*/
 	fragcore::GLRendererInterface *openGLRenderer = new fragcore::GLRendererInterface(nullptr);
-	this->renderer = std::shared_ptr<fragcore::IRenderer>(openGLRenderer);
+	this->renderer = openGLRenderer; // std::shared_ptr<fragcore::IRenderer>(openGLRenderer);
 
 	/*	*/
 	const unsigned int width = display->width() / 2;
@@ -419,6 +435,7 @@ void WindowBackend::initOpenGL() {
 	this->proxyWindow = (fragcore::Window *)openGLRenderer->createWindow(width / 2, height / 2, width, height);
 
 	std::string glsl_version;
+
 #ifdef __APPLE__
 	// GL 3.2 Core + GLSL 150
 	glsl_version = "#version 150";
@@ -440,7 +457,7 @@ void WindowBackend::initOpenGL() {
 			throw fragcore::RuntimeException("Failed to Init ImGUI SDL2 for OpenGL");
 		}
 	} else {
-		throw RuntimeException("");
+		throw RuntimeException("Invalid Window Backend");
 	}
 #endif
 
@@ -776,7 +793,7 @@ int WindowBackend::height() const noexcept { return this->proxyWindow->height();
 
 void WindowBackend::resizable(bool resizable) noexcept { this->proxyWindow->resizable(resizable); }
 
-void WindowBackend::setFullScreen(bool fullscreen) {  this->proxyWindow->setFullScreen(fullscreen); }
+void WindowBackend::setFullScreen(bool fullscreen) { this->proxyWindow->setFullScreen(fullscreen); }
 
 bool WindowBackend::isFullScreen() const { return this->proxyWindow->isFullScreen(); }
 
@@ -784,7 +801,7 @@ void WindowBackend::setBordered(bool bordered) { this->proxyWindow->setBordered(
 
 float WindowBackend::getGamma() const { return this->proxyWindow->getGamma(); }
 
-void WindowBackend::setGamma(float gamma) {  this->proxyWindow->setGamma(gamma); }
+void WindowBackend::setGamma(float gamma) { this->proxyWindow->setGamma(gamma); }
 
 void WindowBackend::setMinimumSize(int width, int height) { this->proxyWindow->setMinimumSize(width, height); }
 void WindowBackend::getMinimumSize(int *width, int *height) { this->proxyWindow->getMinimumSize(width, height); }

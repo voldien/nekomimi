@@ -31,7 +31,7 @@ namespace nekomimi {
 	  public:
 		MIMIWindow(const GfxBackEnd backend,
 				   const WindowLibBackend window_backend = WindowLibBackend::WindowBackendSDL2);
-
+		// TODO: based on existing data.
 	  public:
 		void run();
 

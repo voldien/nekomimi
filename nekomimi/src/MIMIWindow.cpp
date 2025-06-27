@@ -15,6 +15,7 @@ void MIMIWindow::run() {
 	bool show_dockspace = true;
 	bool show_viewports = false;
 
+	/*	*/
 	while (!this->requestQuit) {
 
 		/*	*/

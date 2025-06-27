@@ -17,7 +17,6 @@
  */
 #ifndef _NEKO_MIMI_UI_WINDOW_BACKEND_H_
 #define _NEKO_MIMI_UI_WINDOW_BACKEND_H_ 1
-#define IMTERM_USE_FMT 1
 #include "GraphicBackend/GraphicBackendDef.h"
 #include "WindowManager.h"
 #include <CommandList.h>
@@ -56,6 +55,7 @@ namespace nekomimi {
 
 	  public:
 		WindowBackend(const WindowLibBackend windowBackend, const GfxBackEnd backend);
+
 		~WindowBackend() override;
 
 		/**
@@ -116,8 +116,8 @@ namespace nekomimi {
 
 		WindowLibBackend getBackendWindowManager() const noexcept { return this->windowBackend; }
 
-		const std::shared_ptr<fragcore::IRenderer> &getRenderInterface() const noexcept { return this->renderer; }
-		std::shared_ptr<fragcore::IRenderer> &getRenderInterface() noexcept { return this->renderer; }
+		const fragcore::IRenderer *getRenderInterface() const noexcept { return this->renderer; }
+		fragcore::IRenderer *getRenderInterface() noexcept { return this->renderer; }
 
 		size_t getNumberFrameBuffers() const noexcept;
 
@@ -184,8 +184,8 @@ namespace nekomimi {
 		WindowLibBackend windowBackend;
 
 		/*	*/
-		std::shared_ptr<fragcore::IRenderer> renderer = nullptr;
-
+		fragcore::IRenderer *renderer = nullptr;
+		/*	*/
 		std::shared_ptr<fragcore::WindowManager> windowManager = nullptr;
 		/*	*/
 		fragcore::Window *proxyWindow = {nullptr};
