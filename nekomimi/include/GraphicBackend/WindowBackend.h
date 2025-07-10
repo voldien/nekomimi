@@ -156,11 +156,11 @@ namespace nekomimi {
 
 		bool isFullScreen() const override;
 
-		void setBordered(bool bordered) override;
+		void setBordered(const bool bordered) override;
 
 		float getGamma() const override;
 
-		void setGamma(float gamma) override;
+		void setGamma(const float gamma) override;
 
 		void setMinimumSize(int width, int height) override;
 		void getMinimumSize(int *width, int *height) override;
@@ -168,7 +168,7 @@ namespace nekomimi {
 		void getMaximumSize(int *width, int *height) override;
 
 		fragcore::Display *getCurrentDisplay() const override;
-		void setFullScreen(fragcore::Display &display) override;
+		void setFullScreen(const fragcore::Display &display) override;
 
 		intptr_t getNativePtr() const override; /*  Get native window reference object. */
 

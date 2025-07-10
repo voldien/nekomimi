@@ -168,7 +168,7 @@ bool UIUtilHelper::ComboFilter_DrawPopup(ComboFilterState &state, int START, con
 	SetNextWindowSize(size);
 	Begin("##combo_filter", nullptr, flags);
 
-	PushAllowKeyboardFocus(false);
+	PushTabStop(false);
 
 	for (int i = 0; i < ENTRY_COUNT; i++) {
 		// Track if we're drawing the active index so we
@@ -206,7 +206,7 @@ bool UIUtilHelper::ComboFilter_DrawPopup(ComboFilterState &state, int START, con
 		}
 	}
 
-	PopAllowKeyboardFocus();
+	PopTabStop();
 	End();
 	PopStyleVar(1);
 

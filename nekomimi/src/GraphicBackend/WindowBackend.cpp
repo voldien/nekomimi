@@ -848,7 +848,7 @@ void WindowBackend::minimize() {
 }
 
 fragcore::Display *WindowBackend::getCurrentDisplay() const { return this->proxyWindow->getCurrentDisplay(); }
-void WindowBackend::setFullScreen(fragcore::Display &display) { this->proxyWindow->setFullScreen(display); }
+void WindowBackend::setFullScreen(const fragcore::Display &display) { this->proxyWindow->setFullScreen(display); }
 
 intptr_t WindowBackend::getNativePtr() const {
 	if (!this->proxyWindow) {
