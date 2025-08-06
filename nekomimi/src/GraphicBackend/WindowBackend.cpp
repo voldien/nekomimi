@@ -266,7 +266,6 @@ void WindowBackend::initTerminal() {
 void WindowBackend::initVulkan() {
 
 #ifdef MIMI_IMPL_VULKAN
- 
 
 	int width = 800;
 	int height = 600;
@@ -483,7 +482,8 @@ void WindowBackend::loadFont(const std::string &path) {
 void WindowBackend::enableImGUI(bool enabled) noexcept { this->useImGUI = enabled; }
 bool WindowBackend::isEnabled() const noexcept { return this->useImGUI; }
 void WindowBackend::enableDocking(bool enabled) noexcept { this->useDocking = enabled; }
-void WindowBackend::enableViewPorts(bool enabled) { /*	*/ }
+void WindowBackend::enableViewPorts(bool enabled) { /*	*/
+}
 
 void WindowBackend::showDockSpace(bool *open) {
 
@@ -855,4 +855,11 @@ intptr_t WindowBackend::getNativePtr() const {
 		return 0;
 	}
 	return this->proxyWindow->getNativePtr();
+}
+
+intptr_t WindowBackend::getNativeInternalPtr() const {
+	if (!this->proxyWindow) {
+		return 0;
+	}
+	return this->proxyWindow->getNativeInternalPtr();
 }

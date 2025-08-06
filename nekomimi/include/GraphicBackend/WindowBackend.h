@@ -58,20 +58,18 @@ namespace nekomimi {
 
 		~WindowBackend() override;
 
+	  public:
 		/**
-		 * @brief
-		 *
-		 * @param backend
+		 * @brief Initialize the backend graphic.
 		 */
 		virtual void initGfx(const GfxBackEnd backend);
 
 		/**
-		 * @brief
-		 *
-		 * @param windowBackend
+		 * @brief Initialize the backend window.
 		 */
 		virtual void initWindow(const WindowLibBackend windowBackend);
 
+	  protected: /*	Internal methods for each backends.	*/
 		void initTerminal();
 		void initVulkan();
 		void initOpenGL();
@@ -101,7 +99,7 @@ namespace nekomimi {
 
 		virtual void releaseRender();
 
-	  public: /*	*/
+	  public: /*	Settings Methods.	*/
 		virtual void loadFont(const std::string &path);
 
 		virtual void enableImGUI(bool enabled) noexcept;
@@ -111,7 +109,7 @@ namespace nekomimi {
 		virtual void showDockSpace(bool *open);
 		virtual void showViewPorts(bool *open);
 
-	  public:
+	  public: /*	Access Methods.	*/
 		GfxBackEnd getBackendRenderer() const noexcept { return this->gfxBackend; }
 
 		WindowLibBackend getBackendWindowManager() const noexcept { return this->windowBackend; }
@@ -171,6 +169,7 @@ namespace nekomimi {
 		void setFullScreen(const fragcore::Display &display) override;
 
 		intptr_t getNativePtr() const override; /*  Get native window reference object. */
+		intptr_t getNativeInternalPtr() const override;
 
 	  protected:
 		bool useImGUI = true;
@@ -180,6 +179,7 @@ namespace nekomimi {
 	  private:
 		bool visible = false;
 
+		/*	*/
 		GfxBackEnd gfxBackend;
 		WindowLibBackend windowBackend;
 

@@ -2,10 +2,7 @@
 
 using namespace nekomimi;
 
-UIComponent::UIComponent() : m_show(true), window_flags(ImGuiWindowFlags_None) {
-	
-	this->setName("Default");
-}
+UIComponent::UIComponent() : m_show(true), window_flags(ImGuiWindowFlags_None) { this->setName("Default"); }
 
 void UIComponent::begin() {
 
