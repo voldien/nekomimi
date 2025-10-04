@@ -8,6 +8,7 @@ MIMIWindow::MIMIWindow(const GfxBackEnd backend, const WindowLibBackend window_b
 void MIMIWindow::run() {
 
 	/*	*/
+	this->show();
 	this->maximize();
 	this->focus();
 
@@ -23,20 +24,24 @@ void MIMIWindow::run() {
 
 		ImGui::NewFrame();
 
-		this->displayMenuBar();
+		if (getMenuBarVisable()) {
+			this->displayMenuBar();
+		}
 
 		/*	User Callback.	*/
 		this->renderUI();
 
 		if (this->isEnabled()) {
+
 			if (this->useDocking) {
 				this->showDockSpace(&show_dockspace);
 			}
+
+			/*	*/
 			this->showViewPorts(&show_viewports);
 
 			/*	Draw each UI elements on screen.	*/
-
-			for (unsigned int i = 0; i < components.size(); i++) {
+			for (size_t i = 0; i < components.size(); i++) {
 				std::shared_ptr<UIComponent> &uiComponent = this->components[i];
 				uiComponent->drawUI();
 			}
@@ -58,3 +63,6 @@ void MIMIWindow::removeUIComponent(const std::shared_ptr<UIComponent> &component
 }
 size_t MIMIWindow::getNrUIComponents() const noexcept { return this->components.size(); }
 std::shared_ptr<UIComponent> &MIMIWindow::getComponent(const size_t index) { return this->components[index]; }
+
+void MIMIWindow::setMenuBarVisable(bool enabled) { this->showMenuBar = enabled; }
+bool MIMIWindow::getMenuBarVisable() const noexcept { return this->showMenuBar; }

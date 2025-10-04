@@ -12,7 +12,7 @@ void UIComponent::begin() {
 		ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x * 0.25f, ImGui::GetIO().DisplaySize.y * 0.25f),
 								 ImGuiCond_FirstUseEver);
 
-		this->isContentVisible = ImGui::Begin(getName().c_str(), &this->m_show);
+		this->isContentVisible = ImGui::Begin(this->getName().c_str(), &this->m_show, window_flags);
 	}
 }
 

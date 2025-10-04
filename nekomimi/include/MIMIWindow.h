@@ -25,7 +25,6 @@ namespace nekomimi {
 
 	/**
 	 * @brief
-	 *
 	 */
 	class FVDECLSPEC MIMIWindow : public WindowBackend {
 	  public:
@@ -38,7 +37,6 @@ namespace nekomimi {
 		/**
 		 * @brief Request for the application
 		 * to quit.
-		 *
 		 */
 		void quit();
 
@@ -48,8 +46,8 @@ namespace nekomimi {
 		size_t getNrUIComponents() const noexcept;
 		std::shared_ptr<UIComponent> &getComponent(const size_t index);
 
-		void setStatusBar(bool enabled);
-		bool getStatusbar() const noexcept;
+		void setMenuBarVisable(bool enabled);
+		bool getMenuBarVisable() const noexcept;
 		void setUIComponentEnabled(bool enabled);
 
 	  protected:
@@ -60,6 +58,7 @@ namespace nekomimi {
 		void removeUIComponent(uint32_t uid);
 
 		std::vector<std::shared_ptr<UIComponent>> components;
+		bool showMenuBar = false;
 	};
 } // namespace nekomimi
 
