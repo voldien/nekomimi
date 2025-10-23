@@ -15,19 +15,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program;
  */
-#ifndef _NEKO_MIMI_ACTION_H_
-#define _NEKO_MIMI_ACTION_H_ 1
+#pragma once
 #include <cstdio>
 #include <functional>
 namespace nekomimi {
 
 	template <typename Return> class Action {
 	  public:
-		template <typename... Args> void invoke(Args &&... args) { _callback(args); }
+		template <typename... Args> void invoke(Args &&...args) { _callback(args); }
 
 	  private:
 		std::function<void(void)> _callback = 0;
 	};
 
 } // namespace nekomimi
-#endif

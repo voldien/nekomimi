@@ -1,5 +1,4 @@
-#ifndef _NEKO_MIMI_IMGUI_UI_UTIL_HELPER_H_
-#define _NEKO_MIMI_IMGUI_UI_UTIL_HELPER_H_ 1
+#pragma once
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <ctime>
 #include <imgui.h>
@@ -66,4 +65,3 @@ namespace nekomimi {
 		static int Bezier(const char *label, float P[5]);
 	};
 } // namespace nekomimi
-#endif

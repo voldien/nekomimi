@@ -15,8 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program;
  */
-#ifndef _NEKO_MIMI_UICOMPONENT_H_
-#define _NEKO_MIMI_UICOMPONENT_H_ 1
+#pragma once
 #include "FragDef.h"
 #include <Core/UIDObject.h>
 #include <DataStructure/ITree.h>
@@ -69,5 +68,3 @@ namespace nekomimi {
 		std::string name;
 	};
 } // namespace nekomimi
-
-#endif

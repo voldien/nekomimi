@@ -15,8 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program;
  */
-#ifndef _NEKO_MIMI_UI_RENDERING_BACKEND_H_
-#define _NEKO_MIMI_UI_RENDERING_BACKEND_H_ 1
+#pragma once
 #define IMTERM_USE_FMT 1
 #include "GraphicBackendDef.h"
 #include <CommandList.h>
@@ -128,5 +127,3 @@ namespace nekomimi {
 	};
 
 } // namespace nekomimi
-
-#endif

@@ -15,8 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program;
  */
-#ifndef _MIMI_MIMI_WINDOW_H_
-#define _MIMI_MIMI_WINDOW_H_ 1
+#pragma once
 #include "GraphicBackend/WindowBackend.h"
 #include "UIComponent.h"
 #include <memory>
@@ -61,5 +60,3 @@ namespace nekomimi {
 		bool showMenuBar = false;
 	};
 } // namespace nekomimi
-
-#endif

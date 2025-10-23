@@ -15,8 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program;
  */
-#ifndef _NEKO_MIMI_UI_WINDOW_BACKEND_H_
-#define _NEKO_MIMI_UI_WINDOW_BACKEND_H_ 1
+#pragma once
 #include "GraphicBackend/GraphicBackendDef.h"
 #include "WindowManager.h"
 #include <CommandList.h>
@@ -196,5 +195,3 @@ namespace nekomimi {
 		bool requestResize{false};
 	};
 } // namespace nekomimi
-
-#endif
