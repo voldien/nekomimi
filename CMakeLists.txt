@@ -26,6 +26,8 @@ OPTION(MIMI_DIRECTX_SUPPORT "Enable DirectX Backend" OFF)
 OPTION(MIMI_WINDOW_SDL2_SUPPORT "Enable SDL2 Backend" ON)
 OPTION(MIMI_WINDOW_GLFW3_SUPPORT "Enable GLFW3 Backend" OFF)
 
+OPTION(MIMI_IMPLOT "Use ImPlot" ON)
+
 ################################################
 # Find all dependices libraries and etc.
 ################################################
@@ -50,6 +52,11 @@ ENDIF()
 
 IF(MIMI_TERMINAL_SUPPORT)
 	INCLUDE(imtui)
+ENDIF()
+
+IF(MIMI_IMPLOT)
+	INCLUDE(implot3d)
+	INCLUDE(implot)
 ENDIF()
 
 #
@@ -132,7 +139,8 @@ IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required
 	SET_PROPERTY(TARGET nekomimi-window PROPERTY POSITION_INDEPENDENT_CODE ON)
 ENDIF()
 
-TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC observable fragcore-render-interface fragcore-shader-compiler)
+TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC observable fragcore-render-interface fragcore-shader-compiler implot3d implot)
+TARGET_COMPILE_DEFINITIONS(nekomimi-window INTERFACE IMGUI_DISABLE_OBSOLETE_FUNCTIONS=1)
 ADD_DEPENDENCIES(nekomimi-window observable fragcore-render-interface)
 
 IF(MIMI_WINDOW_SDL2_SUPPORT)

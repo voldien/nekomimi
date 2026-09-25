@@ -24,14 +24,11 @@ void MIMIWindow::run() {
 
 		ImGui::NewFrame();
 
-		if (getMenuBarVisable()) {
-			this->displayMenuBar();
-		}
-
-		/*	User Callback.	*/
-		this->renderUI();
-
 		if (this->isEnabled()) {
+
+			if (getMenuBarVisable()) {
+				this->displayMenuBar();
+			}
 
 			if (this->useDocking) {
 				this->showDockSpace(&show_dockspace);
@@ -39,6 +36,9 @@ void MIMIWindow::run() {
 
 			/*	*/
 			this->showViewPorts(&show_viewports);
+
+			/*	User Callback.	*/
+			this->renderUI();
 
 			/*	Draw each UI elements on screen.	*/
 			for (size_t i = 0; i < components.size(); i++) {

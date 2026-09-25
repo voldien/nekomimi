@@ -11,7 +11,7 @@
 #include <fmt/format.h>
 #include <imgui/imgui.h>
 #include <imgui/misc/cpp/imgui_stdlib.h>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <memory>
 
 #ifdef MIMI_IMPL_WINDOW_SDL2
@@ -475,8 +475,8 @@ void WindowBackend::loadFont(const std::string &path) {
 	ImFontConfig config;
 	ImGuiIO &io = ImGui::GetIO();
 	config.MergeMode = true;
-	io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f, &config, io.Fonts->GetGlyphRangesJapanese());
-	io.Fonts->Build();
+	io.Fonts->AddFontFromFileTTF(path.c_str(), 18.0f, &config, io.Fonts->GetGlyphRangesDefault());
+	//io.Fonts->Build();
 }
 
 void WindowBackend::enableImGUI(bool enabled) noexcept { this->useImGUI = enabled; }

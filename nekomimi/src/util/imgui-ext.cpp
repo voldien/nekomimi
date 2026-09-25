@@ -106,7 +106,7 @@ bool UIUtilHelper::Spinner(const char *label, float radius, int thickness, const
 			ImVec2(centre.x + ImCos(a + g.Time * 8) * radius, centre.y + ImSin(a + g.Time * 8) * radius));
 	}
 
-	window->DrawList->PathStroke(color, false, thickness);
+	window->DrawList->PathStroke(color, thickness);
 
 	return true;
 }
@@ -168,7 +168,7 @@ bool UIUtilHelper::ComboFilter_DrawPopup(ComboFilterState &state, int START, con
 	SetNextWindowSize(size);
 	Begin("##combo_filter", nullptr, flags);
 
-	PushTabStop(false);
+	//PushTabStop(false);
 
 	for (int i = 0; i < ENTRY_COUNT; i++) {
 		// Track if we're drawing the active index so we
@@ -206,7 +206,7 @@ bool UIUtilHelper::ComboFilter_DrawPopup(ComboFilterState &state, int START, con
 		}
 	}
 
-	PopTabStop();
+	//PopTabStop();
 	End();
 	PopStyleVar(1);
 
