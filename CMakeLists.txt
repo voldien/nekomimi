@@ -1,5 +1,11 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 3.9...3.20)
 PROJECT(nekomimi CXX C)
+
+# Check if project is a standalone and not part of another project.
+IF(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+	SET(MIMI_PROJECT_ROOT TRUE)
+ENDIF()
+
 INCLUDE(GNUInstallDirs)
 
 # Ouput directory for both library and executables.
@@ -26,7 +32,7 @@ OPTION(MIMI_DIRECTX_SUPPORT "Enable DirectX Backend" OFF)
 OPTION(MIMI_WINDOW_SDL2_SUPPORT "Enable SDL2 Backend" ON)
 OPTION(MIMI_WINDOW_GLFW3_SUPPORT "Enable GLFW3 Backend" OFF)
 
-OPTION(MIMI_IMPLOT "Use ImPlot" ON)
+OPTION(MIMI_IMPLOT "Use ImPlot/3D" ON)
 
 ################################################
 # Find all dependices libraries and etc.
@@ -43,20 +49,8 @@ ENDIF()
 ############################################
 # Backend libraries
 ############################################
-
-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
-
 IF (NOT TARGET fragcore)
 	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore EXCLUDE_FROM_ALL)
-ENDIF()
-
-IF(MIMI_TERMINAL_SUPPORT)
-	INCLUDE(imtui)
-ENDIF()
-
-IF(MIMI_IMPLOT)
-	INCLUDE(implot3d)
-	INCLUDE(implot)
 ENDIF()
 
 #
@@ -78,6 +72,19 @@ IF(MIMI_VULKAN_SUPPORT AND MIMI_WINDOW_SDL2_SUPPORT)
 ENDIF()
 
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/observable/observable EXCLUDE_FROM_ALL)
+
+# 
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+
+IF(MIMI_TERMINAL_SUPPORT)
+	INCLUDE(imtui)
+ENDIF()
+
+IF(MIMI_IMPLOT)
+	INCLUDE(implot3d)
+	INCLUDE(implot)
+ENDIF()
+
 
 ###################################
 # Source Code For Main Libary.
@@ -139,9 +146,13 @@ IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required
 	SET_PROPERTY(TARGET nekomimi-window PROPERTY POSITION_INDEPENDENT_CODE ON)
 ENDIF()
 
-TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC observable fragcore-render-interface fragcore-shader-compiler implot3d implot)
-TARGET_COMPILE_DEFINITIONS(nekomimi-window INTERFACE IMGUI_DISABLE_OBSOLETE_FUNCTIONS=1)
+TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC observable fragcore-render-interface fragcore-shader-compiler)
+TARGET_COMPILE_DEFINITIONS(nekomimi-window PUBLIC IMGUI_DISABLE_OBSOLETE_FUNCTIONS=1)
 ADD_DEPENDENCIES(nekomimi-window observable fragcore-render-interface)
+
+IF(MIMI_IMPLOT)
+	TARGET_LINK_LIBRARIES(nekomimi-window PUBLIC implot3d implot)
+ENDIF()
 
 IF(MIMI_WINDOW_SDL2_SUPPORT)
 	TARGET_COMPILE_DEFINITIONS(nekomimi-window PRIVATE MIMI_IMPL_WINDOW_SDL2)
@@ -170,6 +181,8 @@ ENDIF()
 ########################
 # Samples codes
 ########################
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/samples)
+IF(MIMI_PROJECT_ROOT)
+	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/samples)
+ENDIF()
 
 INSTALL(TARGETS nekomimi-window DESTINATION lib)
