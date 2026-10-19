@@ -47,16 +47,17 @@ namespace nekomimi {
 
 		void setMenuBarVisable(bool enabled);
 		bool getMenuBarVisable() const noexcept;
-		void setUIComponentEnabled(bool enabled);
+
+		void setUIComponentEnabled(bool enabled) noexcept;
+		bool getUIComponentEnabled() const noexcept{return this->showUIComponents;}
 
 	  protected:
 		virtual void displayMenuBar() = 0;
 		virtual void renderUI() = 0;
 
 	  private:
-		void removeUIComponent(uint32_t uid);
-
 		std::vector<std::shared_ptr<UIComponent>> components;
 		bool showMenuBar = false;
+		bool showUIComponents = true;
 	};
 } // namespace nekomimi

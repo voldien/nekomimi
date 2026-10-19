@@ -41,9 +41,11 @@ void MIMIWindow::run() {
 			this->renderUI();
 
 			/*	Draw each UI elements on screen.	*/
-			for (size_t i = 0; i < components.size(); i++) {
-				std::shared_ptr<UIComponent> &uiComponent = this->components[i];
-				uiComponent->drawUI();
+			if (this->showUIComponents) {
+				for (size_t i = 0; i < components.size(); i++) {
+					std::shared_ptr<UIComponent> &uiComponent = this->components[i];
+					uiComponent->drawUI();
+				}
 			}
 		}
 
@@ -66,3 +68,5 @@ std::shared_ptr<UIComponent> &MIMIWindow::getComponent(const size_t index) { ret
 
 void MIMIWindow::setMenuBarVisable(bool enabled) { this->showMenuBar = enabled; }
 bool MIMIWindow::getMenuBarVisable() const noexcept { return this->showMenuBar; }
+
+void MIMIWindow::setUIComponentEnabled(bool enabled) noexcept { this->showUIComponents = enabled; }

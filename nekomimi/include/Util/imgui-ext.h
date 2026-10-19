@@ -2,6 +2,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <ctime>
 #include <imgui.h>
+
 namespace nekomimi {
 	/**
 	 * @brief a helper class with
@@ -46,17 +47,17 @@ namespace nekomimi {
 				K = C;
 				for (unsigned step = 0; step <= steps; ++step) {
 					float t = (float)step / (float)steps;
-					C[step * 4 + 0] = (1 - t) * (1 - t) * (1 - t); // * P0
-					C[step * 4 + 1] = 3 * (1 - t) * (1 - t) * t;   // * P1
-					C[step * 4 + 2] = 3 * (1 - t) * t * t;		   // * P2
-					C[step * 4 + 3] = t * t * t;				   // * P3
+					C[(step * 4) + 0] = (1 - t) * (1 - t) * (1 - t); // * P0
+					C[(step * 4) + 1] = 3 * (1 - t) * (1 - t) * t;	 // * P1
+					C[(step * 4) + 2] = 3 * (1 - t) * t * t;		 // * P2
+					C[(step * 4) + 3] = t * t * t;					 // * P3
 				}
 			}
 			for (unsigned step = 0; step <= steps; ++step) {
-				ImVec2 point = {K[step * 4 + 0] * P[0].x + K[step * 4 + 1] * P[1].x + K[step * 4 + 2] * P[2].x +
-									K[step * 4 + 3] * P[3].x,
-								K[step * 4 + 0] * P[0].y + K[step * 4 + 1] * P[1].y + K[step * 4 + 2] * P[2].y +
-									K[step * 4 + 3] * P[3].y};
+				ImVec2 point = {(K[(step * 4) + 0] * P[0].x) + (K[(step * 4) + 1] * P[1].x) +
+									(K[(step * 4) + 2] * P[2].x) + (K[(step * 4) + 3] * P[3].x),
+								(K[(step * 4) + 0] * P[0].y) + (K[(step * 4) + 1] * P[1].y) +
+									(K[(step * 4) + 2] * P[2].y) + (K[(step * 4) + 3] * P[3].y)};
 				results[step] = point;
 			}
 		}
