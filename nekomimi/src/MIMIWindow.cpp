@@ -30,7 +30,8 @@ void MIMIWindow::run() {
 				this->displayMenuBar();
 			}
 
-			if (this->useDocking) {
+			if (this->isDockingEnabled()) {
+
 				this->showDockSpace(&show_dockspace);
 			}
 
@@ -42,8 +43,9 @@ void MIMIWindow::run() {
 
 			/*	Draw each UI elements on screen.	*/
 			if (this->showUIComponents) {
-				for (size_t i = 0; i < components.size(); i++) {
-					std::shared_ptr<UIComponent> &uiComponent = this->components[i];
+				for (size_t com_index = 0; com_index < components.size(); com_index++) {
+					std::shared_ptr<UIComponent> &uiComponent = this->components[com_index];
+					ASSERT(&uiComponent, "ui component shall not be null");
 					uiComponent->drawUI();
 				}
 			}
@@ -52,6 +54,8 @@ void MIMIWindow::run() {
 		ImGui::Render();
 		this->endRender();
 	}
+
+	this->onQuit();
 }
 
 void MIMIWindow::quit() { this->requestQuit = true; }
@@ -66,7 +70,7 @@ void MIMIWindow::removeUIComponent(const std::shared_ptr<UIComponent> &component
 size_t MIMIWindow::getNrUIComponents() const noexcept { return this->components.size(); }
 std::shared_ptr<UIComponent> &MIMIWindow::getComponent(const size_t index) { return this->components[index]; }
 
-void MIMIWindow::setMenuBarVisable(bool enabled) { this->showMenuBar = enabled; }
+void MIMIWindow::setMenuBarVisable(bool enabled) noexcept { this->showMenuBar = enabled; }
 bool MIMIWindow::getMenuBarVisable() const noexcept { return this->showMenuBar; }
 
 void MIMIWindow::setUIComponentEnabled(bool enabled) noexcept { this->showUIComponents = enabled; }

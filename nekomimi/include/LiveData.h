@@ -16,16 +16,13 @@
  * along with this program;
  */
 #pragma once
-#include "UIObserver.h"
-#include <functional>
 #include <observable/observable.hpp>
-#include <vector>
 
 template <typename T> class LiveData : public observable::value<T> {
   public:
 	void postValue(const T &value) { *this = value; }
-
 	void setValue(const T &value) { this->set(value); }
 	// void setValue(T &&value) { *this = value; }
+
 	const T &getValue() const { return this->get(); }
 };

@@ -30,7 +30,9 @@ namespace nekomimi {
 	 */
 	class ImGuiUtil {
 	  public:
+
 		template <typename T> static void draw_property_override(fragcore::Property<T> &property) noexcept {
+			
 			bool override = property.is_override();
 			ImGui::PushID(property.get_id());
 
@@ -90,22 +92,20 @@ namespace nekomimi {
 				ImGui::EndCombo();
 			}
 		}
-
 		template <typename T>
-		static void ListComboBox(const char *label, const T *selectables, const size_t nrElements,
-								 const size_t currentSelected, std::function<void(const T *selected)> onSelected) {
+		static void ListComboBox(const char *label, const T *selectedables, const size_t nrElements,
+								 const T &currentSelected, std::function<void(const T *selected)> onSelected,
+								 const ImGuiComboFlags flags = 0) {
 
 			// const size_t item_selected_idx = static_cast<size_t>(currentSelected);
-			const T *combo_preview_value = selectables[currentSelected];
+			const char *combo_preview_value = currentSelected.c_str();
 
-			const ImGuiComboFlags flags = 0;
-			ImGui::SetNextItemWidth(256);
 			if (ImGui::BeginCombo(label, combo_preview_value, flags)) {
-				for (size_t index = 0; index < nrElements; index++) {
-					const bool is_selected = (currentSelected == selectables[index]);
+				for (size_t nth_enum = 0; nth_enum < nrElements; nth_enum++) {
+					const bool is_selected = (currentSelected == selectedables[nth_enum]);
 
-					if (ImGui::Selectable(selectables[index], is_selected)) {
-						onSelected(selectables[index]);
+					if (ImGui::Selectable(selectedables[nth_enum].c_str(), is_selected)) {
+						onSelected(&selectedables[nth_enum]);
 					}
 
 					if (is_selected) {

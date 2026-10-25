@@ -46,21 +46,33 @@ namespace nekomimi {
 
 		virtual bool isVisible() const noexcept;
 
-		//	virtual const std::string &getName() const { return name; }
-		virtual const std::string &getHelperInformation() const { return this->helperInformation; }
+		/*	*/
+		virtual void setHelperInformation(const std::string &helperInfo) noexcept {
+			this->helperInformation = helperInfo;
+		}
+		virtual const std::string &getHelperInformation() const noexcept { return this->helperInformation; }
 
+		/*	*/
 		void setName(const std::string &name) { this->name = name; }
 		const std::string &getName() const { return this->name; }
 
-		// TODO get size
-		// TODO add get parent
+		/*	*/
+		void setWindowFlag(ImGuiWindowFlags flags) { this->window_flags = flags; }
+		ImGuiWindowFlags getWindowFlags() const noexcept { return this->window_flags; }
+
+		enum class WindowMode {
+			Normal,
+			PopUp,
+		};
+
+		void setWindowMode(const WindowMode mode) noexcept { this->windowMode = mode; }
+		WindowMode getWindowMode() const noexcept { return this->windowMode; }
 
 	  protected:
 		virtual void draw() = 0;
 
-		void setHelperInformation(const std::string &info);
-
-	  private:
+	  protected:
+		WindowMode windowMode = WindowMode::Normal;
 		bool m_show;
 		ImGuiWindowFlags window_flags;
 		std::string helperInformation;

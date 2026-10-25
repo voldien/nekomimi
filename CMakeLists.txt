@@ -75,6 +75,7 @@ ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/extern/observable/observable EXCLUD
 
 # 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/extern/fragcore/frag-core/cmake" )
 
 IF(MIMI_TERMINAL_SUPPORT)
 	INCLUDE(imtui)
@@ -85,16 +86,21 @@ IF(MIMI_IMPLOT)
 	INCLUDE(implot)
 ENDIF()
 
+INCLUDE(libsigcplusplus)
+
 
 ###################################
 # Source Code For Main Libary.
 ###################################
+SET(IMGUI_ROOT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/)
+INCLUDE_DIRECTORIES(${IMGUI_ROOT_DIRECTORY})
 FILE(GLOB SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/UIComponents/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/util/*.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/nekomimi/src/GraphicBackend/WindowBackend*.cpp
 
+	#Imgui Source Files
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_draw.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_tables.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/extern/imgui/imgui_widgets.cpp

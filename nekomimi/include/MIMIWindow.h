@@ -29,7 +29,7 @@ namespace nekomimi {
 	  public:
 		MIMIWindow(const GfxBackEnd backend,
 				   const WindowLibBackend window_backend = WindowLibBackend::WindowBackendSDL2);
-		// TODO: based on existing data.
+
 	  public:
 		void run();
 
@@ -45,11 +45,13 @@ namespace nekomimi {
 		size_t getNrUIComponents() const noexcept;
 		std::shared_ptr<UIComponent> &getComponent(const size_t index);
 
-		void setMenuBarVisable(bool enabled);
+		/*	*/
+		void setMenuBarVisable(bool enabled) noexcept;
 		bool getMenuBarVisable() const noexcept;
 
+		/*	*/
 		void setUIComponentEnabled(bool enabled) noexcept;
-		bool getUIComponentEnabled() const noexcept{return this->showUIComponents;}
+		bool getUIComponentEnabled() const noexcept { return this->showUIComponents; }
 
 	  protected:
 		virtual void displayMenuBar() = 0;

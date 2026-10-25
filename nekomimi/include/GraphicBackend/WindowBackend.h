@@ -68,6 +68,9 @@ namespace nekomimi {
 		 */
 		virtual void initWindow(const WindowLibBackend windowBackend);
 
+	  public: /*	Window Callback Events.	*/
+		virtual void onQuit() {}
+
 	  protected: /*	Internal methods for each backends.	*/
 		void initTerminal();
 		void initVulkan();
@@ -98,12 +101,19 @@ namespace nekomimi {
 
 		virtual void releaseRender();
 
+	  public:
+		bool hasRequestedQuit() const noexcept { return this->requestQuit; }
+
 	  public: /*	Settings Methods.	*/
 		virtual void loadFont(const std::string &path);
 
 		virtual void enableImGUI(bool enabled) noexcept;
 		virtual bool isEnabled() const noexcept;
+		/*	*/
 		virtual void enableDocking(bool enabled) noexcept;
+		bool isDockingEnabled() const noexcept { return this->useDocking; }
+
+	  protected:
 		virtual void enableViewPorts(bool enabled);
 		virtual void showDockSpace(bool *open);
 		virtual void showViewPorts(bool *open);
