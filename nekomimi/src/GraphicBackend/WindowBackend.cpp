@@ -611,7 +611,12 @@ void WindowBackend::endRenderOpenGL() {
 		SDL_GL_SwapWindow((SDL_Window *)this->getNativePtr());
 	}
 
+	const ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	glViewport(0, 0, static_cast<int>(io.DisplaySize.x), static_cast<int>(io.DisplaySize.y));
+	
+	/*	*/
+	glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+	glClear(GL_COLOR_BUFFER_BIT);
 #endif
 }
 

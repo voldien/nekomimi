@@ -14,7 +14,6 @@ void UIComponent::begin() {
 		ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x * 0.25f, ImGui::GetIO().DisplaySize.y * 0.25f),
 								 ImGuiCond_FirstUseEver);
 
-		//						 BeginPopup
 		switch (this->windowMode) {
 		case WindowMode::Normal:
 			this->isContentVisible = ImGui::Begin(this->getName().c_str(), &this->m_show, this->window_flags);
@@ -32,16 +31,18 @@ void UIComponent::begin() {
 void UIComponent::drawUI() {
 	if (this->isVisible()) {
 		this->begin();
+
 		/*	*/
 		if (this->isContentVisible) {
 			this->draw();
 		}
-				/*	*/
+		/*	*/
 		this->end();
 	}
 }
 
 void UIComponent::end() {
+
 	switch (this->windowMode) {
 	case WindowMode::Normal:
 		ImGui::End();

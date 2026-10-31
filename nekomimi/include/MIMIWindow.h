@@ -44,6 +44,7 @@ namespace nekomimi {
 		virtual void removeUIComponent(const std::shared_ptr<UIComponent> &component);
 		size_t getNrUIComponents() const noexcept;
 		std::shared_ptr<UIComponent> &getComponent(const size_t index);
+		const std::vector<std::shared_ptr<UIComponent>> &getComponents() const noexcept { return this->components; }
 
 		/*	*/
 		void setMenuBarVisable(bool enabled) noexcept;
